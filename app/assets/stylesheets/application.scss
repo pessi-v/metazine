@@ -6,7 +6,7 @@
 @import "config/reset";
 
 // Components
-// @import "components/btn";
+@import "components/page_header";
 // @import "components/error_message";
 // @import "components/form";
 // @import "components/visually_hidden";
@@ -14,4 +14,5 @@
 
 // Layouts
 @import "layouts/container";
-// @import "layouts/header";
+@import "layouts/page";
+@import "layouts/page_grid";

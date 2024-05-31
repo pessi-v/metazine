@@ -1,0 +1,14 @@
+.page_grid {
+  width: 100%;
+  height: auto;
+
+  @include media(tabletAndUp) {
+    display: grid;
+
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: 5px;
+
+    grid-template-rows: repeat(10, 111px);
+    row-gap: 5px;
+  }
+}
