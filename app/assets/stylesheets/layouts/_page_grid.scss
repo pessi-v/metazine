@@ -6,9 +6,47 @@
     display: grid;
 
     grid-template-columns: repeat(6, 1fr);
-    column-gap: 5px;
+    column-gap: var(--space-xxs);
 
     grid-template-rows: repeat(10, 111px);
-    row-gap: 5px;
+    row-gap: var(--space-xxs);
+  }
+}
+
+// NOTE: column-start, column-end, row-start, row-end TAKE IN LINE NUMBERS (not column numbers)
+@include media(tabletAndUp) {
+  .item-a {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 4;
+  }
+
+  .item-b {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 1;
+    grid-row-end: 4;
+  }
+
+  .item-c {
+    grid-column-start: 5;
+    grid-column-end: 7;
+    grid-row-start: 1;
+    grid-row-end: 9;
+  }
+
+  .item-d {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    grid-row-start: 4;
+    grid-row-end: 9;
+  }
+
+  .item-e {
+    grid-column-start: 3;
+    grid-column-end: 5;
+    grid-row-start: 4;
+    grid-row-end: 9;
   }
 }

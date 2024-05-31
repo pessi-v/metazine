@@ -1,6 +1,7 @@
 .page {
   background-color: var(--color-white);
-  
+  padding: var(--space-s);
+
   @include media(tabletAndUp) {
     width: 66vw;
     min-height: 100vh;
