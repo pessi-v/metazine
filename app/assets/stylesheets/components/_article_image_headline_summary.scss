@@ -1,0 +1,28 @@
+.article_image_headline_summary {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .article_image {
+    width: 100%;
+    max-height: 40%;
+  }
+
+  .headline {
+    width: 100%;
+    height: auto;
+    // max-height: 27.5%;
+  }
+
+  .source {
+    width: 100%;
+    height: auto;
+  }
+
+  .summary {
+    width: 100%;
+    height: auto;
+    // max-height: 27.5%;
+  }
+}
+
