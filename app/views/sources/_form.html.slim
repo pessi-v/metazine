@@ -1,0 +1,29 @@
+= form_with(model: source) do |form|
+  - if source.errors.any?
+    div style="color: red"
+      h2
+        = "#{pluralize(source.errors.count, "error")} prohibited this source from being saved:"
+
+      ul
+        - source.errors.each do |error|
+          li
+            = error.full_message
+
+  div
+    = form.label :name, style: "display: block"
+    = form.text_field :name
+
+  div
+    = form.label :url, style: "display: block"
+    = form.text_field :url
+
+  div
+    = form.label :active, style: "display: block"
+    = form.check_box :active
+
+  div
+    = form.label :show_images, style: "display: block"
+    = form.check_box :show_images
+
+  div
+    = form.submit
