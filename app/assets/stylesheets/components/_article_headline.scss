@@ -1,3 +1,10 @@
 .article_headline {
   margin-bottom: var(--space-m);
+
+  .source {
+    width: 100%;
+    height: auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+  }
 }

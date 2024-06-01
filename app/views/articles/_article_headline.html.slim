@@ -1,8 +1,6 @@
 = link_to(article.url) do
   .article_headline
-    .headline
-      h5
-        = article.title
-    .source
-      p
-        = article.source_name
+    h5.headline
+      = article.title
+    p.source
+      = article.source_name

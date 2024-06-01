@@ -14,12 +14,12 @@
   .source {
     width: 100%;
     height: auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
   }
 
   .image {
     margin-bottom: var(--space-s);
-    // max-height: 100px;
-    // overflow: clip;
   }
 }
 

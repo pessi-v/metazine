@@ -25,7 +25,7 @@ module Articles
         summary: @summary,
         url: @entry.url,
         source_name: @source.name,
-        image_url: @image
+        image_url: @source.show_images ? @image : nil
         # user_id: 1,
         # published_at: published_at,
         # language: set_language,

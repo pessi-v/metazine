@@ -22,16 +22,18 @@
   .source {
     width: 100%;
     height: auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
   }
 
   .summary {
     width: 100%;
     height: auto;
-
-    p {
-      overflow: clip;
-    }
-    // max-height: 27.5%;
+    display: -webkit-box;
+    // -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis ellipsis;
   }
 }
 
