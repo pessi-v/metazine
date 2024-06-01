@@ -2,7 +2,10 @@ class ArticlesController < ApplicationController
   before_action :set_article, only: %i[ show edit update destroy ]
 
   def frontpage
-    @articles = Article.all
+    @articles = Article.last(15)
+    # @articles_without_images = articles.select { |article| !article.image_url }
+    # @articles_with_images = articles - @articles_without_images
+    # binding.break
   end
 
   # GET /articles or /articles.json

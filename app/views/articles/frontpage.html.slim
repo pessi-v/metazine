@@ -12,33 +12,31 @@
           .subtitle
             h6
               'A description of this instance of metazine
-      .content_menu_bar
-        = link_to('sources', sources_path)
-        a
-          'latest
-        a 
-          'most read
-        a 
-          'list view
+      = render 'content_menu_bar'
 
     .page_grid
       .item-a
-        = render 'article_image_headline_summary', article: @articles.first
+        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
       .item-b
-        = render 'articles_3_headline', articles: [@articles.second, @articles.third, @articles.fourth]
+        = render 'many_articles_headline',
+          articles: [next_article_without_image(@articles),
+                     next_article_without_image(@articles),
+                     next_article_without_image(@articles),
+                     next_article_without_image(@articles)]
       .item-c
-        = render 'article_image_headline_summary', article: @articles.fifth
-        = render 'article_headline', article: @articles[5]
-        = render 'article_headline', article: @articles[5]
-        = render 'article_image_headline_summary', article: @articles[6]
+        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+        = render 'article_headline', article: next_article_without_image(@articles)
+        = render 'article_headline', article: next_article_without_image(@articles)
+        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
       .item-d
-        = render 'article_image_headline_summary', article: @articles[7]
-        = render 'article_headline', article: @articles[5]
-        = render 'article_headline', article: @articles[5]
+        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+        = render 'article_headline', article: next_article_without_image(@articles)
+        = render 'article_headline', article: next_article_without_image(@articles)
       .item-e
-        = render 'article_image_headline', article: @articles[9]
-        = render 'article_headline', article: @articles[5]
-        = render 'article_image_headline', article: @articles[9]
+        = render 'article_image_headline', article: next_article_with_image(@articles)
+        = render 'article_headline', article: next_article_without_image(@articles)
+        = render 'article_image_headline', article: next_article_with_image(@articles)
         / = render 'article_headline', article: @articles[5]
       // break
     .page_footer
+      = link_to('sources', sources_path)
