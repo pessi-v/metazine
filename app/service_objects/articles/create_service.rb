@@ -24,9 +24,9 @@ module Articles
         description: @description,
         summary: @summary,
         url: @entry.url,
+        source_name: @source.name,
         image_url: @image
         # user_id: 1,
-        # source_name: @source.name,
         # published_at: published_at,
         # language: set_language,
         # country: set_country,

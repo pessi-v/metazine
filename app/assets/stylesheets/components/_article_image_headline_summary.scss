@@ -4,9 +4,12 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  margin-bottom: var(--space-l);
 
   .image {
     margin-bottom: var(--space-s);
+    // max-height: 40%;
+    // overflow: clip;
   }
 
   .headline {

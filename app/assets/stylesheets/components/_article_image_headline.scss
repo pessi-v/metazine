@@ -3,6 +3,7 @@
   max-height: 100%;
   display: flex;
   flex-direction: column;
+  margin-bottom: var(--space-l);
 
   .headline {
     width: 100%;
@@ -17,6 +18,8 @@
 
   .image {
     margin-bottom: var(--space-s);
+    // max-height: 100px;
+    // overflow: clip;
   }
 }
 
