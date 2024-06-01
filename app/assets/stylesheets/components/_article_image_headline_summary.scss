@@ -8,8 +8,9 @@
 
   .image {
     margin-bottom: var(--space-s);
-    // max-height: 40%;
-    // overflow: clip;
+    max-height: 13rem;
+    width: auto;
+    object-fit: cover;
   }
 
   .headline {

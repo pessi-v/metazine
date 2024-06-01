@@ -1,12 +1,9 @@
-.article_image_headline_summary
-  .image
-    img src=article.image_url
-  .headline
-    h4
+= link_to(article.url) do
+  .article_image_headline_summary
+    img.image src=article.image_url
+    h4.headline
       = article.title
-  .source
-    p
-      'source
-  .summary
-    p
+    p.source
+      = article.source_name
+    p.summary
       = article.description || article.summary

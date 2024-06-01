@@ -31,7 +31,7 @@ picture,
 svg {
   display: block;
   max-width: 100%;
-  opacity: 0.85;
+  opacity: 0.75;
 }
 
 input,
@@ -69,14 +69,14 @@ h4 {
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--color-text-body);
   text-decoration: none;
   transition: color 200ms;
 
   &:hover,
   &:focus,
   &:active {
-    color: var(--color-primary-rotate);
+    // color: var(--color-primary-rotate);
   }
 
 }

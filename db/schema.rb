@@ -23,6 +23,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_01_142918) do
     t.datetime "updated_at", null: false
     t.string "description"
     t.string "summary"
+    t.string "source_name"
   end
 
   create_table "sources", force: :cascade do |t|
