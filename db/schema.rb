@@ -22,6 +22,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_31_191416) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "description"
+    t.string "summary"
   end
 
   create_table "sources", force: :cascade do |t|

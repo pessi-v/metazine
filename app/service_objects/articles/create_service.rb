@@ -16,13 +16,13 @@ module Articles
       @title = clean_parentheses(text_cleaner(@entry.title))
       return if Article.where('articles.title = ? OR articles.url = ?', @title, @entry.url).exists?
 
-      # create_summary
+      create_summary
       check_og
       set_image
       a = Article.new(
         title: @title,
-        # description: @description,
-        # summary: @summary,
+        description: @description,
+        summary: @summary,
         url: @entry.url,
         image_url: @image
         # user_id: 1,
@@ -90,11 +90,11 @@ module Articles
     #   end
     # end
 
-    # def create_summary
-    #   text = @entry.summary || @entry.content
+    def create_summary
+      text = @entry.summary || @entry.content
 
-    #   @summary = text.present? ? "#{text_cleaner(text)[0..700]}#{text.length > 700 ? '…' : ''}" : nil
-    # end
+      @summary = text.present? ? "#{text_cleaner(text)[0..700]}#{text.length > 700 ? '…' : ''}" : nil
+    end
 
     def clean_parentheses(text)
       if (open_parenthesis = text.rindex('('))
