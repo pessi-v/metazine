@@ -27,12 +27,10 @@
       .item-b
         = render 'articles_3_headline', articles: [@articles.second, @articles.third, @articles.fourth]
       .item-c
-        .one_third
-          = render 'article_image_headline_summary', article: @articles.fifth
-        .one_third
-          = render 'article_headline', article: @articles[5]
-        .one_third
-          = render 'article_image_headline_summary', article: @articles[6]
+        = render 'article_image_headline_summary', article: @articles.fifth
+        = render 'article_headline', article: @articles[5]
+        = render 'article_headline', article: @articles[5]
+        = render 'article_image_headline_summary', article: @articles[6]
       .item-d
         = render 'article_image_headline_summary', article: @articles[7]
         = render 'article_image_headline', article: @articles[8]

@@ -1,14 +1,18 @@
 .page_header {
   width: 100%;
   height: 250px;
+  padding-bottom: var(--space-xxl);
+  
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .page_header_split {
   width: 100%;
-  height: 210px;
+  height: 100%;
   display: flex;
   align-items: stretch;
-  // height: auto;
 }
 
 .page_header_split_half {
