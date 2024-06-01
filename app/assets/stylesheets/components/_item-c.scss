@@ -1,4 +1,9 @@
 .item-c {
+  grid-column-start: 5;
+  grid-column-end: 7;
+  grid-row-start: 1;
+  grid-row-end: 9;
+  
   display: flex;
   flex-direction: column;
   justify-content: space-between;

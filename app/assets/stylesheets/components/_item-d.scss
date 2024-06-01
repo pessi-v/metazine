@@ -1,0 +1,10 @@
+.item-d {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  grid-row-start: 4;
+  grid-row-end: 9;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

@@ -22,7 +22,8 @@ body {
   background-color: var(--color-background);
   color: var(--color-text-body);
   line-height: var(--line-height-body);
-  font-family: var(--font-family-sans);
+  // font-family: var(--font-family-sans);
+  font-family: var(--font-family-neo-grotesque);
 }
 
 img,
@@ -47,6 +48,7 @@ h5,
 h6 {
   color: var(--color-text-header);
   line-height: var(--line-height-headers);
+  font-family: var(--font-family-classical-humanist);
 }
 
 h1 {
@@ -75,4 +77,9 @@ a {
   &:active {
     color: var(--color-primary-rotate);
   }
+
+}
+
+p {
+  font-size: var(--font-size-s);
 }

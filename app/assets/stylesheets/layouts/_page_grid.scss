@@ -6,10 +6,10 @@
     display: grid;
 
     grid-template-columns: repeat(6, 1fr);
-    column-gap: var(--space-xxs);
+    column-gap: var(--space-m);
 
     grid-template-rows: repeat(10, 111px);
-    row-gap: var(--space-xxs);
+    row-gap: var(--space-m);
   }
 }
 
@@ -23,30 +23,18 @@
   }
 
   .item-b {
-    grid-column-start: 4;
-    grid-column-end: 5;
-    grid-row-start: 1;
-    grid-row-end: 4;
+  //  in it's own file
   }
 
   .item-c {
-    grid-column-start: 5;
-    grid-column-end: 7;
-    grid-row-start: 1;
-    grid-row-end: 9;
+  //  in it's own file
   }
 
   .item-d {
-    grid-column-start: 1;
-    grid-column-end: 3;
-    grid-row-start: 4;
-    grid-row-end: 9;
+  //  in it's own file
   }
 
-  .item-e {
-    grid-column-start: 3;
-    grid-column-end: 5;
-    grid-row-start: 4;
-    grid-row-end: 9;
+  .item-e { 
+  //  in it's own file
   }
 }
