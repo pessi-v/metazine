@@ -1,10 +1,4 @@
-= link_to(article.url) do
-  .article_image_headline
-    img.image src=article.image_url
-    .headline
-      h4
-        = article.title
-    .source_and_reader_link
-      p.source
-        = article.source_name
-      = link_to('📄', reader_path(article), title: 'read on metazine', class: 'reader_link')
+
+.article_image_headline
+  img.image src=article.image_url
+  = render 'article_headline', article: article

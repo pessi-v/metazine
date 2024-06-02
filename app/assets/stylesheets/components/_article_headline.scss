@@ -1,8 +1,15 @@
 .article_headline {
   margin-bottom: var(--space-m);
 
+  .source_and_reader_link {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--space-xxs);
+  }
+
   .source {
-    width: 100%;
+    width: auto;
     height: auto;
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);

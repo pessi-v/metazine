@@ -11,26 +11,5 @@
     width: 100%;
     object-fit: cover;
   }
-
-  .headline {
-    width: 100%;
-    height: auto;
-  }
-
-  .source_and_reader_link {
-    display: flex;
-    gap: var(--space-s);
-
-    .source {
-      width: 100%;
-      height: auto;
-      font-size: var(--font-size-xs);
-      color: var(--color-text-muted);
-    }
-
-    .reader_link {
-
-    }
-  }
 }
 

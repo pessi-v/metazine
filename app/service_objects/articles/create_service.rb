@@ -18,15 +18,15 @@ module Articles
 
       create_summary
       check_og
-      set_image
+      set_image if @source.show_images
       a = Article.new(
         title: @title,
         description: @description,
         summary: @summary,
         url: @entry.url,
         source_name: @source.name,
-        # published_at: published_at,
-        image_url: @source.show_images ? @image : nil
+        published_at: published_at,
+        image_url: @image || nil
         # user_id: 1,
         # language: set_language,
         # country: set_country,
@@ -35,7 +35,6 @@ module Articles
         # show_image: @source.show_image
       )
 
-      # a.set_image
       a.save
     end
 
