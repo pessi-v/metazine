@@ -1,22 +1,21 @@
-.background
-  .page
-    .index
-      = link_to('← back to front page', root_path)
-      p style="color: green"
-        = notice
 
-      h1
-        'Sources
-      
-      = button_to('Reload all feeds', fetch_feeds_path)
+.index
+  = link_to('← back to front page', root_path)
+  p style="color: green"
+    = notice
+
+  h1
+    'Sources
+  
+  = button_to('Reload all feeds', fetch_feeds_path)
 
 
-      = link_to "New source", new_source_path
+  = link_to "New source", new_source_path
 
-      div id="sources"
-        .page_grid
-          - @sources.each do |source|
-            = link_to source do
-              div
-                = render source
+  div id="sources"
+    .page_grid
+      - @sources.each do |source|
+        = link_to source do
+          div
+            = render source
 

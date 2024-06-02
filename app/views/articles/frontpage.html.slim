@@ -1,41 +1,41 @@
-.background 
-  .page 
-    .page_header
-      .page_header_split
-        .page_header_split_half
-          .title
-            h1
-             'METAZINE
-        .page_header_split_half
-          .search_bar
-            input type="text" placeholder="Search"
-          .subtitle
-            h6
-              'A description of this instance of metazine
-      = render 'content_menu_bar'
+ 
+.page_header
+  .page_header_split
+    .page_header_split_half
+      .title
+        h1
+          'METAZINE
+    .page_header_split_half
+      .search_bar
+        input type="text" placeholder="Search"
+      .subtitle
+        h6
+          'A description of this instance of metazine
+  = render 'content_menu_bar'
 
-    .page_grid
-      .item-a
-        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-      .item-b
-        = render 'many_articles_headline',
-          articles: [next_article_without_image(@articles),
-                     next_article_without_image(@articles),
-                     next_article_without_image(@articles)]
-      .item-c
-        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-        = render 'article_headline', article: next_article_without_image(@articles)
-        = render 'article_headline', article: next_article_without_image(@articles)
-        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-      .item-d
-        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-        = render 'article_headline', article: next_article_without_image(@articles)
-        = render 'article_headline', article: next_article_without_image(@articles)
-      .item-e
-        = render 'article_image_headline', article: next_article_with_image(@articles)
-        = render 'article_headline', article: next_article_without_image(@articles)
-        = render 'article_image_headline', article: next_article_with_image(@articles)
-        / = render 'article_headline', article: @articles[5]
-      // break
-    .page_footer
+.page_grid
+  .item-a
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+  .item-b
+    = render 'many_articles_headline',
+      articles: [next_article_without_image(@articles),
+                  next_article_without_image(@articles),
+                  next_article_without_image(@articles),
+                  next_article_without_image(@articles)]
+  .item-c
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+  .item-d
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+  .item-e
+    = render 'article_image_headline', article: next_article_with_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_image_headline', article: next_article_with_image(@articles)
+    / = render 'article_headline', article: @articles[5]
+  // break
+.page_footer
       = link_to('sources', sources_path)

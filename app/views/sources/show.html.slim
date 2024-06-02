@@ -1,0 +1,12 @@
+
+p style="color: green"
+  = notice
+
+= render @source
+
+div
+  = link_to "Edit this source", edit_source_path(@source)
+  = link_to "Back to sources", sources_path
+
+  = button_to "Destroy this source", @source, method: :delete
+

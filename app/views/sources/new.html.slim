@@ -1,17 +1,14 @@
 
+div
+  = link_to "← Back to sources", sources_path
 
-.background
-  .page
-    div
-      = link_to "← Back to sources", sources_path
+br
 
-    br
+h1
+  'New source
 
-    h1
-      'New source
+br
 
-    br
-    
-    = render "form", source: @source
+= render "form", source: @source
 
 
