@@ -4,13 +4,13 @@
     .page_header_split_half
       .title
         h1
-          'METAZINE
+          = ENV['APP_NAME']
     .page_header_split_half
       .search_bar
         input type="text" placeholder="Search"
       .subtitle
         h6
-          'A description of this instance of metazine
+          = ENV['APP_SHORT_DESCRIPTION']
   = render 'content_menu_bar'
 
 .page_grid

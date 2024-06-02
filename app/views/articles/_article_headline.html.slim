@@ -5,4 +5,4 @@
   .source_and_reader_link
     p.source
       = article.source_name
-    = link_to('○', reader_path(article), title: 'read on metazine', class: 'reader_link')
+    = link_to('○', reader_path(article), title: "Read on #{ENV['APP_NAME']}", class: 'reader_link')
