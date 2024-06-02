@@ -21,6 +21,12 @@
     gap: var(--space-m);
   }
 
+  #readability-page-1 > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
   section {
     display: flex;
     flex-direction: column;
