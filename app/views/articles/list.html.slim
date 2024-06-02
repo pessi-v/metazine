@@ -1,0 +1,17 @@
+.page_header
+  .page_header_split
+    .page_header_split_half
+      .title
+        h1
+          = ENV['APP_NAME']
+    .page_header_split_half
+      .search_bar
+        input type="text" placeholder="Search"
+      .subtitle
+        h6
+          = ENV['APP_SHORT_DESCRIPTION']
+  = render 'content_menu_bar'
+
+.page_grid
+  - @articles.each do |article|
+    = render 'article_headline_summary', article: article

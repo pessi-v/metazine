@@ -14,6 +14,10 @@ class ArticlesController < ApplicationController
     @articles = Article.all
   end
 
+  def list
+    @articles = Article.last(25)
+  end
+
   def reader
     article = Article.find(params[:id])
 

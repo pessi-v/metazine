@@ -8,8 +8,10 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Defines the root path route ("/")
-  root "articles#frontpage"
+  root "articles#frontpage", as: :frontpage
 
+  
   get 'reader/(:id)', to: 'articles#reader', as: :reader
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
+  get 'list', to: 'articles#list', as: :list
 end

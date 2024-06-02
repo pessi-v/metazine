@@ -1,0 +1,4 @@
+.article_headline_summary
+  = render 'article_headline', article: article
+  p.summary
+    = article.description || article.summary
