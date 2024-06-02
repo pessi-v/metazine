@@ -358,7 +358,6 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   node-runner (~> 1.2)
-  nokogiri
   ogpr
   pg (~> 1.1)
   puma (>= 5.0)
