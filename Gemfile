@@ -62,6 +62,10 @@ gem 'ogpr'
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
 gem 'addressable'
 
+# gem "ruby-readability"
+
+# gem 'nokogiri'
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
@@ -86,3 +90,5 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "node-runner", "~> 1.2"

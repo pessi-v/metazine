@@ -84,3 +84,12 @@ a {
 p {
   font-size: var(--font-size-s);
 }
+
+blockquote {
+  font-style: italic;
+  font-family: var(--font-family-serif);
+
+  p {
+    font-size: var(--font-size-m);
+  }
+}

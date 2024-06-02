@@ -1,4 +1,5 @@
 class ArticlesController < ApplicationController
+
   before_action :set_article, only: %i[ show edit update destroy ]
 
   def frontpage
@@ -11,6 +12,20 @@ class ArticlesController < ApplicationController
   # GET /articles or /articles.json
   def index
     @articles = Article.all
+  end
+
+  def reader
+    article = Article.find(params[:id])
+
+    if !article.readability_output
+      set_article_readability_output(article)
+    end
+
+    readability_output = eval article.readability_output
+    
+    @title = readability_output['title']
+    @author = readability_output['byline']
+    @content = readability_output['content'].gsub('class="page"', '')
   end
 
   # GET /articles/1 or /articles/1.json
@@ -65,6 +80,25 @@ class ArticlesController < ApplicationController
   end
 
   private
+    def set_article_readability_output(article)
+      response = Faraday.get(article.url)
+      
+      runner = NodeRunner.new(
+        <<~JAVASCRIPT
+        const { Readability } = require('@mozilla/readability');
+        const jsdom = require("jsdom");
+        const { JSDOM } = jsdom;        
+        const parse = (document) => {
+          const dom = new JSDOM(document);
+          return new Readability(dom.window.document).parse()
+        }
+        JAVASCRIPT
+      )
+      readability_output = runner.parse response.body
+      article.readability_output = readability_output
+      article.save
+    end
+
     # Use callbacks to share common setup or constraints between actions.
     def set_article
       @article = Article.find(params[:id])

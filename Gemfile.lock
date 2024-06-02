@@ -179,6 +179,7 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.7.3)
+    node-runner (1.2.0)
     nokogiri (1.16.5-aarch64-linux)
       racc (~> 1.4)
     nokogiri (1.16.5-arm-linux)
@@ -356,6 +357,8 @@ DEPENDENCIES
   feedjira
   importmap-rails
   jbuilder
+  node-runner (~> 1.2)
+  nokogiri
   ogpr
   pg (~> 1.1)
   puma (>= 5.0)

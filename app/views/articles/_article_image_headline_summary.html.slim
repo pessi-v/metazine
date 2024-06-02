@@ -1,9 +1,10 @@
-= link_to(article.url) do
-  .article_image_headline_summary
-    img.image src=article.image_url
+.article_image_headline_summary
+  img.image src=article.image_url
+  = link_to(article.url) do
     h4.headline
       = article.title
-    p.source
-      = article.source_name
-    p.summary
-      = article.description || article.summary
+  p.source
+    = article.source_name
+  = link_to('read article in metazine', reader_path(article))
+  p.summary
+    = article.description || article.summary

@@ -2,6 +2,24 @@
   background-color: var(--color-white);
   padding: var(--space-xl);
 
+  .reader {
+    padding: 17%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  // blockquote {
+  //   font-style: italic;
+  //   font-family: var(--font-family-serif);
+  // }
+
   @include media(tabletAndUp) {
     width: 66vw;
     min-height: 100vh;

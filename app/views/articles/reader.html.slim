@@ -1,0 +1,9 @@
+.background 
+  .page
+    .reader
+      = link_to('← back to front page', root_path)
+      div
+        = @title
+      div
+        = "By: #{@author}"
+      = @content.html_safe
