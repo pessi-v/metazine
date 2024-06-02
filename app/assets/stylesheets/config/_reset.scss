@@ -92,3 +92,10 @@ blockquote {
     font-size: var(--font-size-m);
   }
 }
+
+sup {
+  vertical-align: top;
+  position: relative;
+  top: -0.5em;
+  margin-right: 2px;
+}

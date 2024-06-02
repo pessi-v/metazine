@@ -1,8 +1,8 @@
 
 .reader
   = link_to('← back to front page', frontpage_path)
-  div
+  h2
     = @title
-  div
-    = "By: #{@author}"
+  strong
+    = @author
   = @content.html_safe

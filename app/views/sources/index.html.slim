@@ -1,3 +1,8 @@
+css:
+  .source_info {
+    grid-column: span 1;
+    grid-row: span 2;
+  }
 
 .index
   = link_to('← back to front page', frontpage_path)
@@ -15,7 +20,6 @@
   div id="sources"
     .page_grid
       - @sources.each do |source|
-        = link_to source do
-          div
-            = render source
+        = link_to(source, class: 'source_info') do  
+          = render source
 
