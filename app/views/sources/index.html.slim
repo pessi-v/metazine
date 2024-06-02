@@ -1,18 +1,19 @@
 .background
   .page
-    p style="color: green"
-      = notice
+    .index
+      = link_to('← back to front page', root_path)
+      p style="color: green"
+        = notice
 
-    h1
-      'Sources
-    
-    = link_to "New source", new_source_path
+      h1
+        'Sources
+      
+      = link_to "New source", new_source_path
 
-    div id="sources"
-      .page_grid
-        - @sources.each do |source|
-          div
-            = render source
-            p
-              = link_to "Show this source", source
+      div id="sources"
+        .page_grid
+          - @sources.each do |source|
+            = link_to source do
+              div
+                = render source
 

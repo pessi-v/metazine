@@ -36,7 +36,10 @@ module Sources
 
       feed = Feedjira.parse(response.body)
 
-      return "Feed Appears to be empty! Status: #{response.status} Source: #{source.name}" if feed.entries.empty?
+      if feed.entries.empty?
+        source.update(last_error_status: 'Feed appears to be empty')
+        return "Feed Appears to be empty! Status: #{response.status} Source: #{source.name}"
+      end
 
       feed.entries.each do |entry|
         # Articles::CreateService.new(source, entry, @regions, @countries, @country_classifier).create_article

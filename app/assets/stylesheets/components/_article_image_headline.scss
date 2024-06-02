@@ -5,21 +5,32 @@
   flex-direction: column;
   margin-bottom: var(--space-l);
 
+  .image {
+    margin-bottom: var(--space-s);
+    max-height: 11rem;
+    width: 100%;
+    object-fit: cover;
+  }
+
   .headline {
     width: 100%;
     height: auto;
-    // max-height: 27.5%;
   }
 
-  .source {
-    width: 100%;
-    height: auto;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-  }
+  .source_and_reader_link {
+    display: flex;
+    gap: var(--space-s);
 
-  .image {
-    margin-bottom: var(--space-s);
+    .source {
+      width: 100%;
+      height: auto;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+    }
+
+    .reader_link {
+
+    }
   }
 }
 

@@ -9,16 +9,17 @@
     gap: var(--space-m);
   }
 
-  section {
+  .index {
     display: flex;
     flex-direction: column;
     gap: var(--space-m);
   }
 
-  // blockquote {
-  //   font-style: italic;
-  //   font-family: var(--font-family-serif);
-  // }
+  section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
 
   @include media(tabletAndUp) {
     width: 66vw;
