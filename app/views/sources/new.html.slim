@@ -2,13 +2,16 @@
 
 .background
   .page
-
-    h1
-    'New source
-
-    = render "form", source: @source
+    div
+      = link_to "← Back to sources", sources_path
 
     br
 
-    div
-      = link_to "Back to sources", sources_path
+    h1
+      'New source
+
+    br
+    
+    = render "form", source: @source
+
+

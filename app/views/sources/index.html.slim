@@ -8,6 +8,9 @@
       h1
         'Sources
       
+      = button_to('Reload all feeds', fetch_feeds_path)
+
+
       = link_to "New source", new_source_path
 
       div id="sources"

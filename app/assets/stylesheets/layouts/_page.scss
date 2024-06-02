@@ -15,6 +15,12 @@
     gap: var(--space-m);
   }
 
+  #post-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
   section {
     display: flex;
     flex-direction: column;
