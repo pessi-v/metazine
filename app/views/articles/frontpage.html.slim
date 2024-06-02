@@ -21,7 +21,6 @@
         = render 'many_articles_headline',
           articles: [next_article_without_image(@articles),
                      next_article_without_image(@articles),
-                     next_article_without_image(@articles),
                      next_article_without_image(@articles)]
       .item-c
         = render 'article_image_headline_summary', article: next_article_with_image(@articles)
