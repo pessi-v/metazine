@@ -24,6 +24,11 @@
     grid-row-end: 4;
   }
 
+  .source_info {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
   .item-b {
   //  in it's own file
   }

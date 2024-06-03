@@ -24,6 +24,12 @@
     gap: var(--space-m);
   }
 
+  #readability-page-1 > article > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
   // #data-element_type="section"
 
   section {

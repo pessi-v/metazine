@@ -3,7 +3,8 @@ class ArticlesController < ApplicationController
   before_action :set_article, only: %i[ show edit update destroy ]
 
   def frontpage
-    @articles = Article.last(15)
+    # @articles = Article.last(15)
+    @articles = Article.order(published_at: :desc).first(15)
     # @articles_without_images = articles.select { |article| !article.image_url }
     # @articles_with_images = articles - @articles_without_images
     # binding.break
@@ -19,13 +20,13 @@ class ArticlesController < ApplicationController
   end
 
   def reader
-    article = Article.find(params[:id])
+    @article = Article.find(params[:id])
 
-    if !article.readability_output
-      set_article_readability_output(article)
+    if !@article.readability_output
+      set_article_readability_output(@article)
     end
 
-    readability_output = eval article.readability_output
+    readability_output = eval @article.readability_output
     
     @title = readability_output['title']
     @author = readability_output['byline']

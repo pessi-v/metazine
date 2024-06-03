@@ -5,4 +5,5 @@
     = @title
   strong
     = @author
+  = @article.published_at.strftime('%e.%-m.%Y')
   = @content.html_safe
