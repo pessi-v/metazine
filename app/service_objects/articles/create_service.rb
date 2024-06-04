@@ -15,6 +15,7 @@ module Articles
     def create_article
       @title = clean_parentheses(text_cleaner(@entry.title))
       return if Article.where('articles.title = ? OR articles.url = ?', @title, @entry.url).exists?
+      return unless detect_language == 'en'
 
       create_summary
       check_og
@@ -150,13 +151,13 @@ module Articles
       end
     end
 
-    # def set_language
-    #   if @summary.present?
-    #     CLD.detect_language(@summary)[:code]
-    #   else
-    #     CLD.detect_language(@title)[:code]
-    #   end
-    # end
+    def detect_language
+      if @summary.present?
+        CLD.detect_language(@summary)[:code]
+      else
+        CLD.detect_language(@title)[:code]
+      end
+    end
 
     private
 
