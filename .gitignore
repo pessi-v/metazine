@@ -38,3 +38,6 @@
 !/app/assets/builds/.keep
 
 /en_sources.json
+
+/.kamal
+/config/deploy.yml

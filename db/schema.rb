@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_05_135014) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_05_200432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "unaccent"
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_05_135014) do
     t.string "source_name"
     t.text "readability_output"
     t.datetime "published_at"
+    t.index ["url", "title"], name: "index_articles_on_url_and_title", unique: true
   end
 
   create_table "sources", force: :cascade do |t|
