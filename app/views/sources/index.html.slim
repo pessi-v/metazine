@@ -12,7 +12,7 @@
   = link_to "New source", new_source_path
 
   div id="sources"
-    .page_grid
+    .list_view
       - @sources.each do |source|
         = link_to(source, class: 'source_info') do  
           = render source

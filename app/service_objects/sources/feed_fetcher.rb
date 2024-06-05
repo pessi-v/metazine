@@ -31,7 +31,6 @@ module Sources
 
       # 304: Not Modified
       return if response.status == 304
-
       return if response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified
 
       feed = Feedjira.parse(response.body)

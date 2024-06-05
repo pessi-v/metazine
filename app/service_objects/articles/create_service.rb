@@ -138,11 +138,10 @@ module Articles
       # remove weird spaces
       text = text.squeeze(' ')
       text = text.squeeze('*')
-      text = text.gsub!(/\&nbsp;/," ")
-
-      # add missing whitspace after punctuation
-      text = text.gsub(/,(?![ ])/, ', ')
-      text = text.gsub(/.(?![ ])/, '. ')
+      text = text.gsub(/\&nbsp;/," ")
+      
+      # add missing whitespace after punctuation
+      text = text.gsub(/([,\.!?:;])(\S)/, '\1 \2')
 
       text.strip
     end

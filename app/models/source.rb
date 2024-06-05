@@ -6,9 +6,18 @@ class Source < ApplicationRecord
   scope :active, -> { where(active: true) }
 
   def valid_feed
+    # Check feed validity
     validator = W3CValidators::FeedValidator.new
     result = validator.validate_uri(url)
-    unless result.validity
+
+    # Check if feed can be parsed for entries
+    connection = Faraday.new(url: url, ssl: { verify: false }) do |faraday|
+      faraday.use FaradayMiddleware::FollowRedirects
+    end
+    response = connection.get
+    feed = Feedjira.parse(response.body)
+
+    if !result.validity && feed.entries.empty?
       errors.add(:url, 'not a valid feed')
     end
   end

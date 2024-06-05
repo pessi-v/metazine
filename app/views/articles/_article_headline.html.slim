@@ -1,3 +1,5 @@
+- with_timestamp = with_timestamp || false
+
 .article_headline
   = link_to(article.url) do
     h4.headline
@@ -6,3 +8,6 @@
     p.source
       = article.source_name
     = link_to('○', reader_path(article), title: "Read on #{ENV['APP_NAME']}", class: 'reader_link')
+  - if with_timestamp
+    .source 
+      = article.published_at.strftime('%A %-d.%-m.%Y')
