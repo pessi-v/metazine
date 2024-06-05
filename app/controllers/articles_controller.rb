@@ -11,8 +11,13 @@ class ArticlesController < ApplicationController
   end
 
   def search
-    # binding.break
     @articles = Article.search_by_title_source_and_readability_output(params[:query]).to_a.sort_by { |a| a.published_at }.reverse
+    render :list
+  end
+  
+  def articles_by_source
+    # binding.break
+    @articles = Article.where(source_name: params[:source_name])
     render :list
   end
 

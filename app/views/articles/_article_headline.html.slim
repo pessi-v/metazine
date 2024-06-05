@@ -5,8 +5,9 @@
     h4.headline
       = article.title
   .source_and_reader_link
-    p.source
-      = article.source_name
+    = link_to(articles_by_source_path(article.source_name))
+      p.source
+        = article.source_name
     = link_to('○', reader_path(article), title: "Read on #{ENV['APP_NAME']}", class: 'reader_link')
   - if with_timestamp
     .source 

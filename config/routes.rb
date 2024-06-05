@@ -15,4 +15,5 @@ Rails.application.routes.draw do
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
   get 'list', to: 'articles#list', as: :list
   get 'search', to: 'articles#search', as: :search
+  get 'articles_by_source/:source_name', to: 'articles#articles_by_source', as: :articles_by_source
 end
