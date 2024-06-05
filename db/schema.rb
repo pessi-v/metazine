@@ -27,8 +27,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_05_135014) do
     t.string "source_name"
     t.text "readability_output"
     t.datetime "published_at"
-    t.boolean "allow_video", default: false
-    t.boolean "allow_audio", default: false
   end
 
   create_table "sources", force: :cascade do |t|
@@ -41,6 +39,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_05_135014) do
     t.string "last_error_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "allow_video", default: false
+    t.boolean "allow_audio", default: false
   end
 
 end

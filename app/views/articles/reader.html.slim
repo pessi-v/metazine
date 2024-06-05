@@ -7,4 +7,6 @@
   strong
     = @author
   = @article.published_at.strftime('%e.%-m.%Y')
+  div
+    = @article.source_name
   = @content.html_safe
