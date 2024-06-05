@@ -96,7 +96,7 @@ module Sources
       end
 
       response = connection.get
-      binding.pry
+      binding.break
       feed = Feedjira.parse(response.body)
     end
   end

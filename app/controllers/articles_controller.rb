@@ -16,7 +16,7 @@ class ArticlesController < ApplicationController
   end
 
   def list
-    @articles = Article.last(25)
+    @articles = Article.last(27)
   end
 
   def reader

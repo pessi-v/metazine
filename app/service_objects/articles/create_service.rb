@@ -16,10 +16,13 @@ module Articles
       @title = clean_parentheses(text_cleaner(@entry.title))
       return if Article.where('articles.title = ? OR articles.url = ?', @title, @entry.url).exists?
       return unless detect_language == 'en'
+      return if @entry.categories.include?('Video') && !@source.allow_video
+      return if (@entry.categories.include?('Podcast') || @entry.categories.include?('Audio')) && !@source.allow_audio
 
       create_summary
       check_og
       set_image if @source.show_images
+
       a = Article.new(
         title: @title,
         description: @description,
@@ -135,9 +138,11 @@ module Articles
       # remove weird spaces
       text = text.squeeze(' ')
       text = text.squeeze('*')
+      text = text.gsub!(/\&nbsp;/," ")
 
       # add missing whitspace after punctuation
-      # how? :(
+      text = text.gsub(/,(?![ ])/, ', ')
+      text = text.gsub(/.(?![ ])/, '. ')
 
       text.strip
     end

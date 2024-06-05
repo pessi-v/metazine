@@ -12,6 +12,7 @@
           = ENV['APP_SHORT_DESCRIPTION']
   = render 'content_menu_bar'
 
-.page_grid
+.list_view
   - @articles.each do |article|
-    = render 'article_headline_summary', article: article
+    = render 'article_small_image_headline_summary_preview', article: article
+    hr

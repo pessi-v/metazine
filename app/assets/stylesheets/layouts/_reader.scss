@@ -12,33 +12,19 @@
     gap: var(--space-m);
   }
 
-  #readability-page-1 > div {
+  .reader #readability-page-1 div {
     display: flex;
     flex-direction: column;
     gap: var(--space-m);
   }
 
-  #readability-page-1 > div > div {
+  .reader section {
     display: flex;
     flex-direction: column;
     gap: var(--space-m);
   }
 
-  #readability-page-1 > article > div {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-m);
-  }
-
-  // #data-element_type="section"
-
-  section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-m);
-  }
-
-  p {
+  .reader p {
     font-size: var(--font-size-l);
     line-height: var(--line-height-reader);
   }

@@ -1,0 +1,11 @@
+.article_small_image_headline_summary_preview {
+  display: flex;
+  gap: var(--space-xl);
+
+  .image {
+    width: var(--space-9xl);
+    height: var(--space-9xl);
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+}

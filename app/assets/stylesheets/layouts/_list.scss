@@ -1,0 +1,13 @@
+.list_view {
+  display: flex;
+  flex-direction: column;
+  padding-left: var(--space-7xl);
+  padding-right: var(--space-7xl);
+  gap: var(--space-xxxl);
+}
+
+.truncate-overflow {
+  --max-lines: 3;
+  max-height: calc(var(--line-height-reader) * var(--max-lines));
+  overflow: hidden;
+}

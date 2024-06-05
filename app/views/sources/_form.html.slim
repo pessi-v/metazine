@@ -19,11 +19,19 @@
 
   div
     = form.label :active, style: "display: block"
-    = form.check_box :active
+    = form.check_box :active, checked: true
 
   div
     = form.label :show_images, style: "display: block"
-    = form.check_box :show_images
+    = form.check_box :show_images, checked: true
+
+  div
+    = form.label :allow_video, style: "display: block"
+    = form.check_box :allow_video
+
+  div
+    = form.label :allow_audio, style: "display: block"
+    = form.check_box :allow_audio
 
   div
     = form.submit

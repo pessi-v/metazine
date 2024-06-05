@@ -1,0 +1,6 @@
+.article_small_image_headline_summary_preview
+  img.image src=article.image_url
+  .headline_source_summary_preview
+    = render 'article_headline', article: article
+    p.truncate-overflow
+      = article.summary
