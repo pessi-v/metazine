@@ -14,4 +14,5 @@ Rails.application.routes.draw do
   get 'reader/(:id)', to: 'articles#reader', as: :reader
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
   get 'list', to: 'articles#list', as: :list
+  get 'search', to: 'articles#search', as: :search
 end

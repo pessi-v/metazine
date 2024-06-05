@@ -10,6 +10,11 @@ class ArticlesController < ApplicationController
     # binding.break
   end
 
+  def search
+    @articles = Article.search_by_title_source_and_readability_output(params[:query])
+    render :list
+  end
+
   # GET /articles or /articles.json
   def index
     @articles = Article.all
