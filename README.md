@@ -1,24 +1,11 @@
-# README
+Metazine is an experimental RSS/Atom feed client built as a Ruby on Rails app. It tries to present feed entries as articles of a unified online publication.
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Features:
+- Feed validation
+- Newspaper-like presentation of articles
+- Full-text search
+- In-app reader view for articles
 
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Planned:
+- ActivityPub integration
+- Comments
