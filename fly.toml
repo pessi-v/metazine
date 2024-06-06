@@ -43,3 +43,7 @@ console_command = '/rails/bin/rails console'
 [[statics]]
   guest_path = '/rails/public'
   url_prefix = '/'
+
+[[env]]
+  APP_NAME = 'Climate news'
+  APP_SHORT_DESCRIPTION = 'Aggregated journalism on the climate crisis'
