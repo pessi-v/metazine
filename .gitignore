@@ -43,3 +43,5 @@
 /config/deploy.yml
 
 /fly.toml
+
+# /.github*

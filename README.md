@@ -22,11 +22,11 @@ Dockerfile should have the required changes for deployment to Fly.io.
 ### Locally
 Make sure you have installed ruby, the 'rails' gem, nodejs and npm.
 
-`git clone https://github.com/pessi-v/metazine.git`
-`bundle`
-`rails db:migrate`
-`npm install jsdom`
-`npm install @mozilla/readability`
+`git clone https://github.com/pessi-v/metazine.git
+bundle
+rails db:migrate
+npm install jsdom
+npm install @mozilla/readability`
 
 run the app:
 `bin/dev`
@@ -34,5 +34,5 @@ run the app:
 ### env variables
 You should define the following variables (in .env, for example):
 
-`APP_NAME = <your instance name here>`
-`APP_SHORT_DESCRIPTION = <whatever you want to say>`
+`APP_NAME = <your instance name here>
+APP_SHORT_DESCRIPTION = <whatever you want to say>`
