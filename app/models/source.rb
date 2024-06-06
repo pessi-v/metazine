@@ -11,13 +11,12 @@ class Source < ApplicationRecord
     result = validator.validate_uri(url)
 
     # Check if feed can be parsed for entries
-    connection = Faraday.new(url: url, ssl: { verify: false }) do |faraday|
-      faraday.use FaradayMiddleware::FollowRedirects
-    end
-    response = connection.get
-    feed = Feedjira.parse(response.body)
+    feed_fetcher = Sources::FeedFetcher.new
 
-    if !result.validity && feed.entries.empty?
+    response = feed_fetcher.make_request(url: url)
+    feed = feed_fetcher.parse_feed(response)
+
+    if !feed || (!result.validity && feed.entries.empty?)
       errors.add(:url, 'not a valid feed')
     end
   end

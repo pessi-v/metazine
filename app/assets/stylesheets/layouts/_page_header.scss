@@ -7,6 +7,11 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  
+  .title {
+    text-transform: uppercase;
+    text-align: center;
+  }
 }
 
 .page_header_split {
@@ -23,8 +28,5 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
-  .title {
-    text-transform: uppercase;
-  }
+  
 }

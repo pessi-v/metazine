@@ -18,6 +18,12 @@
     gap: var(--space-m);
   }
 
+  .reader #readability-page-1 article {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
   .reader section {
     display: flex;
     flex-direction: column;

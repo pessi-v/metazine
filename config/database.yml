@@ -81,5 +81,5 @@ production:
   <<: *default
   database: metazine_production
   username: metazine
-  password: <%= ENV["METAZINE_DATABASE_PASSWORD"] %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
   host: <%= ENV["DB_HOST"] %>

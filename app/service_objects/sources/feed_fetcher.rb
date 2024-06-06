@@ -15,25 +15,13 @@ module Sources
     end
 
     def consume(source)
-      connection = Faraday.new(
-        url: source.url,
-        headers: {
-          'If-Modified-Since': source.last_modified,
-          'If-None-Match': source.etag
-        },
-        ssl: { verify: false }
-      ) do |faraday|
-        faraday.use FaradayMiddleware::FollowRedirects
-        faraday.adapter :net_http # not sure if this is needed/helpful
-      end
-      
-      response = connection.get
+      response = make_request(source: source)
 
       # 304: Not Modified
       return if response.status == 304
       return if response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified
 
-      feed = Feedjira.parse(response.body)
+      feed = parse_feed(response, source: source)
 
       if feed.entries.empty?
         source.update(last_error_status: 'Feed appears to be empty')
@@ -49,54 +37,73 @@ module Sources
       source.etag = response.headers['etag'] if response.headers['etag'].present?
       source.last_error_status = nil
       source.save if source.changed?
+    end
+
+    def make_request(source: nil, url: nil)
+      connection = Faraday.new(
+        url: source&.url || url,
+        headers: {
+          'If-Modified-Since': source&.last_modified,
+          'If-None-Match': source&.etag
+        },
+        ssl: { verify: false }
+      ) do |faraday|
+        faraday.use FaradayMiddleware::FollowRedirects
+        faraday.adapter :net_http # not sure if this is needed/helpful
+      end
+      
+      connection.get
+
+    rescue Faraday::ConnectionFailed => e
+      puts source.name if source
+      puts source.url if source
+      puts e
+      puts "URL DIDN'T WORK"
+      source.update(last_error_status: 'connection_failed') if source
+    rescue URI::InvalidURIError => e
+      puts source.name if source
+      puts source.url if source
+      puts e
+      puts 'INVALID URL ! ! ! ! ! ! ! ! !'
+      source.update(last_error_status: 'invalid_url') if source
+    rescue Faraday::SSLError => e
+      puts source.name if source
+      puts source.url if source
+      puts e
+      puts 'SSL ERROR ! ! ! ! ! ! ! ! !'
+      source.update(last_error_status: 'ssl_error') if source
+    rescue Faraday::TimeoutError => e
+      puts source.name if source
+      puts source.url if source
+      puts e
+      puts 'TIMEOUT ERROR'
+      source.update(last_error_status: 'timeout') if source
+    rescue FaradayMiddleware::RedirectLimitReached => e
+      puts source.name if source
+      puts source.url if source
+      puts e
+      puts 'REDIRECT LIMIT REACHED'
+      source.update(last_error_status: 'redirect_limit_reached') if source
+    end
+
+    def parse_feed(response, source: nil)
+      Feedjira.parse(response.body)
+
     rescue Feedjira::NoParserAvailable => e
-      puts source.name
-      puts source.url
+      puts source.name if source
+      puts source.url if source
       puts e
       puts response.status
       puts response.headers
       puts "XML DIDN'T WORK"
-      source.update(last_error_status: 'xml_parse_error')
-    rescue Faraday::ConnectionFailed => e
-      puts source.name
-      puts source.url
-      puts e
-      puts "URL DIDN'T WORK"
-      source.update(last_error_status: 'connection_failed')
-    rescue URI::InvalidURIError => e
-      puts source.name
-      puts source.url
-      puts e
-      puts 'INVALID URL ! ! ! ! ! ! ! ! !'
-      source.update(last_error_status: 'invalid_url')
-    rescue Faraday::SSLError => e
-      puts source.name
-      puts source.url
-      puts e
-      puts 'SSL ERROR ! ! ! ! ! ! ! ! !'
-      source.update(last_error_status: 'ssl_error')
-    rescue Faraday::TimeoutError => e
-      puts source.name
-      puts source.url
-      puts e
-      puts 'TIMEOUT ERROR'
-      source.update(last_error_status: 'timeout')
-    rescue FaradayMiddleware::RedirectLimitReached => e
-      puts source.name
-      puts source.url
-      puts e
-      puts 'REDIRECT LIMIT REACHED'
-      source.update(last_error_status: 'redirect_limit_reached')
+      source.update(last_error_status: 'xml_parse_error') if source
     end
 
     def debug(url)
-      connection = Faraday.new(url: url, ssl: { verify: false }) do |faraday|
-        faraday.use FaradayMiddleware::FollowRedirects
-      end
+      response = make_request(url: url)
 
-      response = connection.get
       binding.break
-      feed = Feedjira.parse(response.body)
+      feed = parse_feed(response)
     end
   end
 end

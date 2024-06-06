@@ -4,7 +4,7 @@ class ArticlesController < ApplicationController
 
   def frontpage
     # @articles = Article.last(15)
-    @articles = Article.order(published_at: :desc).first(15)
+    latest_articles
     # @articles_without_images = articles.select { |article| !article.image_url }
     # @articles_with_images = articles - @articles_without_images
     # binding.break
@@ -27,7 +27,7 @@ class ArticlesController < ApplicationController
   end
 
   def list
-    @articles = Article.last(27)
+    latest_articles
   end
 
   def reader
@@ -96,6 +96,10 @@ class ArticlesController < ApplicationController
   end
 
   private
+    def latest_articles
+      @articles = Article.order(published_at: :desc).first(15)
+    end
+
     def set_article_readability_output(article)
       response = Faraday.get(article.url)
       
