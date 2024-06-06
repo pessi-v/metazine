@@ -35,6 +35,10 @@
     line-height: var(--line-height-reader);
   }
 
+  .reader iframe {
+    max-width: 100%;
+  }
+
   .reader img {
     margin-left: auto;
     margin-right: auto;
