@@ -2,13 +2,18 @@
 
 .article_headline
   = link_to(article.url) do
-    h4.headline
-      = article.title
+    - if request.original_url.match?(reader_path)
+      h2.headline
+        = article.title
+    - else
+      h4.headline
+        = article.title
   .source_and_reader_link
     = link_to(articles_by_source_path(article.source_name))
       p.source
         = article.source_name
-    = link_to('○', reader_path(article), title: "Read on #{ENV['APP_NAME']}", class: 'reader_link')
+    - unless request.original_url.match?(reader_path)
+      = link_to('○', reader_path(article), title: "Read on #{ENV['APP_NAME']}", class: 'reader_link')
   - if with_timestamp
     .source 
       = article.published_at.strftime('%A %-d.%-m.%Y')

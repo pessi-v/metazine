@@ -17,7 +17,7 @@ class ArticlesController < ApplicationController
   
   def articles_by_source
     # binding.break
-    @articles = Article.where(source_name: params[:source_name])
+    @articles = Article.where(source_name: params[:source_name]).order(published_at: :desc)
     render :list
   end
 

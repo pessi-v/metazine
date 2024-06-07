@@ -29,13 +29,13 @@ module Articles
         summary: @summary,
         url: @entry.url,
         source_name: @source.name,
+        # source_id: @source.id,
         published_at: published_at,
         image_url: @image || nil
         # user_id: 1,
         # language: set_language,
         # country: set_country,
         # region: set_region,
-        # source_id: @source.id,
         # show_image: @source.show_image
       )
 
@@ -43,7 +43,10 @@ module Articles
     end
 
     def check_og
-      @ogp = Ogpr.fetch(asciify(@entry.url))
+      cleaned_url = asciify(@entry.url)
+      return unless cleaned_url
+
+      @ogp = Ogpr.fetch(cleaned_url)
       @description = text_cleaner(@ogp.meta['og:description']) if @ogp.meta['og:description']
     rescue RuntimeError => e
       puts e
@@ -53,7 +56,10 @@ module Articles
 
     def set_image
       if @ogp&.image
-        request = Faraday.get(asciify(@ogp.image))
+        cleaned_url = asciify(@ogp.image)
+        return unless cleaned_url
+        
+        request = Faraday.get(cleaned_url)
         if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
           @image = @ogp.image
           return
@@ -61,7 +67,10 @@ module Articles
       end
 
       if @entry.image.present?
-        request = Faraday.get(asciify(@entry.image))
+        cleaned_url = asciify(@entry.image)
+        return unless cleaned_url
+
+        request = Faraday.get(cleaned_url)
         if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
           @image = @entry.image
           return
@@ -168,6 +177,9 @@ module Articles
     def asciify(url)
       uri = Addressable::URI.parse(url)
       uri.normalize
+    
+    rescue Addressable::URI::InvalidURIError => e
+      return nil
     end
   end
 end
