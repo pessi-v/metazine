@@ -2,14 +2,4 @@
 .reader
   = link_to('← back to front page', frontpage_path)
   = render 'article_headline', article: @article, with_timestamp: true
-
-
-  / = link_to(@article.url)
-  /   h2
-  /     = @title
-  / strong
-  /   = @author
-  / = @article.published_at.strftime('%e.%-m.%Y')
-  / div
-  /   = @article.source_name
   = @content.html_safe

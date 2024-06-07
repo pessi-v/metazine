@@ -29,7 +29,7 @@ module Articles
         summary: @summary,
         url: @entry.url,
         source_name: @source.name,
-        # source_id: @source.id,
+        source_id: @source.id,
         published_at: published_at,
         image_url: @image || nil
         # user_id: 1,

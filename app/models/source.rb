@@ -5,6 +5,9 @@ class Source < ApplicationRecord
 
   scope :active, -> { where(active: true) }
 
+  has_many :articles, dependent: :destroy
+  after_update :update_articles_source_name, if: :saved_change_to_name?
+
   def valid_feed
     # Check feed validity
     validator = W3CValidators::FeedValidator.new
@@ -19,5 +22,11 @@ class Source < ApplicationRecord
     if !feed || (!result.validity && feed.entries.empty?)
       errors.add(:url, 'not a valid feed')
     end
+  end
+
+  private
+
+  def update_articles_source_name
+    articles.update_all(source_name: name)
   end
 end
