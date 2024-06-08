@@ -44,4 +44,4 @@
 
 /fly.toml
 
-# /.github*
+/.github/workflows

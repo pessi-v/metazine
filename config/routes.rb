@@ -16,4 +16,5 @@ Rails.application.routes.draw do
   get 'list', to: 'articles#list', as: :list
   get 'search', to: 'articles#search', as: :search
   get 'articles_by_source/:source_name', to: 'articles#articles_by_source', as: :articles_by_source
+  get '.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
 end

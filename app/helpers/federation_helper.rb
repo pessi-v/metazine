@@ -1,0 +1,2 @@
+module FederationHelper
+end
