@@ -45,3 +45,6 @@
 /fly.toml
 
 /.github/workflows
+
+/private.pem
+/public.pem

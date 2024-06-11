@@ -17,6 +17,9 @@ module Sources
     def consume(source)
       response = make_request(source: source)
 
+      # Internal Server Error
+      return if rseponse.status == 500
+
       # 304: Not Modified
       return if response.status == 304
       return if response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified
@@ -52,7 +55,13 @@ module Sources
         faraday.adapter :net_http # not sure if this is needed/helpful
       end
       
-      connection.get
+      response = connection.get
+
+      if response.status == 500
+        source.update(last_error_status: 'Internal Server Error (500)') if source
+      end
+
+      response
 
     rescue Faraday::ConnectionFailed => e
       puts source.name if source
