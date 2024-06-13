@@ -13,6 +13,10 @@ Planned:
 - Comments
 - Article translations
 
+## Demo App
+
+[Can be found here](https://climatenews-xyz.fly.dev/)
+
 
 ## Installation
 
