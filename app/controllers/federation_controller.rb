@@ -1,6 +1,5 @@
 class FederationController < ApplicationController
   def webfinger
-    response.headers['Content-Type'] = 'application/activity+json'
     response.headers['Access-Control-Allow-Origin'] = "*"
     render json: JSON.generate(
       {  
@@ -12,7 +11,7 @@ class FederationController < ApplicationController
           {
             "rel": "self",
             "type": "application/activity+json",
-            "href": "#{ENV.fetch('APP_URL')}/fediverse_user "
+            "href": fediverse_user_url
           },
           # {
           #   "rel":"http://webfinger.net/rel/profile-page",
@@ -21,11 +20,10 @@ class FederationController < ApplicationController
           # }
         ]
     }
-    )
+    ), content_type: 'application/activity+json'
   end
 
   def fediverse_user
-    response.headers['Content-Type'] = 'application/activity+json'
     response.headers['Access-Control-Allow-Origin'] = "*"
 
     render json: JSON.generate(
@@ -33,9 +31,9 @@ class FederationController < ApplicationController
         "@context": "https://www.w3.org/ns/activitystreams",
         "id": "#{ENV.fetch('APP_URL')}/@#{ENV.fetch('FEDIVERSE_USER_NAME').gsub('@', '')}",
         "type": "Application",
-        # "following": "https://hachyderm.io/users/mapache/following",
+        # "following": "  ",
         # "followers": "https://hachyderm.io/users/mapache/followers",
-        "inbox": "#{ENV.fetch('APP_URL')}/inbox",
+        "inbox": fediverse_inbox_url,
         "outbox": "#{ENV.fetch('APP_URL')}/outbox",
         "preferredUsername": 'aggregator',
         "name": ENV.fetch('APP_NAME'),
@@ -79,13 +77,24 @@ class FederationController < ApplicationController
     #         "value": "<a href=\"https://github.com/mahomedalid\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">github.com/mahomedalid</span><span class=\"invisible\"></span></a>"
     #       }
     #     ]
-    }
-    )
+    }), content_type: 'application/activity+json'
   end
 
   def outbox
+    response.headers['Access-Control-Allow-Origin'] = "*"
+    
+    render json: JSON.generate(
+    {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      "id": "#{ENV.fetch('APP_URL')}/outbox",
+      "type": "OrderedCollection",
+      "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
+      "totalItems": 0,
+      "orderedItems": []
+    }), content_type: 'application/activity+json'
   end
 
   def inbox
+    head 202
   end
 end

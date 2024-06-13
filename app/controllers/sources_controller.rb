@@ -71,6 +71,6 @@ class SourcesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def source_params
-      params.require(:source).permit(:name, :url, :last_modified, :etag, :active, :show_images, :last_error_status)
+      params.require(:source).permit(:name, :url, :last_modified, :etag, :active, :show_images, :allow_video, :allow_audio, :last_error_status)
     end
 end

@@ -1,6 +1,9 @@
 .article_small_image_headline_summary_preview
   = link_to(article.url) do
-    img.image src=article.image_url
+    - if article.image_url
+      img.image src=article.image_url
+    - else
+      .image
   .headline_source_summary_preview
     = render 'article_headline', article: article, with_timestamp: true
     p.truncate-overflow

@@ -18,7 +18,7 @@ module Sources
       response = make_request(source: source)
 
       # Internal Server Error
-      return if rseponse.status == 500
+      return if response.status == 500
 
       # 304: Not Modified
       return if response.status == 304
@@ -69,30 +69,35 @@ module Sources
       puts e
       puts "URL DIDN'T WORK"
       source.update(last_error_status: 'connection_failed') if source
+      return
     rescue URI::InvalidURIError => e
       puts source.name if source
       puts source.url if source
       puts e
-      puts 'INVALID URL ! ! ! ! ! ! ! ! !'
+      puts 'INVALID URL'
       source.update(last_error_status: 'invalid_url') if source
+      return
     rescue Faraday::SSLError => e
       puts source.name if source
       puts source.url if source
       puts e
-      puts 'SSL ERROR ! ! ! ! ! ! ! ! !'
+      puts 'SSL ERROR'
       source.update(last_error_status: 'ssl_error') if source
+      return
     rescue Faraday::TimeoutError => e
       puts source.name if source
       puts source.url if source
       puts e
       puts 'TIMEOUT ERROR'
       source.update(last_error_status: 'timeout') if source
+      return
     rescue FaradayMiddleware::RedirectLimitReached => e
       puts source.name if source
       puts source.url if source
       puts e
       puts 'REDIRECT LIMIT REACHED'
       source.update(last_error_status: 'redirect_limit_reached') if source
+      return
     end
 
     def parse_feed(response, source: nil)
@@ -106,6 +111,7 @@ module Sources
       puts response.headers
       puts "XML DIDN'T WORK"
       source.update(last_error_status: 'xml_parse_error') if source
+      return
     end
 
     def debug(url)

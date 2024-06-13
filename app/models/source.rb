@@ -22,6 +22,10 @@ class Source < ApplicationRecord
     if !feed || (!result.validity && feed.entries.empty?)
       errors.add(:url, 'not a valid feed')
     end
+
+  rescue Net::HTTPFatalError => e
+    update(last_error_status: 'Internal Server Error (500)')
+    return
   end
 
   private

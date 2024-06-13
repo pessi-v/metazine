@@ -17,8 +17,8 @@ Rails.application.routes.draw do
   get 'search', to: 'articles#search', as: :search
   get 'articles_by_source/:source_name', to: 'articles#articles_by_source', as: :articles_by_source
   get '.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
-  get "fediverse_user", to: 'federation#fediverse_user', as: :fediverse_user
-  get "@aggregator", to: 'federation#fediverse_user'
+  get "@aggregator", to: 'federation#fediverse_user', as: :fediverse_user
+  # get "@aggregator", to: 'federation#fediverse_user'
   get "outbox", to: 'federation#outbox', as: :fediverse_outbox
-  get "inbox", to: 'federation#inbox', as: :fediverse_inbox
+  post "inbox", to: 'federation#inbox', as: :fediverse_inbox
 end
