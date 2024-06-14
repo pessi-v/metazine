@@ -20,7 +20,7 @@ class FederationController < ApplicationController
           # }
         ]
     }
-    ), content_type: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams'
+    ), content_type: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
   end
 
   def fediverse_user
@@ -35,7 +35,7 @@ class FederationController < ApplicationController
         # "followers": "https://hachyderm.io/users/mapache/followers",
         "inbox": fediverse_inbox_url,
         "outbox": "#{ENV.fetch('APP_URL')}/outbox",
-        "preferredUsername": 'aggregator',
+        "preferredUsername": ENV.fetch('FEDIVERSE_USER_NAME'),
         "name": ENV.fetch('APP_NAME'),
         "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
         "url": ENV.fetch('APP_URL'),
