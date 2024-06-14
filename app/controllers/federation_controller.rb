@@ -8,15 +8,15 @@ class FederationController < ApplicationController
         ],
         "links": [
           {
+            "rel": "http://webfinger.net/rel/profile-page",
+            "type": "text/html",
+            "href": "#{ENV.fetch('APP_URL')}/"
+          },
+          {
             "rel": "self",
             "type": "application/activity+json",
             "href": fediverse_user_url
-          },
-          # {
-          #   "rel":"http://webfinger.net/rel/profile-page",
-          #   "type":"text/html",
-          #   "href":"#{ENV.fetch('APP_URL')}/"
-          # }
+          }
         ]
     }), 
       content_type: 'application/jrd+json'
