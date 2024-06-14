@@ -1,6 +1,6 @@
 .page {
   background-color: var(--color-white);
-  padding: var(--space-xl);
+  padding: var(--space-s);
 
   .index {
     display: flex;
@@ -9,6 +9,7 @@
   }
 
   @include media(tabletAndUp) {
+    padding: var(--space-xl);
     width: 66vw;
     min-height: 100vh;
     height: auto;

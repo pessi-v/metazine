@@ -1,9 +1,23 @@
-.list_view {
+.list_view_desktop {
+  display: none;
+
+  @include media(tabletAndUp) {
+    display: flex;
+    flex-direction: column;
+    padding-left: 17%;
+    padding-right: 17%;
+    gap: var(--space-xxxl);
+  }
+}
+
+.list_view_mobile {
   display: flex;
   flex-direction: column;
-  padding-left: 17%;
-  padding-right: 17%;
-  gap: var(--space-xxxl);
+  gap: var(--space-l);
+  
+  @include media(tabletAndUp) {
+    display: none;
+  }
 }
 
 .truncate-overflow {

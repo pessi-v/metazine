@@ -5,8 +5,8 @@
   // padding: var(--space-l);
   
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
+  flex-direction: column;
   
   .title {
     text-transform: uppercase;
@@ -15,18 +15,22 @@
 }
 
 .page_header_split {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: stretch;
+  @include media(tabletAndUp) {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: stretch;
+  }
 }
 
 .page_header_split_half {
-  width: 50%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  
+
+  @include media(tabletAndUp) {
+    width: 50%;
+    height: 100%;
+  }
 }

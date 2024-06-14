@@ -52,7 +52,11 @@ h6 {
 }
 
 h1 {
-  font-size: var(--font-size-xxxxl);
+  font-size: var(--font-size-xxxl);
+
+  @include media(tabletAndUp) {
+    font-size: var(--font-size-xxxxl);
+  }
 }
 
 h2 {
