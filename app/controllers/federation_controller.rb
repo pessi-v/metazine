@@ -20,7 +20,7 @@ class FederationController < ApplicationController
           # }
         ]
     }
-    ), content_type: 'application/activity+json'
+    ), content_type: 'application/jrd+json'
   end
 
   def fediverse_user
