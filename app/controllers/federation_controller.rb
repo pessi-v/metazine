@@ -20,7 +20,7 @@ class FederationController < ApplicationController
           # }
         ]
     }
-    ), content_type: 'application/ld+json; profile="https://www.w3.org/ns/activitystreams"'
+    ), content_type: 'application/activity+json'
   end
 
   def fediverse_user
