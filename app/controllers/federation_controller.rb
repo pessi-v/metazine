@@ -95,6 +95,18 @@ class FederationController < ApplicationController
   end
 
   def inbox
-    head 202
+    # Parse the incoming ActivityPub request.
+    # activity = ActivityPub::Activity.from_h(params.require(:activity).permit!)
+
+    # # Process the incoming activity.
+    # case activity.type
+    # when "Create"
+    #   # Handle the creation of a new activity.
+    # when "Follow"
+    #   # Handle a new follow request.
+    # end
+
+    # # Respond to the request.
+    head :created
   end
 end

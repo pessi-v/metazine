@@ -16,6 +16,7 @@ module Sources
 
     def consume(source)
       response = make_request(source: source)
+      return unless response
 
       # Internal Server Error
       return if response.status == 500
@@ -25,6 +26,11 @@ module Sources
       return if response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified
 
       feed = parse_feed(response, source: source)
+
+      if feed.nil?
+        source.update(last_error_status: 'feed not available for some reason')
+        return "feed not available for some reason! Status: #{response.status} Source: #{source.name}"
+      end
 
       if feed.entries.empty?
         source.update(last_error_status: 'Feed appears to be empty')

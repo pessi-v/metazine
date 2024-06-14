@@ -82,6 +82,12 @@ gem 'cld'
 # Postgres full-text search
 gem 'pg_search'
 
+# ActivityPub
+# gem 'activitypub', git: 'https://github.com/rauversion/activitypub'
+# gem 'federails', git: 'https://gitlab.com/experimentslabs/federails', branch: 'main'
+# gem 'federails', git: 'https://github.com/pessi-v/federails', branch: 'main'
+# gem 'pundit'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
@@ -97,7 +103,7 @@ group :development do
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
 
-  gem 'webfinger'
+  # gem 'webfinger'
 end
 
 group :test do
