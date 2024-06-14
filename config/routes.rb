@@ -10,8 +10,6 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   root "articles#frontpage", as: :frontpage
 
-  # mount Federails::Engine => '/'
-  
   get 'reader/(:id)', to: 'articles#reader', as: :reader
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
   get 'list', to: 'articles#list', as: :list
@@ -22,6 +20,4 @@ Rails.application.routes.draw do
   # get "@aggregator", to: 'federation#fediverse_user'
   get "outbox", to: 'federation#outbox', as: :fediverse_outbox
   post "inbox", to: 'federation#inbox', as: :fediverse_inbox
-
-  # get '/.well-known/webfinger', to: 'webfinger#show'
 end
