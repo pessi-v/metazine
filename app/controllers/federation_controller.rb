@@ -1,6 +1,5 @@
 class FederationController < ApplicationController
   def webfinger
-    response.headers['Access-Control-Allow-Origin'] = "*"
     render json: JSON.generate(
       {  
         "subject": "acct:#{ENV.fetch('FEDIVERSE_USER_NAME').gsub('@', '')}@#{URI.parse(ENV.fetch('APP_URL')).host}",
@@ -19,12 +18,11 @@ class FederationController < ApplicationController
           #   "href":"#{ENV.fetch('APP_URL')}/"
           # }
         ]
-    }
-    ), content_type: 'application/activity+json'
+    }), 
+      content_type: 'application/jrd+json'
   end
 
   def fediverse_user
-    response.headers['Access-Control-Allow-Origin'] = "*"
 
     render json: JSON.generate(
       {
