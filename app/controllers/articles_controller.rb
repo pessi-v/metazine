@@ -97,7 +97,7 @@ class ArticlesController < ApplicationController
 
   private
     def latest_articles
-      @articles = Article.order(published_at: :desc).first(15)
+      @articles = Article.order(published_at: :desc).first(30)
     end
 
     def set_article_readability_output(article)

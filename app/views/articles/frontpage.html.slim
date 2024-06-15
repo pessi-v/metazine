@@ -34,6 +34,27 @@
     = render 'article_image_headline', article: next_article_with_image(@articles)
     = render 'article_headline', article: next_article_without_image(@articles)
     = render 'article_image_headline', article: next_article_with_image(@articles)
-    / = render 'article_headline', article: @articles[5]
-  // break
+.page_grid
+  .item-a
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+  .item-b
+    = render 'many_articles_headline',
+      articles: [next_article_without_image(@articles),
+                  next_article_without_image(@articles),
+                  next_article_without_image(@articles),
+                  next_article_without_image(@articles)]
+  .item-c
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+  .item-d
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+  .item-e
+    = render 'article_image_headline', article: next_article_with_image(@articles)
+    = render 'article_headline', article: next_article_without_image(@articles)
+    = render 'article_image_headline', article: next_article_with_image(@articles)
+
 
