@@ -11,6 +11,17 @@
 
   = link_to "New source", new_source_path
 
+  div id="article_counts"
+    table
+      - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
+        tr
+          th
+            p
+              = date.strftime("%A %d.")
+          th
+            p
+              = @article_counts_by_day[index]
+
   div id="sources"
     .list_view_desktop
       - @sources.each do |source|

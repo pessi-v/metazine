@@ -8,4 +8,8 @@ class Article < ApplicationRecord
                   against: %i[title source_name readability_output],
                   using: { tsearch: { prefix: true } }, # tsearch = full text search
                   ignoring: :accents
+
+  scope :today, -> { where('DATE(published_at) = CURRENT_DATE') }
+  scope :yesterday, -> { where('DATE(published_at) = CURRENT_DATE - 1') }
+  scope :days_ago, ->(days) { where("DATE(published_at) = CURRENT_DATE - #{days}") } 
 end
