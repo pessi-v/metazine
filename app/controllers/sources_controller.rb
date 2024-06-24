@@ -1,5 +1,6 @@
 class SourcesController < ApplicationController
   before_action :set_source, only: %i[ show edit update destroy ]
+  http_basic_authenticate_with name: "admin", password: "metazine", only: [:new, :edit, :create, :destroy, :update]
 
   # GET /sources or /sources.json
   def index
