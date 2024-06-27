@@ -8,3 +8,7 @@ s = Rufus::Scheduler.singleton
 s.every '30m' do
   Sources::FeedFetcher.new.consume_all
 end
+
+s.every '1m' do
+  puts 'keep alive'
+end
