@@ -3,6 +3,9 @@
   height: auto;
   // border-bottom: 1px dashed var(--color-glint);
   // padding: var(--space-l);
+  display: flex;
+  flex-direction: column;
+  row-gap: var(--space-m);
 
   @include media(tabletAndUp) {
     display: grid;

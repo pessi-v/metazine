@@ -41,12 +41,12 @@ class FederationController < ApplicationController
         "memorial": false, # Mastodon only: a digital "tombstone"
         "icon": {
           "type": "Image",
-          "mediaType": "image/png",
+          "mediaType": "image/jpg",
           "url": "#{ENV.fetch('APP_URL')}/waves.jpg"
         },
         "image": {
           "type": "Image",
-          "mediaType": "image/png",
+          "mediaType": "image/jpg",
           "url": "#{ENV.fetch('APP_URL')}/waves.jpg"
         },
         "publicKey": {
@@ -75,6 +75,28 @@ class FederationController < ApplicationController
     #         "value": "<a href=\"https://github.com/mahomedalid\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\" translate=\"no\"><span class=\"invisible\">https://</span><span class=\"\">github.com/mahomedalid</span><span class=\"invisible\"></span></a>"
     #       }
     #     ]
+    }), content_type: 'application/activity+json'
+  end
+
+  def following
+    render json: JSON.generate(
+      {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "id": "#{ENV.fetch('APP_URL')}/following",
+        "type": "OrderedCollection",
+        "totalItems": 1,
+        "first": "#{ENV.fetch('APP_URL')}/following_accts"
+    }), content_type: 'application/activity+json'
+  end
+
+  def followers
+    render json: JSON.generate(
+      {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "id": "#{ENV.fetch('APP_URL')}/followers",
+        "type": "OrderedCollection",
+        "totalItems": 1000000,
+        "first": "#{ENV.fetch('APP_URL')}/follower_accts"
     }), content_type: 'application/activity+json'
   end
 
