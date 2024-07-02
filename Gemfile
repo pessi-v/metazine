@@ -62,7 +62,7 @@ gem 'ogpr'
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
 gem 'addressable'
 
-# gem "ruby-readability"
+gem "ruby-readability", :require => 'readability'
 
 # gem 'nokogiri'
 

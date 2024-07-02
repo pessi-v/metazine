@@ -9,6 +9,7 @@ h1
 
 br
 
-= render "form", source: @source
+= turbo_frame_tag 'new_source'
+  = render "form", source: @source
 
 

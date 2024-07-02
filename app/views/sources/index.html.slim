@@ -8,8 +8,8 @@
   
   = button_to('Reload all feeds', fetch_feeds_path)
 
-
-  = link_to "New source", new_source_path
+  = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
+    = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
 
   div id="article_counts"
     table
@@ -22,9 +22,10 @@
             p
               = @article_counts_by_day[index]
 
-  div id="sources"
-    .list_view_desktop
-      - @sources.each do |source|
-        = link_to(source, class: 'source_info') do  
-          = render source
+  
+  .list_view_desktop
+    = turbo_frame_tag 'new_source'
+    - @sources.each do |source|
+      = link_to(source) do  
+        = render source
 
