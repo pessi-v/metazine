@@ -1,0 +1,35 @@
+css:
+  .article_image_headline_summary_3_rows {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    gap: var(--space-s);
+    flex-direction: column;
+    justify-content: flex-end;
+
+    @include media(tabletAndUp) {
+    }
+
+    .image {
+      flex-grow: 1;
+      min-height: 0;
+      xheight: 100%;
+      width: auto;
+      object-fit: cover;
+      object-position: center 20%; // left-right top-bottom
+    }
+
+    .summary {
+      width: 100%;
+      height: auto;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+  }
+
+
+.article_image_headline_summary_3_rows
+  img.image src=article.image_url
+  = render 'article_headline', article: article
+  p.summary
+    = article.description || article.summary

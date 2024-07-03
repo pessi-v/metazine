@@ -7,6 +7,6 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
-  padding-bottom: var(--space-s);
+  border-left: var(--border);
+  padding-left: var(--space-s);
 }

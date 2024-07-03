@@ -1,11 +1,11 @@
 .page_grid {
   width: 100%;
   height: auto;
-  // border-bottom: 1px dashed var(--color-glint);
+  // border-bottom: var(--border);
   // padding: var(--space-l);
   display: flex;
   flex-direction: column;
-  row-gap: var(--space-m);
+  row-gap: var(--space-l);
 
   @include media(tabletAndUp) {
     display: grid;
@@ -13,8 +13,8 @@
     grid-template-columns: repeat(6, 1fr);
     column-gap: var(--space-m);
 
-    grid-template-rows: repeat(8, 120px);
-    row-gap: var(--space-m);
+    grid-template-rows: repeat(8, var(--space-7xl));
+    row-gap: var(--space-xl);
   }
 }
 
