@@ -23,9 +23,9 @@
               = @article_counts_by_day[index]
 
   
-  .list_view_desktop
-    = turbo_frame_tag 'new_source'
-    = turbo_frame_tag 'sources'
+  = turbo_frame_tag 'sources'
+    .list_view_desktop
+      = turbo_frame_tag 'new_source'
       = render @sources
     / - @sources.each do |source|
     /   = link_to(source) do  

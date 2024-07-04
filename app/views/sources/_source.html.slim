@@ -3,33 +3,52 @@ css:
     color: var(--color-primary);
   }
 
+  .source_card {
+    width: 100%;
+    height: auto;
+    border: var(--border);
+    display: flex;
+  }
+
+  .half {
+    width: 50%;
+  }
 
 = turbo_frame_tag source
-  p
-    strong
-      'Name:
-    = source.name
+  .source_card
+    .half
+      h1
+        = source.name
 
-  p
-    strong
-      'Url:
-    = source.url
+      p
+        = source.url
 
-  p
-    strong
-      'Active:
-    = source.active
+      p
+        strong
+          'Active:
+        = source.active
 
-  p
-    strong
-      'Show images:
-    = source.show_images
+      p
+        strong
+          'Show images:
+        = source.show_images
 
-  p
-    strong
-      'Last error status:
-    p.error 
-      = source.last_error_status
+      p
+        strong
+          'Allow video:
+        = source.allow_video
+      
+      p
+        strong
+          'Allow audio:
+        = source.allow_audio
 
-  = button_to "Edit", edit_source_path(source), method: :get
-  = button_to "Delete", source, method: :delete, form: {data: {turbo_confirm: "Deleting this source will destroy all of it's articles too. If you want to keep the articles, you should just deactivate the source."}}
+      p
+        strong
+          'Last error status:
+        p.error 
+          = source.last_error_status
+
+    .half
+      = button_to "Change", edit_source_path(source), method: :get
+      = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
