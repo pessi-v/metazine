@@ -6,6 +6,7 @@ class Source < ApplicationRecord
   scope :active, -> { where(active: true) }
 
   has_many :articles, dependent: :destroy
+  before_create :add_description_and_image
   after_update :update_articles_source_name, if: :saved_change_to_name?
 
   def valid_feed
@@ -29,6 +30,15 @@ class Source < ApplicationRecord
   end
 
   private
+
+  def add_description_and_image
+    uri = URI(s.url)
+    uri.query = uri.fragment = nil
+    uri.path = ""
+    ogp = Ogpr.fetch(uri.to_s)
+    image_url = ogp.image
+    description = ogp.description
+  end
 
   def update_articles_source_name
     articles.update_all(source_name: name)

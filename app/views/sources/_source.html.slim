@@ -1,22 +1,32 @@
 css:
-  .error {
-    color: var(--color-primary);
-  }
 
   .source_card {
     width: 100%;
     height: auto;
     border: var(--border);
     display: flex;
+  
+    .section {
+      width: 50%;
+    }
+
+    .error {
+      color: var(--color-primary);
+    }
+
+    .image {
+      height: var(--space-9xl);
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+    }
   }
 
-  .half {
-    width: 50%;
-  }
 
 = turbo_frame_tag source
   .source_card
-    .half
+    img.image src=source.image_url
+      
+    .section
       h1
         = source.name
 
@@ -49,6 +59,9 @@ css:
         p.error 
           = source.last_error_status
 
-    .half
+    .section
+      p
+        = source.description
+
       = button_to "Change", edit_source_path(source), method: :get
       = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
