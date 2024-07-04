@@ -1,3 +1,12 @@
+GIT
+  remote: https://github.com/pessi-v/ogpr
+  revision: 0cf586b4eee4d655be40f196eae3c82c78aa301b
+  branch: master
+  specs:
+    ogpr (1.1.0)
+      nokogiri (~> 1.8)
+      rest-client (~> 2.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -155,7 +164,7 @@ GEM
       rake (>= 13)
     guess_html_encoding (0.0.11)
     http-accept (1.7.0)
-    http-cookie (1.0.5)
+    http-cookie (1.0.6)
       domain_name (~> 0.5)
     httpclient (2.8.3)
     i18n (1.14.5)
@@ -184,7 +193,7 @@ GEM
     matrix (0.4.2)
     mime-types (3.5.2)
       mime-types-data (~> 3.2015)
-    mime-types-data (3.2024.0507)
+    mime-types-data (3.2024.0702)
     mini_mime (1.1.5)
     minitest (5.23.1)
     msgpack (1.7.2)
@@ -214,9 +223,6 @@ GEM
       racc (~> 1.4)
     nokogiri (1.16.5-x86_64-linux)
       racc (~> 1.4)
-    ogpr (1.1.0)
-      nokogiri (~> 1.8)
-      rest-client (~> 2.1.0)
     pg (1.5.6)
     pg_search (2.3.6)
       activerecord (>= 5.2)
@@ -395,7 +401,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   node-runner (~> 1.2)
-  ogpr
+  ogpr!
   pg (~> 1.1)
   pg_search
   puma (>= 5.0)

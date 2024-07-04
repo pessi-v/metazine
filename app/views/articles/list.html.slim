@@ -14,9 +14,9 @@
 .list_view_desktop
   - @articles.each do |article|
     = render 'article_small_image_headline_summary_preview', article: article
-    hr
+    .line
 
 .list_view_mobile
   - @articles.each do |article|
     = render 'article_image_headline_summary', article: article
-    hr
+    .line

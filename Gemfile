@@ -56,7 +56,7 @@ gem 'faraday_middleware'
 gem 'feedjira'
 
 # a ruby library to fetch and parse meta tags which represent OpenGraph Protocol and TwitterCard.
-gem 'ogpr'
+gem 'ogpr', git: 'https://github.com/pessi-v/ogpr', branch: 'master'
 
 # Addressable is an alternative implementation to the URI implementation that is part of Ruby's standard library.
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.

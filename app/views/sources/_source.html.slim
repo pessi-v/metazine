@@ -33,10 +33,11 @@ css:
       p
         = source.url
 
-      p
-        strong
-          'Articles:
-        = source.articles_count
+      = link_to(articles_by_source_path(source.name), data: {turbo: false})
+        p
+          strong
+            'Articles:
+          = source.articles_count
 
       p
         strong
