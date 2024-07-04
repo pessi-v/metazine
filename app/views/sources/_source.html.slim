@@ -4,7 +4,7 @@ css:
   }
 
 
-.source_info id=dom_id(source)
+= turbo_frame_tag source
   p
     strong
       'Name:
@@ -30,3 +30,6 @@ css:
       'Last error status:
     p.error 
       = source.last_error_status
+
+  = button_to "Edit", edit_source_path(source), method: :get
+  = button_to "Delete", source, method: :delete, form: {data: {turbo_confirm: "Deleting this source will destroy all of it's articles too. If you want to keep the articles, you should just deactivate the source."}}

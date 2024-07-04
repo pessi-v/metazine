@@ -25,7 +25,9 @@
   
   .list_view_desktop
     = turbo_frame_tag 'new_source'
-    - @sources.each do |source|
-      = link_to(source) do  
-        = render source
+    = turbo_frame_tag 'sources'
+      = render @sources
+    / - @sources.each do |source|
+    /   = link_to(source) do  
+    /     = render source
 

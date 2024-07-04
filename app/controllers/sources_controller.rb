@@ -44,6 +44,7 @@ class SourcesController < ApplicationController
       if @source.save
         format.html { redirect_to source_url(@source), notice: "Source was successfully created." }
         format.json { render :show, status: :created, location: @source }
+        format.turbo_stream
       else
         format.html { render :new, status: :unprocessable_entity }
         format.json { render json: @source.errors, status: :unprocessable_entity }
@@ -71,6 +72,7 @@ class SourcesController < ApplicationController
     respond_to do |format|
       format.html { redirect_to sources_url, notice: "Source was successfully destroyed." }
       format.json { head :no_content }
+      format.turbo_stream
     end
   end
 
