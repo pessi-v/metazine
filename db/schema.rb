@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_04_165939) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_04_181155) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
   enable_extension "unaccent"
@@ -45,6 +45,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_04_165939) do
     t.boolean "allow_audio", default: false
     t.string "description"
     t.string "image_url"
+    t.integer "articles_count"
   end
 
   create_table "users", force: :cascade do |t|

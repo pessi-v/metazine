@@ -44,3 +44,7 @@ class Source < ApplicationRecord
     articles.update_all(source_name: name)
   end
 end
+
+Source.find_each do |source|
+  Source.reset_counters(source.id, :articles)
+end

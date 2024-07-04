@@ -1,6 +1,8 @@
 class Article < ApplicationRecord
   include PgSearch::Model
 
+  belongs_to :source, counter_cache: true
+
   validates :title, :source_name, presence: true
   validates :title, uniqueness: true
 
