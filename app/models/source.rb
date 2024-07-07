@@ -32,7 +32,7 @@ class Source < ApplicationRecord
   private
 
   def add_description_and_image
-    uri = URI(s.url)
+    uri = URI(url)
     uri.query = uri.fragment = nil
     uri.path = ""
     ogp = Ogpr.fetch(uri.to_s)
