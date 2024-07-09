@@ -49,7 +49,7 @@ module Articles
     end
 
     def set_image
-      if @ogp&.image
+      if @ogp&.image.url.present?
         # cleaned_url = asciify(@ogp.image.url)
         # return unless cleaned_url
         
