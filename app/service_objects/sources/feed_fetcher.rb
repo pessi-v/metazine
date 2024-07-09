@@ -107,7 +107,7 @@ module Sources
     end
 
     def parse_feed(response, source: nil)
-      Feedjira.parse(response.body)
+      Feedjira.parse(response.body.force_encoding('utf-8'))
 
     rescue Feedjira::NoParserAvailable => e
       puts source.name if source

@@ -6,10 +6,10 @@ css:
     gap: var(--space-xl);
     xborder-top: var(--border);
     xborder-bottom: var(--border);
-    padding-top: var(--space-l);
-    padding-bottom: var(--space-l);
-    margin-top: var(--space-l);
-    margin-bottom: var(--space-l);
+    xpadding-top: var(--space-l);
+    xpadding-bottom: var(--space-l);
+    xmargin-top: var(--space-l);
+    xmargin-bottom: var(--space-l);
     flex-grow: 1;
     min-height: 0;
   }
@@ -42,7 +42,7 @@ css:
                   next_article_without_image(@articles),
                   next_article_without_image(@articles)]
   .item-c
-    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    = render 'article_headline_summary', article: next_article_without_image(@articles)
 
     .top_and_bottom_border
       .line
@@ -51,15 +51,21 @@ css:
       = render 'article_headline', article: next_article_without_image(@articles)
       .line
     
-    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    = render 'article_headline_summary', article: next_article_without_image(@articles)
+    
+    .top_and_bottom_border
+      .line
+      = render 'article_headline', article: next_article_without_image(@articles)
+      = render 'article_headline', article: next_article_without_image(@articles)
+      = render 'article_headline', article: next_article_without_image(@articles)
+
   .item-d
+    = render 'article_headline_summary', article: next_article_without_image(@articles)
     = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-    = render 'article_headline', article: next_article_without_image(@articles)
-    = render 'article_headline', article: next_article_without_image(@articles)
+    
   .item-e
-    = render 'article_image_headline', article: next_article_with_image(@articles)
-    = render 'article_headline', article: next_article_without_image(@articles)
-    = render 'article_image_headline', article: next_article_with_image(@articles)
+    = render 'article_headline_summary', article: next_article_without_image(@articles)
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
 
 
 

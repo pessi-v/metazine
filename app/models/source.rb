@@ -1,7 +1,7 @@
 class Source < ApplicationRecord
   validates :name, :url, presence: true
   validates :name, :url, uniqueness: true
-  validate :valid_feed
+  validate :valid_feed, on: :create
 
   scope :active, -> { where(active: true) }
 

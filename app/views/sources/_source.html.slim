@@ -28,7 +28,11 @@ css:
       
     .section
       h1
-        = source.name
+        - if source.active
+          = source.name
+        - else
+          s
+            = source.name
 
       p
         = source.url

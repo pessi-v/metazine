@@ -7,6 +7,7 @@ module Articles
     def initialize(source, entry)
       @source = source
       @entry = entry
+      @ogp = get_ogp
       # @regions = regions
       # @countries = countries
       # @country_classifier = country_classifier
@@ -20,12 +21,12 @@ module Articles
       return if (@entry.categories.include?('Podcast') || @entry.categories.include?('Audio')) && !@source.allow_audio
 
       create_summary
-      check_og
+      # check_og
       set_image if @source.show_images
 
       a = Article.new(
         title: @title,
-        description: @description,
+        description: @ogp.description,
         summary: @summary,
         url: @entry.url,
         source_name: @source.name,
@@ -42,26 +43,20 @@ module Articles
       a.save
     end
 
-    def check_og
-      cleaned_url = asciify(@entry.url)
-      return unless cleaned_url
-
-      @ogp = Ogpr.fetch(cleaned_url)
-      @description = text_cleaner(@ogp.meta['og:description']) if @ogp.meta['og:description']
-    rescue RuntimeError => e
-      puts e
-      puts @entry.url
-      puts 'SEEMS LIKE OG IS NOT AVAILABLE'
+    def get_ogp
+      response = Faraday.get(@entry.url)
+      OGP::OpenGraph.new(response.body)
     end
 
     def set_image
       if @ogp&.image
-        cleaned_url = asciify(@ogp.image)
-        return unless cleaned_url
+        # cleaned_url = asciify(@ogp.image.url)
+        # return unless cleaned_url
         
-        request = Faraday.get(cleaned_url)
+        # request = Faraday.get(cleaned_url)
+        request = Faraday.get(@ogp.image.url)
         if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
-          @image = @ogp.image
+          @image = @ogp.image.url
           return
         end
       end

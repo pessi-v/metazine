@@ -86,6 +86,8 @@ GEM
       tzinfo (~> 2.0)
     addressable (2.8.6)
       public_suffix (>= 2.0.2, < 6.0)
+    ansi (1.5.0)
+    ast (2.4.2)
     base64 (0.2.0)
     bigdecimal (3.1.8)
     bindex (0.8.1)
@@ -223,6 +225,11 @@ GEM
       racc (~> 1.4)
     nokogiri (1.16.5-x86_64-linux)
       racc (~> 1.4)
+    oga (3.4)
+      ast
+      ruby-ll (~> 2.1)
+    ogp (0.5.0)
+      oga (~> 3.3)
     pg (1.5.6)
     pg_search (2.3.6)
       activerecord (>= 5.2)
@@ -288,6 +295,9 @@ GEM
       netrc (~> 0.8)
     rexml (3.2.8)
       strscan (>= 3.0.9)
+    ruby-ll (2.1.3)
+      ansi
+      ast
     ruby-readability (0.7.1)
       guess_html_encoding (>= 0.0.4)
       nokogiri (>= 1.6.0)
@@ -401,6 +411,7 @@ DEPENDENCIES
   importmap-rails
   jbuilder
   node-runner (~> 1.2)
+  ogp
   ogpr!
   pg (~> 1.1)
   pg_search

@@ -3,11 +3,7 @@ class ArticlesController < ApplicationController
   before_action :set_article, only: %i[ show edit update destroy ]
 
   def frontpage
-    # @articles = Article.last(15)
     latest_articles
-    # @articles_without_images = articles.select { |article| !article.image_url }
-    # @articles_with_images = articles - @articles_without_images
-    # binding.break
   end
 
   def search
@@ -16,7 +12,6 @@ class ArticlesController < ApplicationController
   end
   
   def articles_by_source
-    # binding.break
     @articles = Article.where(source_name: params[:source_name]).order(published_at: :desc)
     render :list
   end
@@ -97,7 +92,7 @@ class ArticlesController < ApplicationController
 
   private
     def latest_articles
-      @articles = Article.order(published_at: :desc).first(15)
+      @articles = Article.order(published_at: :desc).first(30)
     end
 
     def set_article_readability_output(article)
