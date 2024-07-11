@@ -112,6 +112,12 @@ module Articles
       text = text.gsub(/([,\.!?:;])(\S)/, '\1 \2')
 
       text.strip
+
+      if text.end_with?('[…]')
+        text = remove_last_sentence(text)
+      end
+
+      text
     end
 
     def published_at
@@ -132,6 +138,11 @@ module Articles
     end
 
     private
+
+    def remove_last_sentence(text)
+      last_punctuation_index = text.rindex(/[.!?]/)
+      text[0..last_punctuation_index]
+    end
 
     def asciify(url)
       uri = Addressable::URI.parse(url)
