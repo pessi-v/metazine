@@ -3,14 +3,10 @@
 # Generic article sources RSS job
 module Articles
   class CreateService
-    # def initialize(source, entry, regions, countries, country_classifier)
     def initialize(source, entry)
       @source = source
       @entry = entry
       @ogp = get_ogp
-      # @regions = regions
-      # @countries = countries
-      # @country_classifier = country_classifier
     end
 
     def create_article
@@ -21,7 +17,6 @@ module Articles
       return if (@entry.categories.include?('Podcast') || @entry.categories.include?('Audio')) && !@source.allow_audio
 
       create_summary
-      # check_og
       set_image if @source.show_images
 
       a = Article.new(
@@ -33,11 +28,6 @@ module Articles
         source_id: @source.id,
         published_at: published_at,
         image_url: @image || nil
-        # user_id: 1,
-        # language: set_language,
-        # country: set_country,
-        # region: set_region,
-        # show_image: @source.show_image
       )
 
       a.save
@@ -45,15 +35,11 @@ module Articles
 
     def get_ogp
       response = Faraday.get(@entry.url)
-      OGP::OpenGraph.new(response.body)
+      OGP::OpenGraph.new(response.body, required_attributes: [])
     end
 
     def set_image
       if @ogp&.image.url.present?
-        # cleaned_url = asciify(@ogp.image.url)
-        # return unless cleaned_url
-        
-        # request = Faraday.get(cleaned_url)
         request = Faraday.get(@ogp.image.url)
         if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
           @image = @ogp.image.url
@@ -74,28 +60,6 @@ module Articles
 
       nil
     end
-
-    # def set_country
-    #   tagged_countries = (@entry.categories & @countries)
-
-    #   @country =
-    #     if tagged_countries.count.zero?
-    #       prediction = @country_classifier.predict(@title)
-    #       prediction.keys[0] if prediction.values[0] > 0.7
-    #     elsif tagged_countries.count == 1
-    #       tagged_countries[0]
-    #     else
-    #       'International'
-    #     end
-    # end
-
-    # def set_region
-    #   if @country == 'International' || @country.nil?
-    #     'International'
-    #   else
-    #     @regions.select { |_key, value| value.include?(@country) }.keys[0]
-    #   end
-    # end
 
     def create_summary
       text = @entry.summary || @entry.content
