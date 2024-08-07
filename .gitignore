@@ -42,10 +42,6 @@
 /.kamal
 /config/deploy.yml
 
-/fly.toml
-
-/.github/workflows
-
 /private.pem
 /public.pem
 /*/.DS_Store
