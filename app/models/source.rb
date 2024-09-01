@@ -32,12 +32,16 @@ class Source < ApplicationRecord
   private
 
   def add_description_and_image
-    uri = URI(url)
-    uri.query = uri.fragment = nil
-    uri.path = ""
-    ogp = Ogpr.fetch(uri.to_s)
-    image_url = ogp.image
-    description = ogp.description
+    # uri = URI(url)
+    # uri.query = uri.fragment = nil
+    # uri.path = ""
+    # ogp = Ogpr.fetch(uri.to_s)
+
+    response = Faraday.get(url)
+    ogp = OGP::OpenGraph.new(response.body, required_attributes: [])
+
+    image_url = ogp&.image
+    description = ogp&.description
   end
 
   def update_articles_source_name
