@@ -36,12 +36,17 @@ class Source < ApplicationRecord
     # uri.query = uri.fragment = nil
     # uri.path = ""
     # ogp = Ogpr.fetch(uri.to_s)
+    # binding.break
 
     response = Faraday.get(url)
     ogp = OGP::OpenGraph.new(response.body, required_attributes: [])
 
     image_url = ogp&.image
     description = ogp&.description
+
+  rescue OGP::MalformedSourceError => e
+    puts 'source url does not have ogp metadata'
+    return
   end
 
   def update_articles_source_name
