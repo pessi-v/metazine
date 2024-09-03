@@ -36,6 +36,13 @@ class SourcesController < ApplicationController
     redirect_to sources_path
   end
 
+  def fetch_feed
+    # TODO make this action only available to admin
+    # binding.break
+    Sources::FeedFetcher.new.consume(Source.find(44))
+    redirect_to sources_path
+  end
+
   # POST /sources or /sources.json
   def create
     @source = Source.new(source_params)
