@@ -38,5 +38,5 @@ run the app:
 ### env variables
 You should define the following variables (in .env, for example):
 
-`APP_NAME = <your instance name here>
+`INSTANCE_NAME = <your instance name here>
 APP_SHORT_DESCRIPTION = <whatever you want to say>`

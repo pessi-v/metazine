@@ -37,7 +37,7 @@ class FederationController < ApplicationController
         "inbox": fediverse_inbox_url,
         "outbox": "#{ENV.fetch('APP_URL')}/outbox",
         "preferredUsername": ENV.fetch('FEDIVERSE_USER_NAME'),
-        "name": ENV.fetch('APP_NAME'),
+        "name": ENV.fetch('INSTANCE_NAME'),
         "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
         "url": ENV.fetch('APP_URL'),
         "discoverable": true, # Mastodon only

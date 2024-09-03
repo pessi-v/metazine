@@ -13,7 +13,7 @@
       p.source
         = article.source_name
     - unless request.original_url.match?(reader_path)
-      = link_to('○', reader_path(article), title: "Read on #{ENV['APP_NAME']}", class: 'reader_link')
+      = link_to('○', reader_path(article), title: "Read on #{ENV['INSTANCE_NAME']}", class: 'reader_link')
   - if with_timestamp
     p.source 
       = article.published_at.strftime('%A %-d.%-m.%Y')
