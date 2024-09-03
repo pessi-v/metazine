@@ -51,10 +51,10 @@ module Sources
     def make_request(source: nil, url: nil)
       connection = Faraday.new(
         url: source&.url || url,
-        headers: {
-          'If-Modified-Since': source&.last_modified,
-          'If-None-Match': source&.etag
-        },
+        # headers: {
+        #   'If-Modified-Since': source&.last_modified,
+        #   'If-None-Match': source&.etag
+        # },
         ssl: { verify: false }
       ) do |faraday|
         faraday.use FaradayMiddleware::FollowRedirects
