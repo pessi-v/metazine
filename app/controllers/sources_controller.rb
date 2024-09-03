@@ -38,8 +38,7 @@ class SourcesController < ApplicationController
 
   def fetch_feed
     # TODO make this action only available to admin
-    # binding.break
-    Sources::FeedFetcher.new.consume(Source.find(44))
+    Sources::FeedFetcher.new.consume(Source.find(params[:source_id]))
     redirect_to sources_path
   end
 
