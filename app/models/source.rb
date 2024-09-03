@@ -11,8 +11,8 @@ class Source < ApplicationRecord
 
   def valid_feed
     # Check feed validity
-    validator = W3CValidators::FeedValidator.new
-    result = validator.validate_uri(url)
+    # validator = W3CValidators::FeedValidator.new
+    # result = validator.validate_uri(url)
 
     # Check if feed can be parsed for entries
     feed_fetcher = Sources::FeedFetcher.new
@@ -20,10 +20,11 @@ class Source < ApplicationRecord
     response = feed_fetcher.make_request(url: url)
     feed = feed_fetcher.parse_feed(response)
 
-    if !feed || (!result.validity && feed.entries.empty?)
-      errors.add(:url, 'not a valid feed')
-    end
+    # if !feed || (!result.validity && feed.entries.empty?)
+    #   errors.add(:url, 'not a valid feed')
+    # end
 
+  
   rescue Net::HTTPFatalError => e
     update(last_error_status: 'Internal Server Error (500)')
     return
