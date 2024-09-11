@@ -15,6 +15,7 @@ module Sources
     end
 
     def consume(source)
+      
       response = make_request(source: source)
       return unless response
 
