@@ -15,14 +15,15 @@ class FederationController < ApplicationController
           {
             "rel": "self",
             "type": "application/activity+json",
-            "href": fediverse_user_url
+            "href": fediverse_user_url(ENV.fetch('FEDIVERSE_USER_NAME'))
           }
         ]
     }), 
       content_type: 'application/jrd+json'
   end
 
-  def fediverse_user
+  def fediverse_user # the ActivityPub actor object
+    user = params[:fediverse_user]
 
     render json: JSON.generate(
       {
@@ -30,8 +31,8 @@ class FederationController < ApplicationController
           "https://www.w3.org/ns/activitystreams",
           "https://w3id.org/security/v1"
         ],
-        "id": "#{ENV.fetch('APP_URL')}/@#{ENV.fetch('FEDIVERSE_USER_NAME').gsub('@', '')}",
         "type": "Application",
+        "id": "#{ENV.fetch('APP_URL')}/@#{user}", # THIS NEEDS SOME CHECK FOR IF THIS ACTOR EXISTS, OTHERWISE ANY ACTOR IS AVAILABLE
         "following": "#{ENV.fetch('APP_URL')}/following",
         "followers": "#{ENV.fetch('APP_URL')}/followers",
         "inbox": fediverse_inbox_url,
@@ -83,12 +84,14 @@ class FederationController < ApplicationController
   end
 
   def outbox
+    user = params[:fediverse_user]
+
     response.headers['Access-Control-Allow-Origin'] = "*"
     
     render json: JSON.generate(
     {
       "@context": "https://www.w3.org/ns/activitystreams",
-      "id": "#{ENV.fetch('APP_URL')}/outbox",
+      "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
       "type": "OrderedCollection",
       "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
       "totalItems": 0,
