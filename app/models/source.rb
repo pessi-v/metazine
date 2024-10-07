@@ -30,16 +30,15 @@ class Source < ApplicationRecord
     return
   end
 
+  def consume_feed
+    feed_fetcher = Sources::FeedFetcher.new.consume(self)
+  end
+
   private
 
   def add_description_and_image
-    # uri = URI(url)
-    # uri.query = uri.fragment = nil
-    # uri.path = ""
-    # ogp = Ogpr.fetch(uri.to_s)
-    # binding.break
-
-    response = Faraday.get(url)
+    uri = URI(url)
+    response = Faraday.get(uri.origin)
     ogp = OGP::OpenGraph.new(response.body, required_attributes: [])
 
     image_url = ogp&.image
