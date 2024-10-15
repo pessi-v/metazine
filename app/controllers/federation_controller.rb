@@ -107,20 +107,20 @@ class FederationController < ApplicationController
             "https://www.w3.org/ns/activitystreams#Public"
           ],
           "cc": [],
-          "published": "2024-02-18T21:06:38-08:00"
+          "published": Time.current
         },
         {
           "@context": "https://www.w3.org/ns/activitystreams",
           "id": "12345",
           "type": "Note",
           "content": "Testing the fedi things",
-          "url": "https://newfutu.re/reader/706",
+          "url": "https://newfutu.re/reader/707",
           "attributedTo": "https://newfutu.re/@editor",
           "to": [
             "https://www.w3.org/ns/activitystreams#Public"
           ],
           "cc": [],
-          "published": "2024-02-18T21:06:38-08:00"
+          "published": Time.current
         }
       ]
     }), content_type: 'application/activity+json'
