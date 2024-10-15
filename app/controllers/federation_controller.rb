@@ -36,7 +36,7 @@ class FederationController < ApplicationController
         "following": "#{ENV.fetch('APP_URL')}/following",
         "followers": "#{ENV.fetch('APP_URL')}/followers",
         "inbox": fediverse_inbox_url,
-        "outbox": fediverse_outbox_url,
+        "outbox": fediverse_outbox_url(user),
         "preferredUsername": ENV.fetch('FEDIVERSE_USER_NAME'),
         "name": ENV.fetch('INSTANCE_NAME'),
         "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
