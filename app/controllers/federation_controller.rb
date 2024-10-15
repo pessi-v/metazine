@@ -111,14 +111,14 @@ class FederationController < ApplicationController
         },
         {
           "@context": "https://www.w3.org/ns/activitystreams",
-          "id": "12345",
+          "id": "https://www.w3.org/ns/activitystreams#Public",
           "type": "Note",
           "content": "Testing the fedi things",
           "url": "https://newfutu.re/reader/707",
           "attributedTo": "https://newfutu.re/@editor",
-          "to": [
-            "https://www.w3.org/ns/activitystreams#Public"
-          ],
+          # "to": [
+          #   "https://www.w3.org/ns/activitystreams#Public"
+          # ],
           "cc": [],
           "published": Time.current
         }
