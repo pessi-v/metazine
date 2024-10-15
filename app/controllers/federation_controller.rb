@@ -95,7 +95,7 @@ class FederationController < ApplicationController
       "type": "OrderedCollection",
       "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
       "totalItems": 2,
-      "orderedItems": [
+      "orderedItems": [ {
         "@context": "https://www.w3.org/ns/activitystreams",
         "type": "Create",
         "id": "https://newfutu.re/reader/706",
@@ -114,6 +114,8 @@ class FederationController < ApplicationController
           "cc": [],
           "published": Time.current
         },
+      },
+      {
         "@context": "https://www.w3.org/ns/activitystreams",
         "type": "Create",
         "id": "https://newfutu.re/reader/707",
@@ -132,6 +134,7 @@ class FederationController < ApplicationController
           "cc": [],
           "published": Time.current
         },
+      }
       ]
     }), content_type: 'application/activity+json'
   end
