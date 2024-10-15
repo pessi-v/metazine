@@ -100,6 +100,10 @@ class FederationController < ApplicationController
         "type": "Create",
         "id": "https://newfutu.re/reader/706",
         "actor": "https://newfutu.re/@editor",
+        "to": [
+          "https://www.w3.org/ns/activitystreams#Public"
+        ],
+        "cc": [],
         "published": Time.current,
         "object": {
           "@context": "https://www.w3.org/ns/activitystreams",
@@ -120,6 +124,10 @@ class FederationController < ApplicationController
         "type": "Create",
         "id": "https://newfutu.re/reader/707",
         "actor": "https://newfutu.re/@editor",
+        "to": [
+          "https://www.w3.org/ns/activitystreams#Public"
+        ],
+        "cc": [],
         "published": Time.current,
         "object": {
           "@context": "https://www.w3.org/ns/activitystreams",
