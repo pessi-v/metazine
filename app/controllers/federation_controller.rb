@@ -94,8 +94,22 @@ class FederationController < ApplicationController
       "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
       "type": "OrderedCollection",
       "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
-      "totalItems": 0,
-      "orderedItems": []
+      "totalItems": 1,
+      "orderedItems": [
+        {
+          "@context": "https://www.w3.org/ns/activitystreams",
+          "id": "12345",
+          "type": "Note",
+          "content": "Testing the fedi things",
+          "url": "https://newfutu.re/reader/706",
+          "attributedTo": "https://newfutu.re/@editor",
+          "to": [
+            "https://www.w3.org/ns/activitystreams#Public"
+          ],
+          "cc": [],
+          "published": "2024-02-18T21:06:38-08:00",
+        }
+      ]
     }), content_type: 'application/activity+json'
   end
 
