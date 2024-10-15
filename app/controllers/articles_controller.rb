@@ -37,8 +37,14 @@ class ArticlesController < ApplicationController
     @title = readability_output['title']
     @author = readability_output['byline']
     @content = readability_output['content'].gsub('class="page"', '')
-  end
 
+    respond_to do |format|
+      format.html
+      format.json { render json: @article }
+    end
+
+    # respond_to :json, :html
+  end
   # GET /articles/1 or /articles/1.json
   def show
   end

@@ -96,9 +96,14 @@ class FederationController < ApplicationController
       "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
       "totalItems": 2,
       "orderedItems": [
-        {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Create",
+        "id": "https://newfutu.re/reader/706",
+        "actor": "https://newfutu.re/@editor",
+        "published": Time.current,
+        "object": {
           "@context": "https://www.w3.org/ns/activitystreams",
-          "id": "12345",
+          "id": "706",
           "type": "Note",
           "content": "Testing the fedi things",
           "url": "https://newfutu.re/reader/706",
@@ -109,19 +114,7 @@ class FederationController < ApplicationController
           "cc": [],
           "published": Time.current
         },
-        {
-          "@context": "https://www.w3.org/ns/activitystreams",
-          "id": "https://www.w3.org/ns/activitystreams#Public",
-          "type": "Note",
-          "content": "Testing the fedi things",
-          "url": "https://newfutu.re/reader/707",
-          "attributedTo": "https://newfutu.re/@editor",
-          # "to": [
-          #   "https://www.w3.org/ns/activitystreams#Public"
-          # ],
-          "cc": [],
-          "published": Time.current
-        }
+        
       ]
     }), content_type: 'application/activity+json'
   end
