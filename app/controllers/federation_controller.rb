@@ -86,68 +86,72 @@ class FederationController < ApplicationController
   def outbox
     user = params[:fediverse_user]
 
-    response.headers['Access-Control-Allow-Origin'] = "*"
-    
+    fetched_articles = Article.where.not(readability_output: nil).limit(10)
+
     render json: JSON.generate(
-    {
-      "@context": "https://www.w3.org/ns/activitystreams",
-      "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
-      "type": "OrderedCollection",
-      "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
-      "totalItems": 2,
-      "orderedItems": [ {
-        "@context": "https://www.w3.org/ns/activitystreams",
-        "type": "Create",
-        "id": "https://newfutu.re/reader/706",
-        "actor": "https://newfutu.re/@editor",
-        "to": [
-          "https://www.w3.org/ns/activitystreams#Public"
-        ],
-        "cc": [],
-        "published": Time.current,
-        "object": {
-          "@context": "https://www.w3.org/ns/activitystreams",
-          "id": "706",
-          "type": "Note",
-          "content": "Testing the fedi things",
-          "url": "https://newfutu.re/reader/706",
-          "attributedTo": "https://newfutu.re/@editor",
-          "to": [
-            "https://www.w3.org/ns/activitystreams#Public"
-          ],
-          "cc": [],
-          "published": Time.current
-        },
-      },
       {
         "@context": "https://www.w3.org/ns/activitystreams",
-        "type": "Create",
-        "id": "https://newfutu.re/reader/707",
-        "actor": "https://newfutu.re/@editor",
-        "to": [
-          "https://www.w3.org/ns/activitystreams#Public"
-        ],
-        "cc": [],
-        "published": Time.current,
-        "object": {
-          "@context": "https://www.w3.org/ns/activitystreams",
-          "id": "707",
-          "type": "Note",
-          "content": "Testing the fedi things",
-          "url": "https://newfutu.re/reader/707",
-          "attributedTo": "https://newfutu.re/@editor",
-          "to": [
-            "https://www.w3.org/ns/activitystreams#Public"
-          ],
-          "cc": [],
-          "published": Time.current
-        },
-      }
-      ]
-    }), content_type: 'application/activity+json'
+        "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
+        "type": "OrderedCollection",
+        "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
+        "totalItems": fetched_articles.count,
+        "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
+
+        # "orderedItems": [ 
+        #     {
+        #   "@context": "https://www.w3.org/ns/activitystreams",
+        #   "type": "Create",
+        #   "id": "https://newfutu.re/reader/706",
+        #   "actor": "https://newfutu.re/@editor",
+        #   "to": [
+        #     "https://www.w3.org/ns/activitystreams#Public"
+        #   ],
+        #   "cc": [],
+        #   "published": Time.current,
+        #   "object": {
+        #     "@context": "https://www.w3.org/ns/activitystreams",
+        #     "id": "706",
+        #     "type": "Note",
+        #     "content": "Testing the fedi things",
+        #     "url": "https://newfutu.re/reader/706",
+        #     "attributedTo": "https://newfutu.re/@editor",
+        #     "to": [
+        #       "https://www.w3.org/ns/activitystreams#Public"
+        #     ],
+        #     "cc": [],
+        #     "published": Time.current
+        #   },
+        # },
+        # {
+        #   "@context": "https://www.w3.org/ns/activitystreams",
+        #   "type": "Create",
+        #   "id": "https://newfutu.re/reader/707",
+        #   "actor": "https://newfutu.re/@editor",
+        #   "to": [
+        #     "https://www.w3.org/ns/activitystreams#Public"
+        #   ],
+        #   "cc": [],
+        #   "published": Time.current,
+        #   "object": {
+        #     "@context": "https://www.w3.org/ns/activitystreams",
+        #     "id": "707",
+        #     "type": "Note",
+        #     "content": "Testing the fedi things",
+        #     "url": "https://newfutu.re/reader/707",
+        #     "attributedTo": "https://newfutu.re/@editor",
+        #     "to": [
+        #       "https://www.w3.org/ns/activitystreams#Public"
+        #     ],
+        #     "cc": [],
+        #     "published": Time.current
+        #   },
+        # }
+        # ]
+      }), content_type: 'application/activity+json'
   end
 
   def inbox
+    user = params[:fediverse_user]
     # Parse the incoming ActivityPub request.
     # activity = ActivityPub::Activity.from_h(params.require(:activity).permit!)
 
