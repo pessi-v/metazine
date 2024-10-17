@@ -35,7 +35,7 @@ class FederationController < ApplicationController
         "id": "#{ENV.fetch('APP_URL')}/@#{user}", # THIS NEEDS SOME CHECK FOR IF THIS ACTOR EXISTS, OTHERWISE ANY ACTOR IS AVAILABLE
         "following": "#{ENV.fetch('APP_URL')}/following",
         "followers": "#{ENV.fetch('APP_URL')}/followers",
-        "inbox": fediverse_inbox_url,
+        "inbox": fediverse_inbox_url(user),
         "outbox": fediverse_outbox_url(user),
         "preferredUsername": ENV.fetch('FEDIVERSE_USER_NAME'),
         "name": ENV.fetch('INSTANCE_NAME'),
@@ -96,57 +96,6 @@ class FederationController < ApplicationController
         "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
         "totalItems": fetched_articles.count,
         "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
-
-        # "orderedItems": [ 
-        #     {
-        #   "@context": "https://www.w3.org/ns/activitystreams",
-        #   "type": "Create",
-        #   "id": "https://newfutu.re/reader/706",
-        #   "actor": "https://newfutu.re/@editor",
-        #   "to": [
-        #     "https://www.w3.org/ns/activitystreams#Public"
-        #   ],
-        #   "cc": [],
-        #   "published": Time.current,
-        #   "object": {
-        #     "@context": "https://www.w3.org/ns/activitystreams",
-        #     "id": "706",
-        #     "type": "Note",
-        #     "content": "Testing the fedi things",
-        #     "url": "https://newfutu.re/reader/706",
-        #     "attributedTo": "https://newfutu.re/@editor",
-        #     "to": [
-        #       "https://www.w3.org/ns/activitystreams#Public"
-        #     ],
-        #     "cc": [],
-        #     "published": Time.current
-        #   },
-        # },
-        # {
-        #   "@context": "https://www.w3.org/ns/activitystreams",
-        #   "type": "Create",
-        #   "id": "https://newfutu.re/reader/707",
-        #   "actor": "https://newfutu.re/@editor",
-        #   "to": [
-        #     "https://www.w3.org/ns/activitystreams#Public"
-        #   ],
-        #   "cc": [],
-        #   "published": Time.current,
-        #   "object": {
-        #     "@context": "https://www.w3.org/ns/activitystreams",
-        #     "id": "707",
-        #     "type": "Note",
-        #     "content": "Testing the fedi things",
-        #     "url": "https://newfutu.re/reader/707",
-        #     "attributedTo": "https://newfutu.re/@editor",
-        #     "to": [
-        #       "https://www.w3.org/ns/activitystreams#Public"
-        #     ],
-        #     "cc": [],
-        #     "published": Time.current
-        #   },
-        # }
-        # ]
       }), content_type: 'application/activity+json'
   end
 

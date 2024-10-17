@@ -29,7 +29,7 @@ class Article < ApplicationRecord
         "https://www.w3.org/ns/activitystreams#Public"
       ],
       "cc": [],
-      "published": published_at
+      "published": published_at.iso8601
     }
   end
 
@@ -43,7 +43,7 @@ class Article < ApplicationRecord
         "https://www.w3.org/ns/activitystreams#Public"
       ],
       "cc": [],
-      "published": published_at,
+      "published": published_at.iso8601,
       "object": fedi_object
     }
   end
