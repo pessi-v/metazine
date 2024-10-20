@@ -86,7 +86,7 @@ class FederationController < ApplicationController
   def outbox
     user = params[:fediverse_user]
 
-    fetched_articles = Article.where.not(readability_output: nil).limit(10)
+    fetched_articles = Article.where.not(readability_output: nil)
 
     render json: JSON.generate(
       {
