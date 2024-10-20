@@ -31,7 +31,7 @@ class FederationController < ApplicationController
           "https://www.w3.org/ns/activitystreams",
           "https://w3id.org/security/v1"
         ],
-        "type": "Application",
+        "type": "Service",
         "id": "#{ENV.fetch('APP_URL')}/@#{user}", # THIS NEEDS SOME CHECK FOR IF THIS ACTOR EXISTS, OTHERWISE ANY ACTOR IS AVAILABLE
         "following": "#{ENV.fetch('APP_URL')}/following",
         "followers": "#{ENV.fetch('APP_URL')}/followers",
