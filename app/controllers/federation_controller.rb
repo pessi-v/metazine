@@ -1,4 +1,6 @@
 class FederationController < ApplicationController
+  include Pagy::Backend
+
   def webfinger
     render json: JSON.generate(
       {  
@@ -84,18 +86,40 @@ class FederationController < ApplicationController
   end
 
   def outbox
-    user = params[:fediverse_user]
+    # user = params[:fediverse_user]
 
-    fetched_articles = Article.where.not(readability_output: nil)
+    # fetched_articles = Article.where.not(readability_output: nil)
+
+    # render json: JSON.generate(
+    #   {
+    #     "@context": "https://www.w3.org/ns/activitystreams",
+    #     "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
+    #     "type": "OrderedCollection",
+    #     "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
+    #     "totalItems": fetched_articles.count,
+    #     "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
+    #   }), content_type: 'application/activity+json'
+    # binding.break
+    user = params[:fediverse_user]
+    @pagy, @articles = pagy(Article.where.not(readability_output: nil))
+
+    # fetched_articles = Article.where.not(readability_output: nil)
 
     render json: JSON.generate(
       {
         "@context": "https://www.w3.org/ns/activitystreams",
         "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
-        "type": "OrderedCollection",
+        "type": "Collection",
         "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
-        "totalItems": fetched_articles.count,
-        "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
+        "totalItems": Article.where.not(readability_output: nil).count,
+        # "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
+        "first": {
+          "type": "CollectionPage",
+          "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox?page=1",
+          "partOf": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
+          "next": "#{ENV.fetch('APP_URL')}/@#{user}/outbox?page=2",
+          "items": @articles.map { |a| a.fedi_activity_and_object }
+        }
       }), content_type: 'application/activity+json'
   end
 
