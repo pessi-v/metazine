@@ -213,6 +213,7 @@ GEM
       ruby-ll (~> 2.1)
     ogp (0.5.0)
       oga (~> 3.3)
+    pagy (9.1.0)
     pg (1.5.6)
     pg_search (2.3.6)
       activerecord (>= 5.2)
@@ -390,6 +391,7 @@ DEPENDENCIES
   jbuilder
   node-runner (~> 1.2)
   ogp
+  pagy (~> 9.1)
   pg (~> 1.1)
   pg_search
   puma (>= 5.0)
