@@ -109,12 +109,12 @@ class FederationController < ApplicationController
       {
         "@context": "https://www.w3.org/ns/activitystreams",
         "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
-        "type": "Collection",
+        "type": "OrderedCollection",
         "summary": ENV.fetch('APP_SHORT_DESCRIPTION'),
         "totalItems": Article.where.not(readability_output: nil).count,
         # "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
         "first": {
-          "type": "CollectionPage",
+          "type": "OrderedCollectionPage",
           "id": "#{ENV.fetch('APP_URL')}/@#{user}/outbox?page=1",
           "partOf": "#{ENV.fetch('APP_URL')}/@#{user}/outbox",
           "next": "#{ENV.fetch('APP_URL')}/@#{user}/outbox?page=2",
