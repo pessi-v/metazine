@@ -40,7 +40,10 @@ module Articles
 
     def set_image
       if @ogp&.image&.url.present?
-        request = Faraday.get(@ogp.image.url)
+        cleaned_url = asciify(@ogp.image.url)
+        return unless cleaned_url
+        
+        request = Faraday.get(cleaned_url)
         if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
           @image = @ogp.image.url
           return

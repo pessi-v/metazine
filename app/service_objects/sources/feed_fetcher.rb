@@ -35,7 +35,7 @@ module Sources
       handle_fetch_error(source, :ssl_error, e)
     rescue Faraday::TimeoutError => e
       handle_fetch_error(source, :timeout, e)
-    rescue Faraday::FollowRedirects::TooManyRedirectsError => e
+    rescue Faraday::FollowRedirects::RedirectLimitReached => e
       handle_fetch_error(source, :redirect_limit_reached, e)
     end
 
