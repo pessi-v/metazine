@@ -1,158 +1,215 @@
 # frozen_string_literal: true
 
-# Generic article sources RSS job
 module Articles
   class CreateService
     def initialize(source, entry)
       @source = source
       @entry = entry
-      @ogp = get_ogp
     end
 
     def create_article
-      @title = clean_parentheses(text_cleaner(@entry.title))
-      return if Article.where('articles.title = ? OR articles.url = ?', @title, @entry.url).exists?
-      return unless detect_language == 'en'
-      return if @entry.categories.include?('Video') && !@source.allow_video
-      return if (@entry.categories.include?('Podcast') || @entry.categories.include?('Audio')) && !@source.allow_audio
+      return if article_exists? || !english? || !allowed_media_type?
 
-      create_summary
-      set_image if @source.show_images
-
-      a = Article.new(
-        title: @title,
-        description: @ogp.description,
-        summary: @summary,
-        url: @entry.url,
-        source_name: @source.name,
-        source_id: @source.id,
-        published_at: published_at,
-        image_url: @image || nil
-      )
-
-      a.save
-    end
-
-    def get_ogp
-      response = Faraday.get(@entry.url)
-      OGP::OpenGraph.new(response.body, required_attributes: [])
-    end
-
-    def set_image
-      if @ogp&.image&.url.present?
-        cleaned_url = asciify(@ogp.image.url)
-        return unless cleaned_url
-        
-        request = Faraday.get(cleaned_url)
-        if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
-          @image = @ogp.image.url
-          return
-        end
-      end
-
-      if @entry.image.present?
-        cleaned_url = asciify(@entry.image)
-        return unless cleaned_url
-
-        request = Faraday.get(cleaned_url)
-        if request.status == 200 && request.headers['content-type']&.match?('image') # Content-type header not always present!
-          @image = @entry.image
-          return
-        end
-      end
-
-      nil
-    end
-
-    def create_summary
-      text = @entry.summary || @entry.content
-
-      @summary = text.present? ? "#{text_cleaner(text)[0..700]}#{text.length > 700 ? '…' : ''}" : nil
-    end
-
-    def clean_parentheses(text)
-      if (open_parenthesis = text.rindex('('))
-        if (close_parenthesis = text[open_parenthesis..].index(')'))
-          text = text[0...open_parenthesis] + text[open_parenthesis + close_parenthesis + 1..]
-        else
-          return text
-        end
-        clean_parentheses(text)
-      else
-        text.squeeze(' ')
-      end
-    end
-
-    def text_cleaner(text)
-      text = text&.force_encoding('utf-8')
-      text = ApplicationController.helpers.strip_links text
-      text = text.sanitize
-      text = ApplicationController.helpers.strip_tags text
-      text = CGI.unescapeHTML text
-      text.delete!("\t")
-      text.delete!("\n")
-      text = text.capitalize if text == text.upcase
-
-      # remove head [tag]
-      if text[0] == '[' && text.match?(']')
-        closure = text.index(']')
-        text = text[closure + 1..]
-      end
-
-      # remove tail
-      if (ellipsis = text.index(/(\[…\]){1}/))
-        text = "#{text[0..ellipsis - 1].strip}…"
-      elsif (ellipsis = text.index(/…{1}/))
-        text = text[0..ellipsis]
-      end
-
-      # remove weird spaces
-      text = text.squeeze(' ')
-      text = text.squeeze('*')
-      text = text.gsub(/\&nbsp;/," ")
-      
-      # add missing whitespace after punctuation
-      text = text.gsub(/([,\.!?:;])(\S)/, '\1 \2')
-
-      text.strip
-
-      if text.end_with?('[…]')
-        text = remove_last_sentence(text)
-      end
-
-      text
-    end
-
-    def published_at
-      if @entry.published.blank?
-        Time.current
-      else
-        timestamp = Time.zone.parse(@entry.published.to_s)
-        timestamp > Time.current ? Time.current : timestamp
-      end
-    end
-
-    def detect_language
-      if @summary.present?
-        CLD.detect_language(@summary)[:code]
-      else
-        CLD.detect_language(@title)[:code]
-      end
+      Article.create!(article_attributes)
     end
 
     private
+
+    attr_reader :source, :entry
+
+    def article_exists?
+      Article.where('articles.title = ? OR articles.url = ?', clean_title, entry.url).exists?
+    end
+
+    def english?
+      text = summary.presence || clean_title
+      CLD.detect_language(text)[:code] == 'en'
+    end
+
+    def allowed_media_type?
+      return false if entry.categories.include?('Video') && !source.allow_video
+      return false if (entry.categories.intersect?(['Podcast', 'Audio'])) && !source.allow_audio
+      true
+    end
+
+    def article_attributes
+      {
+        title: clean_title,
+        description: fetch_og_data.description,
+        summary: summary,
+        url: entry.url,
+        source_name: source.name,
+        source_id: source.id,
+        published_at: determine_published_at,
+        image_url: find_image_url
+      }
+    end
+
+    def clean_title
+      @clean_title ||= TextCleaner.new(entry.title).clean_with_parentheses
+    end
+
+    def summary
+      @summary ||= begin
+        text = entry.summary.presence || entry.content.presence
+        return nil unless text
+
+        cleaned_text = TextCleaner.new(text).clean
+        truncate_summary(cleaned_text)
+      end
+    end
+
+    def truncate_summary(text, length: 700)
+      return text if text.length <= length
+      "#{text[0..length]}…"
+    end
+
+    def determine_published_at
+      return Time.current if entry.published.blank?
+      
+      timestamp = Time.zone.parse(entry.published.to_s)
+      timestamp > Time.current ? Time.current : timestamp
+    end
+
+    def find_image_url
+      return unless source.show_images
+      
+      ImageFinder.new(entry: entry, og_data: fetch_og_data).find_url
+    end
+
+    def fetch_og_data
+      @og_data ||= begin
+        response = Faraday.get(entry.url)
+        OGP::OpenGraph.new(response.body, required_attributes: [])
+      end
+    end
+  end
+
+  class TextCleaner
+    def initialize(text)
+      @text = text
+    end
+
+    def clean
+      text
+        .force_encoding('utf-8')
+        .then { |t| strip_formatting(t) }
+        .then { |t| remove_special_characters(t) }
+        .then { |t| fix_spacing(t) }
+        .then { |t| handle_ellipsis(t) }
+        .then { |t| clean_head_and_tail(t) }
+        .strip
+    end
+
+    def clean_with_parentheses
+      clean_parentheses(clean)
+    end
+
+    private
+
+    attr_reader :text
+
+    def strip_formatting(text)
+      text = ApplicationController.helpers.strip_links(text)
+      text = text.sanitize
+      text = ApplicationController.helpers.strip_tags(text)
+      CGI.unescapeHTML(text)
+    end
+
+    def remove_special_characters(text)
+      text.delete("\t").delete("\n")
+    end
+
+    def fix_spacing(text)
+      text = text.squeeze(' ').squeeze('*')
+      text = text.gsub(/\&nbsp;/, " ")
+      text.gsub(/([,\.!?:;])(\S)/, '\1 \2')
+    end
+
+    def handle_ellipsis(text)
+      return remove_last_sentence(text) if text.end_with?('[…]')
+      text
+    end
+
+    def clean_head_and_tail(text)
+      text = remove_head_tag(text)
+      text = handle_tail_ellipsis(text)
+      text = text.capitalize if text == text.upcase
+      text
+    end
+
+    def remove_head_tag(text)
+      return text unless text.start_with?('[') && text.match?(']')
+      
+      closure = text.index(']')
+      text[(closure + 1)..]
+    end
+
+    def handle_tail_ellipsis(text)
+      if (ellipsis = text.index(/(\[…\]){1}/))
+        "#{text[0..ellipsis - 1].strip}…"
+      elsif (ellipsis = text.index(/…{1}/))
+        text[0..ellipsis]
+      else
+        text
+      end
+    end
+
+    def clean_parentheses(text)
+      return text unless (open_parenthesis = text.rindex('('))
+      return text unless (close_parenthesis = text[open_parenthesis..].index(')'))
+
+      cleaned_text = text[0...open_parenthesis] + text[open_parenthesis + close_parenthesis + 1..]
+      clean_parentheses(cleaned_text)
+    end
 
     def remove_last_sentence(text)
       last_punctuation_index = text.rindex(/[.!?]/)
       text[0..last_punctuation_index]
     end
+  end
 
-    def asciify(url)
-      uri = Addressable::URI.parse(url)
-      uri.normalize
-    
-    rescue Addressable::URI::InvalidURIError => e
-      return nil
+  class ImageFinder
+    def initialize(entry:, og_data:)
+      @entry = entry
+      @og_data = og_data
+    end
+
+    def find_url
+      find_og_image || find_entry_image
+    end
+
+    private
+
+    attr_reader :entry, :og_data
+
+    def find_og_image
+      return unless og_data&.image&.url.present?
+      
+      url = og_data.image.url
+      return url if valid_image_url?(url)
+      nil
+    end
+
+    def find_entry_image
+      return unless entry.image.present?
+      
+      url = sanitize_url(entry.image)
+      return url if url && valid_image_url?(url)
+      nil
+    end
+
+    def valid_image_url?(url)
+      response = Faraday.get(url)
+      response.status == 200 && response.headers['content-type']&.match?('image')
+    rescue Faraday::Error
+      false
+    end
+
+    def sanitize_url(url)
+      Addressable::URI.parse(url).normalize.to_s
+    rescue Addressable::URI::InvalidURIError
+      nil
     end
   end
 end
