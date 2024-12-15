@@ -111,6 +111,8 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  gem 'webmock'  # For mocking HTTP requests
+  gem 'mocha'    # For mocking/stubbing in general
 end
 
 gem "dockerfile-rails", ">= 1.6", :group => :development
