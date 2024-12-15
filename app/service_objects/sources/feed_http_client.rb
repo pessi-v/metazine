@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'faraday/follow_redirects'
+
 module Sources
   class FeedHttpClient
     def self.connection(url, headers = {})
@@ -13,7 +15,8 @@ module Sources
           read_timeout: 20       # Read timeout
         }
       ) do |faraday|
-        faraday.use FaradayMiddleware::FollowRedirects, limit: 5
+        faraday.request :url_encoded # encodes as "application/x-www-form-urlencoded" if not already encoded or of another type
+        faraday.response :follow_redirects, limit: 5 # some feeds are behind a redirect
         faraday.adapter :net_http
       end
     end

@@ -50,8 +50,8 @@ gem 'slim-rails'
 gem 'w3c_validators'
 
 # Simple, but flexible HTTP client library, with support for multiple backends. 
-gem 'faraday'
-gem 'faraday_middleware'
+gem 'faraday', '~> 2.0'
+gem 'faraday-follow_redirects'
 
 gem 'feedjira'
 

@@ -1,3 +1,5 @@
+gem 'faraday-follow_redirects'
+
 module HTTPRequestsHelper
   def self.make_request(source: nil, url: nil)
     connection = Faraday.new(
@@ -9,7 +11,8 @@ module HTTPRequestsHelper
       },
       ssl: { verify: false }
     ) do |faraday|
-      faraday.use FaradayMiddleware::FollowRedirects
+      faraday.request :url_encoded # encodes as "application/x-www-form-urlencoded" if not already encoded or of another type
+      faraday.response :follow_redirects, limit: 5
       faraday.adapter :net_http # not sure if this is needed/helpful
     end
     
@@ -49,7 +52,7 @@ module HTTPRequestsHelper
     puts 'TIMEOUT ERROR'
     source.update(last_error_status: 'timeout') if source
     return
-  rescue FaradayMiddleware::RedirectLimitReached => e
+  rescue Faraday::FollowRedirects::RedirectLimitReached => e
     puts source.name if source
     puts source.url if source
     puts e
