@@ -3,6 +3,7 @@
 module Sources
   class FeedFetcher
     include Concerns::ErrorHandler
+    include Concerns::HTTPRequestsHelper
     
     def consume_all
       Rails.logger.info("Starting feed consumption for all active sources")
@@ -38,7 +39,7 @@ module Sources
       request_url = source&.url || url
       return unless valid_url?(request_url)
 
-      connection = FeedHttpClient.connection(request_url)
+      connection = connection(source: source, url: request_url)
       connection.get
     rescue Faraday::ConnectionFailed => e
       handle_fetch_error(source, :connection_failed, e)
@@ -60,7 +61,10 @@ module Sources
     end
 
     def handle_response_status(response, source)
-      return false if response.status == 500
+      if response.status == 500
+        Rails.logger.info("Internal Server Error for source: #{source.name}")
+        return false
+      end
       
       if response.status == 304 || not_modified?(response, source)
         Rails.logger.info("Feed not modified for source: #{source.name}")
