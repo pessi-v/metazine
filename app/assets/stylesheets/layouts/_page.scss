@@ -1,3 +1,5 @@
+@use "../mixins/media";
+
 .page {
   background-color: var(--color-white);
   padding: var(--space-s);
@@ -8,7 +10,7 @@
     gap: var(--space-m);
   }
 
-  @include media(tabletAndUp) {
+  @include media.media(tabletAndUp) {
     padding: var(--space-xl);
     width: 66vw;
     min-height: 100vh;

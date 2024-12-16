@@ -1,32 +1,32 @@
 // Mixins
-@import "mixins/media";
+@use "mixins/media";
 
 // Configuration
-@import "config/variables";
-@import "config/reset";
+@use "config/variables";
+@use "config/reset";
 
 // Components
-@import "components/btn";
-@import "components/content_menu_bar";
-@import "components/search_bar";
-@import "components/subtitle";
-@import "components/article_image_headline_summary";
+@use "components/btn";
+@use "components/content_menu_bar";
+@use "components/search_bar";
+@use "components/subtitle";
+@use "components/article_image_headline_summary";
 // @import "components/article_image_headline_summary_3_rows";
-@import "components/article_image_headline";
-@import "components/article_headline";
-@import "components/article_headline_summary";
-@import "components/article_small_image_headline_summary_preview";
-@import "components/item-b";
-@import "components/item-c";
-@import "components/item-d";
-@import "components/item-e";
-@import "components/source";
+@use "components/article_image_headline";
+@use "components/article_headline";
+@use "components/article_headline_summary";
+@use "components/article_small_image_headline_summary_preview";
+@use "components/item-b";
+@use "components/item-c";
+@use "components/item-d";
+@use "components/item-e";
+@use "components/source";
 
 // Layouts
-@import "layouts/container";
-@import "layouts/page";
-@import "layouts/page_header";
-@import "layouts/page_grid";
-@import "layouts/page_footer";
-@import "layouts/reader";
-@import "layouts/list";
+@use "layouts/container";
+@use "layouts/page";
+@use "layouts/page_header";
+@use "layouts/page_grid";
+@use "layouts/page_footer";
+@use "layouts/reader";
+@use "layouts/list";

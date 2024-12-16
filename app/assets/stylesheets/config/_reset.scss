@@ -1,3 +1,5 @@
+@use "../mixins/media";
+
 *,
 *::before,
 *::after {
@@ -54,7 +56,7 @@ h6 {
 h1 {
   font-size: var(--font-size-xxxl);
 
-  @include media(tabletAndUp) {
+  @include media.media(tabletAndUp) {
     font-size: var(--font-size-xxxxl);
   }
 }

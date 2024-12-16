@@ -1,5 +1,7 @@
+@use "../mixins/media";
+
 .item-c {
-  @include media(tabletAndUp) {
+  @include media.media(tabletAndUp) {
     grid-column-start: 5;
     grid-column-end: 7;
     grid-row-start: 1;

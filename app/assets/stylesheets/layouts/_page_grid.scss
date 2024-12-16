@@ -1,3 +1,5 @@
+@use "../mixins/media";
+
 .page_grid {
   width: 100%;
   height: auto;
@@ -7,7 +9,7 @@
   flex-direction: column;
   row-gap: var(--space-l);
 
-  @include media(tabletAndUp) {
+  @include media.media(tabletAndUp) {
     display: grid;
 
     grid-template-columns: repeat(6, 1fr);
@@ -19,7 +21,7 @@
 }
 
 // NOTE: column-start, column-end, row-start, row-end TAKE IN LINE NUMBERS (not column numbers)
-@include media(tabletAndUp) {
+@include media.media(tabletAndUp) {
   .item-a {
     grid-column-start: 1;
     grid-column-end: 4;

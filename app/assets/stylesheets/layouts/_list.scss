@@ -1,7 +1,9 @@
+@use "../mixins/media";
+
 .list_view_desktop {
   display: none;
 
-  @include media(tabletAndUp) {
+  @include media.media(tabletAndUp) {
     display: flex;
     flex-direction: column;
     padding-left: 17%;
@@ -15,7 +17,7 @@
   flex-direction: column;
   gap: var(--space-l);
   
-  @include media(tabletAndUp) {
+  @include media.media(tabletAndUp) {
     display: none;
   }
 }
