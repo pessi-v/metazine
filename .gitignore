@@ -49,3 +49,4 @@
 /app.json
 /.github
 .tool-versions
+/node_modules
