@@ -1,17 +1,17 @@
 @use "../mixins/media";
 
 .item-c {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  // row-gap: var(--space-m);
+
   @include media.media(tabletAndUp) {
     grid-column-start: 5;
     grid-column-end: 7;
     grid-row-start: 1;
     grid-row-end: 9;
   }
-    
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  // row-gap: var(--space-m);
 }
 
 .one_third {
