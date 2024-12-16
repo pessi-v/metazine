@@ -19,6 +19,19 @@ module Sources
       process_feed(feed, source, response)
     end
 
+    # Debug method for development use
+    def debug(url)
+      response = make_request(url: url)
+      return unless response
+
+      Rails.logger.debug("Debug request for URL: #{url}")
+      Rails.logger.debug("Response status: #{response.status}")
+      Rails.logger.debug("Response headers: #{response.headers}")
+      
+      binding.break
+      parse_feed(response)
+    end
+
     private
 
     def make_request(source: nil, url: nil)
@@ -100,19 +113,6 @@ module Sources
         last_error_status: nil
       )
       source.save if source.changed?
-    end
-
-    # Debug method for development use
-    def debug(url)
-      response = make_request(url: url)
-      return unless response
-
-      Rails.logger.debug("Debug request for URL: #{url}")
-      Rails.logger.debug("Response status: #{response.status}")
-      Rails.logger.debug("Response headers: #{response.headers}")
-      
-      binding.break
-      parse_feed(response)
     end
   end
 end
