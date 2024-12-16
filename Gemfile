@@ -90,6 +90,9 @@ gem 'pg_search'
 # gem 'federails', git: 'https://github.com/pessi-v/federails', branch: 'main'
 # gem 'pundit'
 
+gem "dockerfile-rails", ">= 1.6", :group => :development
+gem "pagy", "~> 9.1"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
@@ -115,7 +118,3 @@ group :test do
   gem 'webmock'  # For mocking HTTP requests
   gem 'mocha'    # For mocking/stubbing in general
 end
-
-gem "dockerfile-rails", ">= 1.6", :group => :development
-
-gem "pagy", "~> 9.1"
