@@ -117,4 +117,6 @@ group :test do
   gem "selenium-webdriver"
   gem 'webmock'  # For mocking HTTP requests
   gem 'mocha'    # For mocking/stubbing in general
+  gem "factory_bot", "~> 6.5"
 end
+

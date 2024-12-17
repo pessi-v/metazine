@@ -3,7 +3,7 @@ require_relative "../config/environment"
 require "rails/test_help"
 require 'webmock/minitest'
 require 'mocha/minitest'
-# Dir[Rails.root.join('test/support/**/*.rb')].each { |f| require f }
+require 'minitest/mock'
 require_relative 'support/feed_test_helpers'
 
 
@@ -17,5 +17,8 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+
+    include FactoryBot::Syntax::Methods
+    FactoryBot.find_definitions
   end
 end
