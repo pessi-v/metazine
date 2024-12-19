@@ -41,7 +41,8 @@ module Articles
         source_name: source.name,
         source_id: source.id,
         published_at: determine_published_at,
-        image_url: find_image_url
+        image_url: find_image_url,
+        paywalled: paywalled?
       }
     end
 
@@ -77,11 +78,46 @@ module Articles
       ImageFinder.new(entry: entry, og_data: fetch_og_data).find_url
     end
 
+    def fetch_original_page
+      @original_page_response ||= Faraday.get(entry.url) do |req|
+        # Mimic a modern browser
+        req.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+        req.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        req.headers['Accept-Language'] = 'en-US,en;q=0.5'
+        req.headers['Accept-Encoding'] = 'gzip, deflate, br'
+        req.headers['Connection'] = 'keep-alive'
+        req.headers['Upgrade-Insecure-Requests'] = '1'
+        req.headers['Sec-Fetch-Dest'] = 'document'
+        req.headers['Sec-Fetch-Mode'] = 'navigate'
+        req.headers['Sec-Fetch-Site'] = 'none'
+        req.headers['Sec-Fetch-User'] = '?1'
+      end
+    end
+
     def fetch_og_data
       @og_data ||= begin
-        response = Faraday.get(entry.url)
+        response = fetch_original_page
         OGP::OpenGraph.new(response.body, required_attributes: [])
       end
+    end
+
+    def paywalled?
+      return false unless response_body = fetch_original_page.body
+    
+      doc = Nokogiri::HTML(response_body)
+      
+      # Check for the presence of paywall form div
+      return true if doc.css('#paywall-form').any?
+      
+      # Check for paywall message text
+      paywall_message = doc.css('.po-ln__message')
+      return true if paywall_message.text.include?("available to subscribers only")
+      
+      # Check if intro section ends with ellipsis [...] which indicates truncated content
+      intro_section = doc.css('.po-cn__intro').text
+      return true if intro_section&.strip&.end_with?("[…]")
+      
+      false
     end
   end
 

@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_07_123333) do
+ActiveRecord::Schema[8.0].define(version: 2024_12_19_193343) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
 
   create_table "articles", force: :cascade do |t|
@@ -28,6 +28,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_07_123333) do
     t.text "readability_output"
     t.datetime "published_at"
     t.integer "source_id"
+    t.boolean "paywalled", default: false
     t.index ["url", "title"], name: "index_articles_on_url_and_title", unique: true
   end
 
@@ -54,5 +55,4 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_07_123333) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
-
 end
