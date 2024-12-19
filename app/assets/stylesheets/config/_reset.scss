@@ -53,14 +53,6 @@ h6 {
   font-family: var(--font-family-classical-humanist);
 }
 
-h1 {
-  font-size: var(--font-size-xxxl);
-
-  @include media.media(tabletAndUp) {
-    font-size: var(--font-size-xxxxl);
-  }
-}
-
 h2 {
   font-size: var(--font-size-xxl);
 }
@@ -83,7 +75,6 @@ a {
   &:active {
     // color: var(--color-primary-rotate);
   }
-
 }
 
 p {

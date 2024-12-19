@@ -2,17 +2,25 @@
 
 .page_header {
   width: 100%;
-  height: 250px;
+  height: 125px;
   padding-bottom: var(--space-xxl);
   // padding: var(--space-l);
-  
+
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  
+
   .title {
     text-transform: uppercase;
     text-align: center;
+  }
+
+  h1 {
+    font-size: var(--font-size-xxxl);
+
+    @include media.media(tabletAndUp) {
+      font-size: 5rem;
+    }
   }
 }
 
@@ -27,12 +35,20 @@
 
 .page_header_split_half {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  // flex-direction: column;
 
   @include media.media(tabletAndUp) {
     width: 50%;
     height: 100%;
   }
+}
+
+.page_header_split_half.left {
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.page_header_split_half.right {
+  align-items: center;
+  justify-content: space-evenly;
 }

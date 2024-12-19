@@ -22,15 +22,15 @@ css:
 
 .page_header
   .page_header_split
-    .page_header_split_half
+    .page_header_split_half.left
       .title
         h1
           = ENV['INSTANCE_NAME']
-    .page_header_split_half
-      = render 'search_bar'
+    .page_header_split_half.right
       .subtitle
         h6
           = ENV['APP_SHORT_DESCRIPTION']
+      = render 'search_bar'
   = render 'content_menu_bar'
 
 .page_grid
