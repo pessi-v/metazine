@@ -2,6 +2,8 @@
 
 module Articles
   class CreateService
+    require 'faraday/gzip'
+
     def initialize(source, entry)
       @source = source
       @entry = entry
@@ -35,7 +37,7 @@ module Articles
     def article_attributes
       {
         title: clean_title,
-        description: fetch_og_data.description,
+        description: description,
         summary: summary,
         url: entry.url,
         source_name: source.name,
@@ -48,6 +50,13 @@ module Articles
 
     def clean_title
       @clean_title ||= TextCleaner.new(entry.title).clean_with_parentheses
+    end
+
+    def description
+      og_description = fetch_og_data.description
+      if og_description
+        return cleaned_text = TextCleaner.new(og_description).clean
+      end
     end
 
     def summary
@@ -74,12 +83,15 @@ module Articles
 
     def find_image_url
       return unless source.show_images
-      
+
       ImageFinder.new(entry: entry, og_data: fetch_og_data).find_url
     end
 
     def fetch_original_page
-      @original_page_response ||= Faraday.get(entry.url) do |req|
+      connection = Faraday.new do |conn|
+        conn.use Faraday::Gzip::Middleware
+      end
+      @original_page_response ||= connection.get(entry.url) do |req|
         # Mimic a modern browser
         req.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
         req.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'

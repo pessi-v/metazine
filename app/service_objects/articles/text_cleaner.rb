@@ -11,7 +11,8 @@ module Articles
         .then { |t| remove_special_characters(t) }
         .then { |t| fix_spacing(t) }
         .then { |t| handle_ellipsis(t) }
-        .then { |t| clean_head_and_tail(t) }
+        .then { |t| remove_head_tag(t) }
+        .then { |t| capitalize(t) }
         .strip
     end
 
@@ -41,13 +42,11 @@ module Articles
     end
 
     def handle_ellipsis(text)
-      return remove_last_sentence(text) if text.end_with?('[…]')
+      return remove_last_sentence(text) if text.match?('…')
       text
     end
 
-    def clean_head_and_tail(text)
-      text = remove_head_tag(text)
-      text = handle_tail_ellipsis(text)
+    def capitalize(text)
       text = text.capitalize if text == text.upcase
       text
     end
@@ -57,16 +56,6 @@ module Articles
       
       closure = text.index(']')
       text[(closure + 1)..]
-    end
-
-    def handle_tail_ellipsis(text)
-      if (ellipsis = text.index(/(\[…\]){1}/))
-        "#{text[0..ellipsis - 1].strip}…"
-      elsif (ellipsis = text.index(/…{1}/))
-        text[0..ellipsis]
-      else
-        text
-      end
     end
 
     def clean_parentheses(text)
