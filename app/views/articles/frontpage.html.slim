@@ -59,13 +59,15 @@ css:
       = render 'article_headline', article: next_article_without_image(@articles)
       = render 'article_headline', article: next_article_without_image(@articles)
 
-  .item-d
+  .item-d style="grid-area: D"
     = render 'article_headline_summary', article: next_article_without_image(@articles)
+  .item-e style="grid-area: E"
+    = render 'article_headline_summary', article: next_article_without_image(@articles)
+  .item-f style="grid-area: F"
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+  .item-g style="grid-area: G"
     = render 'article_image_headline_summary', article: next_article_with_image(@articles)
     
-  .item-e
-    = render 'article_headline_summary', article: next_article_without_image(@articles)
-    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
 
 
 

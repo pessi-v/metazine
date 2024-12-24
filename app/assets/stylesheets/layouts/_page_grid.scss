@@ -17,31 +17,46 @@
 
     grid-template-rows: repeat(8, var(--space-7xl));
     row-gap: var(--space-xl);
+
+    grid-template-areas:
+      "A A A B C C"
+      "A A A B C C"
+      "A A A B C C"
+      "D D E E C C"
+      "D D E E C C"
+      "F F G G C C"
+      "F F G G C C"
+      "F F G G C C";
   }
 }
 
 // NOTE: column-start, column-end, row-start, row-end TAKE IN LINE NUMBERS (not column numbers)
 @include media.media(tabletAndUp) {
   .item-a {
-    grid-column-start: 1;
-    grid-column-end: 4;
-    grid-row-start: 1;
-    grid-row-end: 4;
+    grid-area: A;
+    // grid-column-start: 1;
+    // grid-column-end: 4;
+    // grid-row-start: 1;
+    // grid-row-end: 4;
   }
 
   .item-b {
-  //  in it's own file
+    //  in it's own file
+    grid-area: B;
   }
 
   .item-c {
-  //  in it's own file
+    //  in it's own file
+    grid-area: C;
   }
 
   .item-d {
-  //  in it's own file
+    //  in it's own file
+    grid-area: D;
   }
 
-  .item-e { 
-  //  in it's own file
+  .item-e {
+    //  in it's own file
+    grid-area: E;
   }
 }

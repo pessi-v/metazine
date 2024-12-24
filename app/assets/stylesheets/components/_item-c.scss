@@ -7,10 +7,11 @@
   // row-gap: var(--space-m);
 
   @include media.media(tabletAndUp) {
-    grid-column-start: 5;
-    grid-column-end: 7;
-    grid-row-start: 1;
-    grid-row-end: 9;
+    // grid-column-start: 5;
+    // grid-column-end: 7;
+    // grid-row-start: 1;
+    // grid-row-end: 9;
+    grid-area: C;
   }
 }
 

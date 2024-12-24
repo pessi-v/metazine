@@ -1,8 +1,9 @@
 .item-b {
-  grid-column-start: 4;
-  grid-column-end: 5;
-  grid-row-start: 1;
-  grid-row-end: 4;
+  // grid-column-start: 4;
+  // grid-column-end: 5;
+  // grid-row-start: 1;
+  // grid-row-end: 4;
+  grid-area: B;
 
   display: flex;
   flex-direction: column;
