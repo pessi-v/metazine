@@ -25,7 +25,7 @@ module Articles
     end
 
     def english?
-      text = summary.presence || clean_title
+      text = description.presence || clean_title
       CLD.detect_language(text)[:code] == 'en'
     end
 
@@ -38,8 +38,9 @@ module Articles
     def article_attributes
       {
         title: clean_title,
-        description: description,
-        summary: summary,
+        description: @description,
+        # summary: summary, # TODO: drop summary column from table
+        description_length: @description.length,
         url: entry.url,
         source_name: source.name,
         source_id: source.id,
@@ -54,9 +55,19 @@ module Articles
     end
 
     def description
+      # Use OG:Description if present
       og_description = fetch_og_data.description
       if og_description
-        return cleaned_text = TextCleaner.new(og_description).clean
+        return @description = TextCleaner.new(og_description).clean
+      end
+
+      # Use entry Summary if present, or take a part of main text
+      @description ||= begin
+        text = entry.summary.presence || entry.content.presence
+        return nil unless text
+
+        cleaned_text = TextCleaner.new(text).clean
+        truncate_summary(cleaned_text)
       end
     end
 
