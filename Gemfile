@@ -45,7 +45,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-gem 'slim-rails'
+gem 'slim-rails' # Slim HTML templating engine
 
 # A Ruby wrapper for the World Wide Web Consortium’s online validation services. 
 gem 'w3c_validators'
@@ -64,7 +64,7 @@ gem 'ogp'
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
 gem 'addressable'
 
-gem "ruby-readability", :require => 'readability'
+gem "ruby-readability", :require => 'readability' # Similar to MOzilla's Readability JS package
 
 # gem 'nokogiri'
 
@@ -93,8 +93,8 @@ gem 'pg_search'
 gem "dockerfile-rails", ">= 1.6", :group => :development
 gem "pagy", "~> 9.1"
 
-gem 'faraday-gzip', '~> 3'
-gem 'brotli'
+gem 'faraday-gzip', '~> 3' # request compressed http responses
+gem 'brotli' # decode compressed http responses
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
