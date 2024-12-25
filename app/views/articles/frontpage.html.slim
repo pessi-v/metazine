@@ -36,13 +36,18 @@ css:
 .page_grid
   .item-a
     = render 'article_image_headline_summary_3_rows', article: next_article_with_image(@articles)
+  .item-f style="grid-area: F"
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+  .item-g style="grid-area: G"
+    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+    
   .item-b
     = render 'many_articles_headline',
-      articles: [next_article_without_image(@articles),
-                  next_article_without_image(@articles),
-                  next_article_without_image(@articles)]
+      articles: [next_article_with_short_title(@articles),
+                  next_article_with_short_title(@articles),
+                  next_article_with_short_title(@articles)]
   .item-c
-    = render 'article_headline_summary', article: next_article_without_image(@articles)
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
 
     .top_and_bottom_border
       .line
@@ -51,7 +56,7 @@ css:
       = render 'article_headline', article: next_article_without_image(@articles)
       .line
     
-    = render 'article_headline_summary', article: next_article_without_image(@articles)
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
     
     .top_and_bottom_border
       .line
@@ -60,14 +65,11 @@ css:
       = render 'article_headline', article: next_article_without_image(@articles)
 
   .item-d style="grid-area: D"
-    = render 'article_headline_summary', article: next_article_without_image(@articles)
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    / = render 'article_headline_summary', article: next_article_without_image(@articles)
   .item-e style="grid-area: E"
-    = render 'article_headline_summary', article: next_article_without_image(@articles)
-  .item-f style="grid-area: F"
-    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-  .item-g style="grid-area: G"
-    = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-    
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    / = render 'article_headline_summary', article: next_article_without_image(@articles)
 
 
 

@@ -81,7 +81,7 @@ module Articles
       end
     end
 
-    def truncate_summary(text, length: 700)
+    def truncate_summary(text, length: 350)
       return text if text.length <= length
       "#{text[0..length]}…"
     end
