@@ -1,3 +1,7 @@
 .content_menu_bar
-  =link_to('latest', frontpage_path)
-  = link_to('list view', list_path)
+  = link_to(frontpage_path) do
+    h4
+      = 'LATEST'
+  = link_to(list_path) do 
+    h4
+      = 'LIST VIEW'

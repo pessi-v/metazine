@@ -1,5 +1,4 @@
 .article_headline {
-
   .source_and_reader_link {
     display: flex;
     justify-content: flex-start;
@@ -12,5 +11,6 @@
     height: auto;
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
+    letter-spacing: 0.02em;
   }
 }
