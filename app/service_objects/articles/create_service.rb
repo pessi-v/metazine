@@ -7,6 +7,9 @@ module Articles
     def initialize(source, entry)
       @source = source
       @entry = entry
+      @original_page = fetch_original_page
+      @description = description
+      @clean_title = clean_title
     end
 
     def create_article
@@ -18,32 +21,32 @@ module Articles
 
     private
 
-    attr_reader :source, :entry
+    # attr_reader :source, :entry, :original_page
 
     def article_exists?
-      Article.where('articles.title = ? OR articles.url = ?', clean_title, entry.url).exists?
+      Article.where('articles.title = ? OR articles.url = ?', @clean_title, @entry.url).exists?
     end
 
     def english?
-      text = description.presence || clean_title
+      text = @description.presence || @clean_title
       CLD.detect_language(text)[:code] == 'en'
     end
 
     def allowed_media_type?
-      return false if entry.categories.include?('Video') && !source.allow_video
-      return false if (entry.categories.intersect?(['Podcast', 'Audio'])) && !source.allow_audio
+      return false if @entry.categories.include?('Video') && !source.allow_video
+      return false if (@entry.categories.intersect?(['Podcast', 'Audio'])) && !source.allow_audio
       true
     end
 
     def article_attributes
       {
-        title: clean_title,
+        title: @clean_title,
         description: @description,
         # summary: summary, # TODO: drop summary column from table
         description_length: @description.length,
-        url: entry.url,
-        source_name: source.name,
-        source_id: source.id,
+        url: @entry.url,
+        source_name: @source.name,
+        source_id: @source.id,
         published_at: determine_published_at,
         image_url: find_image_url,
         paywalled: paywalled?
@@ -51,7 +54,7 @@ module Articles
     end
 
     def clean_title
-      @clean_title ||= TextCleaner.new(entry.title).clean_with_parentheses
+      TextCleaner.new(@entry.title).clean_with_parentheses
     end
 
     def description
@@ -63,7 +66,7 @@ module Articles
 
       # Use entry Summary if present, or take a part of main text
       @description ||= begin
-        text = entry.summary.presence || entry.content.presence
+        text = @entry.summary.presence || entry.content.presence
         return nil unless text
 
         cleaned_text = TextCleaner.new(text).clean
@@ -87,23 +90,23 @@ module Articles
     end
 
     def determine_published_at
-      return Time.current if entry.published.blank?
+      return Time.current if @entry.published.blank?
       
-      timestamp = Time.zone.parse(entry.published.to_s)
+      timestamp = Time.zone.parse(@entry.published.to_s)
       timestamp > Time.current ? Time.current : timestamp
     end
 
     def find_image_url
-      return unless source.show_images
+      return unless @source.show_images
 
-      ImageFinder.new(entry: entry, og_data: fetch_og_data).find_url
+      ImageFinder.new(entry: @entry, og_data: fetch_og_data).find_url
     end
 
     def fetch_original_page
       connection = Faraday.new do |conn|
         conn.use Faraday::Gzip::Middleware
       end
-      @original_page_response ||= connection.get(entry.url) do |req|
+      connection.get(@entry.url) do |req|
         # Mimic a modern browser
         req.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
         req.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
@@ -120,13 +123,12 @@ module Articles
 
     def fetch_og_data
       @og_data ||= begin
-        response = fetch_original_page
-        OGP::OpenGraph.new(response.body, required_attributes: [])
+        OGP::OpenGraph.new(@original_page.body, required_attributes: [])
       end
     end
 
     def paywalled?
-      return false unless response_body = fetch_original_page.body
+      return false unless response_body = @original_page.body
     
       doc = Nokogiri::HTML(response_body)
       

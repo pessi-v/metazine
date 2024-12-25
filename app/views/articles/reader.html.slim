@@ -1,5 +1,7 @@
 
 .reader
   = link_to('← back to front page', frontpage_path)
+  - if @article.image_url
+    = image_tag(@article.image_url) unless @content.match?(@article.image_url)
   = render 'article_headline', article: @article, with_timestamp: true
   = @content.html_safe
