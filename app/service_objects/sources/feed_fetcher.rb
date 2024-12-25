@@ -14,7 +14,7 @@ module Sources
     def consume(source)
       Rails.logger.info("Processing feed for source: #{source.name}")
       response = make_request(source: source)
-      return unless response && handle_response_status(response, source)
+      return unless response && response_status_ok?(response, source)
       
       feed = parse_feed(response, source: source)
       process_feed(feed, source, response)
@@ -60,7 +60,7 @@ module Sources
       false
     end
 
-    def handle_response_status(response, source)
+    def response_status_ok?(response, source)
       if response.status == 500
         Rails.logger.info("Internal Server Error for source: #{source.name}")
         return false

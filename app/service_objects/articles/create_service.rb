@@ -12,7 +12,8 @@ module Articles
     def create_article
       return if article_exists? || !english? || !allowed_media_type?
 
-      Article.create!(article_attributes)
+      # Article.create!(article_attributes) # will raise an error 
+      Article.create(article_attributes) # don't raise errors such as ActiveRecord::RecordNotUnique, just move on
     end
 
     private
