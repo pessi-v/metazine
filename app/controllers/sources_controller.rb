@@ -4,7 +4,7 @@ class SourcesController < ApplicationController
 
   # GET /sources or /sources.json
   def index
-    @sources = Source.all.order(name: :asc)
+    @sources = Source.all.order(articles_count: :desc)
     @article_counts_by_day = [
       Article.today.count,
       Article.yesterday.count,

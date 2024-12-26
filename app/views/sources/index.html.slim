@@ -1,26 +1,28 @@
 .index
-  = link_to('← back to front page', frontpage_path)
-  p style="color: green"
-    = notice
+  .list_view_desktop
+    .source_card
+      = link_to('← back to front page', frontpage_path)
+      p style="color: green"
+        = notice
 
-  h1
-    'Sources
-  
-  = button_to('Reload all feeds', fetch_feeds_path)
+      h1
+        'Sources
+      
+      = button_to('Reload all feeds', fetch_feeds_path)
 
-  = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
-    = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
+      = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
+        = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
 
-  div id="article_counts"
-    table
-      - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
-        tr
-          th
-            p
-              = date.strftime("%A %d.")
-          th
-            p
-              = @article_counts_by_day[index]
+      div id="article_counts"
+        table
+          - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
+            tr
+              th
+                p
+                  = date.strftime("%A %d.")
+              th
+                p
+                  = @article_counts_by_day[index]
 
   
   .list_view_desktop
