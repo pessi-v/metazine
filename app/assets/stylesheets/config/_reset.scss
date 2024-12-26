@@ -106,3 +106,8 @@ hr {
   height: 1px;
   border-top: var(--border);
 }
+
+ul,
+ol {
+  padding-left: var(--space-m);
+}
