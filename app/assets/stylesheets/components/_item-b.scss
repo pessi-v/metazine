@@ -3,11 +3,11 @@
   // grid-column-end: 5;
   // grid-row-start: 1;
   // grid-row-end: 4;
-  grid-area: B;
+  // grid-area: B;
 
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-around;
   border-left: var(--border);
   padding-left: var(--space-s);
 }

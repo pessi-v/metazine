@@ -4,8 +4,8 @@ css:
     flex-direction: column;
     justify-content: center;
     gap: var(--space-xl);
-    xborder-top: var(--border);
-    xborder-bottom: var(--border);
+    border-top: var(--border);
+    border-bottom: var(--border);
     xpadding-top: var(--space-l);
     xpadding-bottom: var(--space-l);
     xmargin-top: var(--space-l);
@@ -41,28 +41,34 @@ css:
   .item-g style="grid-area: G"
     = render 'article_image_headline_summary', article: next_article_with_image(@articles)
     
-  .item-b
+  .item-b style="grid-area: B"
     = render 'many_articles_headline',
       articles: [next_article_with_short_title(@articles),
-                  next_article_with_short_title(@articles),
-                  next_article_with_short_title(@articles)]
-  .item-c
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+                next_article_with_short_title(@articles),
+                next_article_with_short_title(@articles)]
 
-    .top_and_bottom_border
-      .line
-      = render 'article_headline', article: next_article_without_image(@articles)
-      = render 'article_headline', article: next_article_without_image(@articles)
-      = render 'article_headline', article: next_article_without_image(@articles)
-      .line
+
+  / .item-c
+  = render 'article_headline_summary', article: next_article_with_long_description(@articles), style: "grid-area: C"
+  
+  .item-b style="grid-area: H"
+    = render 'many_articles_headline',
+      articles: [next_article_without_image(@articles),
+                next_article_without_image(@articles),
+                next_article_without_image(@articles)]
+   
+  = render 'article_headline_summary', article: next_article_with_long_description(@articles), style: "grid-area: I"
     
+  / div style="grid-area: J"
+  /   / .line
+  /   = render 'article_headline', article: next_article_without_image(@articles)
+  /   = render 'article_headline', article: next_article_without_image(@articles)
+  /   = render 'article_headline', article: next_article_without_image(@articles)
+
+
+
+  .item-d style="grid-area: J"
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    
-    .top_and_bottom_border
-      .line
-      = render 'article_headline', article: next_article_without_image(@articles)
-      = render 'article_headline', article: next_article_without_image(@articles)
-      = render 'article_headline', article: next_article_without_image(@articles)
 
   .item-d style="grid-area: D"
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
