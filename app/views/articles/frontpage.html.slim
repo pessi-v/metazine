@@ -20,18 +20,6 @@ css:
   }
 
 = render 'layouts/page_header'
-/ .page_header
-/   .page_header_split
-/     .page_header_split_half.left
-/       .title
-/         h1
-/           = ENV['INSTANCE_NAME']
-/     .page_header_split_half.right
-/       .subtitle
-/         h6
-/           = ENV['APP_SHORT_DESCRIPTION']
-/       = render 'search_bar'
-/   = render 'content_menu_bar'
 
 .page_grid
   .item-a
@@ -58,24 +46,14 @@ css:
                 next_article_without_image(@articles)]
    
   = render 'article_headline_summary', article: next_article_with_long_description(@articles), style: "grid-area: I"
-    
-  / div style="grid-area: J"
-  /   / .line
-  /   = render 'article_headline', article: next_article_without_image(@articles)
-  /   = render 'article_headline', article: next_article_without_image(@articles)
-  /   = render 'article_headline', article: next_article_without_image(@articles)
-
-
 
   .item-d style="grid-area: J"
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
 
   .item-d style="grid-area: D"
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    / = render 'article_headline_summary', article: next_article_without_image(@articles)
   .item-e style="grid-area: E"
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    / = render 'article_headline_summary', article: next_article_without_image(@articles)
 
 
 

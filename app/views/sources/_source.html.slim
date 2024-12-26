@@ -1,13 +1,24 @@
 css:
-
   .source_card {
-    width: 100%;
-    height: auto;
+    width: 40em;
+    aspect-ratio: 1 / 0.6;
+    xheight: auto;
     border: var(--border);
     display: flex;
   
     .section {
       width: 50%;
+
+      .right {
+        padding: var(--space-s);
+
+        .line-clamp {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;  
+          overflow: hidden;
+        }
+      }
     }
 
     .error {
@@ -15,64 +26,57 @@ css:
     }
 
     .image {
-      height: var(--space-9xl);
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: black;
     }
   }
 
 
 = turbo_frame_tag source
   .source_card
-    / img.image src=source.image_url
+    .section
+      img.image src=source.image_url
       
     .section
-      h1
-        - if source.active
-          = source.name
-        - else
-          s
+      .right
+        h2
+          - if source.active
             = source.name
-
-      p
-        = source.url
-
-      = link_to(articles_by_source_path(source.name), data: {turbo: false})
+          - else
+            s
+              = source.name
+        p.line-clamp
+          = source.description
+        p
+          = source.url
+        = link_to(articles_by_source_path(source.name), data: {turbo: false})
+          p
+            strong
+              'Articles:
+            = source.articles_count
         p
           strong
-            'Articles:
-          = source.articles_count
-
-      p
-        strong
-          'Active:
-        = source.active
-
-      p
-        strong
-          'Show images:
-        = source.show_images
-
-      p
-        strong
-          'Allow video:
-        = source.allow_video
-      
-      p
-        strong
-          'Allow audio:
-        = source.allow_audio
-
-      p
-        strong
-          'Last error status:
-        p.error 
-          = source.last_error_status
-
-    .section
-      p
-        = source.description
-
-      = button_to "Change", edit_source_path(source), method: :get
-      = button_to "Get feed", fetch_feed_path(source_id: source), method: :post
-      = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
+            'Active:
+          = source.active
+        p
+          strong
+            'Show images:
+          = source.show_images
+        p
+          strong
+            'Allow video:
+          = source.allow_video      
+        p
+          strong
+            'Allow audio:
+          = source.allow_audio
+        p
+          strong
+            'Last error status:
+          p.error 
+            = source.last_error_status
+        = button_to "Change", edit_source_path(source), method: :get
+        = button_to "Get feed", fetch_feed_path(source_id: source), method: :post
+        = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
