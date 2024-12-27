@@ -59,7 +59,7 @@ module Articles
 
     def description
       # Use OG:Description if present
-      og_description = fetch_og_data.description
+      og_description = fetch_og_data&.description
       if og_description
         return @description = TextCleaner.new(og_description).clean
       end
@@ -122,7 +122,7 @@ module Articles
     end
 
     def fetch_og_data
-      # binding.break
+      return nil if @original_page.body.empty?
       @og_data ||= begin
         OGP::OpenGraph.new(@original_page.body, required_attributes: [])
       end

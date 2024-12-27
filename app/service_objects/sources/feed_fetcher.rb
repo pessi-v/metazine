@@ -77,6 +77,7 @@ module Sources
     end
 
     def not_modified?(response, feed, source)
+      # binding.break
       (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
         (feed.last_built && feed.last_built == source.last_built)
     end

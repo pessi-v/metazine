@@ -99,7 +99,6 @@ class FederationController < ApplicationController
     #     "totalItems": fetched_articles.count,
     #     "orderedItems": fetched_articles.map { |a| a.fedi_activity_and_object }
     #   }), content_type: 'application/activity+json'
-    # binding.break
     user = params[:fediverse_user]
     @pagy, @articles = pagy(Article.where.not(readability_output: nil))
 
