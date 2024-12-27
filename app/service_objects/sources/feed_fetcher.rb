@@ -14,9 +14,10 @@ module Sources
     def consume(source)
       Rails.logger.info("Processing feed for source: #{source.name}")
       response = make_request(source: source)
-      return unless response && response_status_ok?(response, source)
-      
       feed = parse_feed(response, source: source)
+
+      return unless response && response_status_ok?(response, feed, source)
+      # binding.break
       process_feed(feed, source, response)
     end
 
@@ -60,13 +61,14 @@ module Sources
       false
     end
 
-    def response_status_ok?(response, source)
+    def response_status_ok?(response, feed, source)
+      # binding.break
       if response.status == 500
         Rails.logger.info("Internal Server Error for source: #{source.name}")
         return false
       end
       
-      if response.status == 304 || not_modified?(response, source)
+      if response.status == 304 || not_modified?(response, feed, source)
         Rails.logger.info("Feed not modified for source: #{source.name}")
         return false
       end
@@ -74,9 +76,9 @@ module Sources
       true
     end
 
-    def not_modified?(response, source)
-      response.headers['last-modified'] && 
-        response.headers['last-modified'] == source.last_modified
+    def not_modified?(response, feed, source)
+      (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
+        (feed.last_built && feed.last_built == source.last_built)
     end
 
     def parse_feed(response, source: nil)
@@ -93,7 +95,7 @@ module Sources
       end
       
       process_entries(feed.entries, source)
-      update_source_metadata(source, response)
+      update_source_metadata(source, feed, response)
       true
     end
 
@@ -110,10 +112,11 @@ module Sources
       end
     end
 
-    def update_source_metadata(source, response)
+    def update_source_metadata(source, feed, response)
       source.assign_attributes(
         last_modified: response.headers['last-modified'],
         etag: response.headers['etag'],
+        last_built: feed.last_built,
         last_error_status: nil
       )
       source.save if source.changed?

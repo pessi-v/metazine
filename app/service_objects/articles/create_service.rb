@@ -122,6 +122,7 @@ module Articles
     end
 
     def fetch_og_data
+      # binding.break
       @og_data ||= begin
         OGP::OpenGraph.new(@original_page.body, required_attributes: [])
       end
