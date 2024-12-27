@@ -78,8 +78,14 @@ a {
   }
 }
 
+label,
 p {
   font-size: var(--font-size-s);
+}
+
+input[type="checkbox"] {
+  margin-right: var(--space-xxxs);
+  accent-color: var(--color-text-header);
 }
 
 blockquote {
@@ -110,4 +116,15 @@ hr {
 ul,
 ol {
   padding-left: var(--space-m);
+}
+
+button,
+.button {
+  border: var(--border);
+  margin: var(--space-xxxs) 0 var(--space-xxxs) 0;
+  padding: var(--space-xxxs);
+  font-family: var(--font-family-headlines);
+  color: var(--color-text-header);
+  background-color: var(--color-light);
+  cursor: unset;
 }

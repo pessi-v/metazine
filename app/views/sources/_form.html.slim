@@ -1,4 +1,23 @@
-= form_with(model: source) do |form|
+css:
+  .form {
+    width: 40em;
+    height: 12em;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    border: var(--border);
+
+  }
+
+= form_with(model: source, class: 'form') do |form|
+  h2 style="text-align: center;"
+    'New
+    br
+    'source
+
   - if source.errors.any?
     div style="color: red"
       h4
@@ -8,33 +27,33 @@
         - source.errors.each do |error|
           li
             = error.full_message
+  div
+    div
+      = link_to 'Cancel', sources_path, class: 'button'
+    div
+      = form.submit class: 'button'
 
   div
-    = form.label :name, style: "display: block"
-    = form.text_field :name
+    div
+      = form.label :name, style: "display: none;"
+      = form.text_field :name, placeholder: 'Name'
 
-  div
-    = form.label :url, style: "display: block"
-    = form.text_field :url
+    div
+      = form.label :url, style: "display: none"
+      = form.text_field :url, placeholder: 'Url'
+    
+    div
+      = form.check_box :active, checked: true
+      = form.label :active, style: "display: inline-block"
 
-  div
-    = form.label :active, style: "display: block"
-    = form.check_box :active, checked: true
+    div
+      = form.check_box :show_images, checked: true
+      = form.label :show_images, style: "display: inline-block"
 
-  div
-    = form.label :show_images, style: "display: block"
-    = form.check_box :show_images, checked: true
+    div
+      = form.check_box :allow_video
+      = form.label :allow_video, style: "display: inline-block"
 
-  div
-    = form.label :allow_video, style: "display: block"
-    = form.check_box :allow_video
-
-  div
-    = form.label :allow_audio, style: "display: block"
-    = form.check_box :allow_audio
-
-  div
-    = link_to 'cancel', sources_path, class: 'btn btn--primary'
-
-  div
-    = form.submit
+    div
+      = form.check_box :allow_audio
+      = form.label :allow_audio, style: "display: inline-block"

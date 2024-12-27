@@ -1,35 +1,13 @@
-/ .page_header
-/   .page_header_split
-/     .page_header_split_half
-/       .title
-/         h1
-/           = ENV['INSTANCE_NAME']
-/     .page_header_split_half
-/       = render 'search_bar'
-/       .subtitle
-/         h6
-/           = ENV['APP_SHORT_DESCRIPTION']
-/   = render 'content_menu_bar'
-
-.page_header
-  .page_header_split
-    .page_header_split_half.left
-      .title
-        h1
-          = ENV['INSTANCE_NAME']
-    .page_header_split_half.right
-      .subtitle
-        h6
-          = ENV['APP_SHORT_DESCRIPTION']
-      = render 'search_bar'
-  = render 'content_menu_bar'
+= render 'layouts/page_header'
 
 .list_view_desktop
   - @articles.each do |article|
     = render 'article_small_image_headline_summary_preview', article: article
-    .line
+    - unless article == @articles.last
+      .line
 
 .list_view_mobile
   - @articles.each do |article|
     = render 'article_image_headline_summary', article: article
-    .line
+    - unless article == @articles.last
+      .line

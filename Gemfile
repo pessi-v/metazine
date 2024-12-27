@@ -64,9 +64,6 @@ gem 'ogp'
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
 gem 'addressable'
 
-# gem "ruby-readability", :require => 'readability' # Similar to MOzilla's Readability JS package
-# gem 'fastimage' # required for readability
-
 # gem 'nokogiri'
 
 # Run backend JS code with Node
@@ -113,6 +110,9 @@ group :development do
   # gem "spring"
 
   gem 'webfinger'
+
+  gem "ruby-readability", :require => 'readability' # Similar to MOzilla's Readability JS package
+  gem 'fastimage' # required for readability
 end
 
 group :test do

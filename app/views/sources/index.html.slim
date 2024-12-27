@@ -1,17 +1,32 @@
+css:
+  .controls_box {
+    width: 40em;
+    height: 12em;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    border: var(--border);
+    
+  }
+
 .index
   .list_view_desktop
-    .source_card
-      = link_to('← back to front page', frontpage_path)
+    .controls_box
       p style="color: green"
         = notice
 
-      h1
-        'Sources
+      div
+        h2
+          'Sources
+        = link_to('← back to front page', frontpage_path)
       
-      = button_to('Reload all feeds', fetch_feeds_path)
-
-      = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
-        = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
+      div
+        = button_to('Reload all feeds', fetch_feeds_path)
+        = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
+          = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }, class: 'button'
 
       div id="article_counts"
         table
@@ -29,7 +44,3 @@
   = turbo_frame_tag 'sources', class: 'list_view_desktop'
     = turbo_frame_tag 'new_source'
     = render @sources
-    / - @sources.each do |source|
-    /   = link_to(source) do  
-    /     = render source
-

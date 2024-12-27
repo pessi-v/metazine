@@ -1,6 +1,6 @@
 .article_small_image_headline_summary_preview {
   display: flex;
-  gap: var(--space-xl);
+  gap: var(--space-m);
 
   .image {
     width: var(--space-9xl);
@@ -8,4 +8,10 @@
     aspect-ratio: 1 / 1;
     object-fit: cover;
   }
+}
+
+.headline_source_summary_preview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

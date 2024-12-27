@@ -2,9 +2,10 @@ css:
   .source_card {
     width: 40em;
     aspect-ratio: 1 / 0.6;
-    xheight: auto;
     border: var(--border);
     display: flex;
+    margin-left: auto;
+    margin-right: auto;
   
     .section {
       width: 50%;
@@ -23,6 +24,7 @@ css:
 
     .error {
       color: var(--color-primary);
+      display: inline-block;
     }
 
     .image {
@@ -30,6 +32,13 @@ css:
       height: 100%;
       object-fit: contain;
       background: black;
+    }
+    
+    .buttons {
+      display: flex;
+      justify-content: flex-start;
+      width: 100%;
+      gap: var(--space-xxxs);
     }
   }
 
@@ -72,11 +81,14 @@ css:
           strong
             'Allow audio:
           = source.allow_audio
-        p
-          strong
-            'Last error status:
-          p.error 
+        
+        .buttons
+          p
+            strong
+              'Last error status:
+          p.error
             = source.last_error_status
-        = button_to "Change", edit_source_path(source), method: :get
-        = button_to "Get feed", fetch_feed_path(source_id: source), method: :post
-        = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
+        .buttons 
+          = button_to "Change", edit_source_path(source), method: :get
+          = button_to "Get feed", fetch_feed_path(source_id: source), method: :post
+          = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
