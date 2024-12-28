@@ -37,6 +37,9 @@ class ArticlesController < ApplicationController
       format.json { render json: @article }
     end
   end
+
+  def vits
+  end
   
   private
     def latest_articles
