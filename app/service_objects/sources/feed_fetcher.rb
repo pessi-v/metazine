@@ -17,7 +17,6 @@ module Sources
       response = make_request(source: source)
       return unless response && response_status_ok?(response, source)
 
-      binding.break
       feed = parse_feed(response, source: source)
       return if not_modified?(response, feed, source)
 
@@ -33,7 +32,6 @@ module Sources
       Rails.logger.debug("Response status: #{response.status}")
       Rails.logger.debug("Response headers: #{response.headers}")
       
-      binding.break
       parse_feed(response)
     end
 
@@ -79,7 +77,6 @@ module Sources
     end
 
     def not_modified?(response, feed, source)
-      binding.break
       if (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
           (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
           (feed.last_modified == source.last_modified)
