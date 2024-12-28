@@ -33,8 +33,9 @@ module Articles
     end
 
     def allowed_media_type?
-      return false if @entry.categories.include?('Video') && !source.allow_video
-      return false if (@entry.categories.intersect?(['Podcast', 'Audio'])) && !source.allow_audio
+      # binding.break
+      return false if @entry.categories.include?('Video') && !@source.allow_video
+      return false if (@entry.categories.intersect?(['Podcast', 'Audio'])) && !@source.allow_audio
       true
     end
 

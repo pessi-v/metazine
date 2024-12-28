@@ -13,11 +13,13 @@ module Sources
 
     def consume(source)
       Rails.logger.info("Processing feed for source: #{source.name}")
+      
       response = make_request(source: source)
-      feed = parse_feed(response, source: source)
+      return unless response && response_status_ok?(response, source)
 
-      return unless response && response_status_ok?(response, feed, source)
-      # binding.break
+      feed = parse_feed(response, source: source)
+      return if not_modified?(response, feed, source)
+
       process_feed(feed, source, response)
     end
 
@@ -61,14 +63,13 @@ module Sources
       false
     end
 
-    def response_status_ok?(response, feed, source)
-      # binding.break
+    def response_status_ok?(response, source)
       if response.status == 500
         Rails.logger.info("Internal Server Error for source: #{source.name}")
         return false
       end
       
-      if response.status == 304 || not_modified?(response, feed, source)
+      if response.status == 304
         Rails.logger.info("Feed not modified for source: #{source.name}")
         return false
       end
@@ -77,13 +78,17 @@ module Sources
     end
 
     def not_modified?(response, feed, source)
-      # binding.break
-      (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
-        (feed.last_built && feed.last_built == source.last_built)
+      if (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
+          (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
+          (feed.last_modified == source.last_modified)
+        Rails.logger.info("Feed not modified for source: #{source.name}")
+        return true
+      end
+      
+      false
     end
 
     def parse_feed(response, source: nil)
-      Feedjira.parse(response.body.force_encoding('utf-8'))
     rescue Feedjira::NoParserAvailable => e
       handle_fetch_error(source, :xml_parse_error, e)
       nil
@@ -115,9 +120,9 @@ module Sources
 
     def update_source_metadata(source, feed, response)
       source.assign_attributes(
-        last_modified: response.headers['last-modified'],
+        last_modified: response.headers['last-modified'] || feed.last_modified,
         etag: response.headers['etag'],
-        last_built: feed.last_built,
+        last_built: feed.respond_to?(:last_built) ? feed.last_built : nil,
         last_error_status: nil
       )
       source.save if source.changed?
