@@ -15,25 +15,43 @@ module Sources
       Rails.logger.info("Processing feed for source: #{source.name}")
 
       response = make_request(source: source)
-      return unless response && response_status_ok?(response, source)
+      if response.status == 500
+        handle_fetch_error(source, :internal_server_error)
+        return
+      end
+
+      if response.status == 304
+        # Happy path: feed not modified
+        Rails.logger.info("Feed not modified for source: #{source.name}")
+        source.update(last_error_status: nil)
+        return
+      end
 
       feed = parse_feed(response, source: source)
-      return if not_modified?(response, feed, source)
+
+      if feed_not_modified?(response, feed, source)
+        # Happy path: feed not modified
+        # Sometimes the server doesn't handle etag or last-modified headers,
+        # but the feed still contains a tag that tells you when it was last changed
+        Rails.logger.info("Feed not modified for source: #{source.name}")
+        source.update(last_error_status: nil)
+        return
+      end
 
       process_feed(feed, source, response)
     end
 
-    # Debug method for development use
-    def debug(url)
-      response = make_request(url: url)
-      return unless response
+    # # Debug method for development use
+    # def debug(url)
+    #   response = make_request(url: url)
+    #   return unless response
 
-      Rails.logger.debug("Debug request for URL: #{url}")
-      Rails.logger.debug("Response status: #{response.status}")
-      Rails.logger.debug("Response headers: #{response.headers}")
+    #   Rails.logger.debug("Debug request for URL: #{url}")
+    #   Rails.logger.debug("Response status: #{response.status}")
+    #   Rails.logger.debug("Response headers: #{response.headers}")
       
-      parse_feed(response)
-    end
+    #   parse_feed(response)
+    # end
 
     private
 
@@ -62,29 +80,28 @@ module Sources
       false
     end
 
-    def response_status_ok?(response, source)
-      if response.status == 500
-        Rails.logger.info("Internal Server Error for source: #{source.name}")
-        return false
-      end
+    # def response_status_ok?(response, source)
+    #   if response.status == 500
+    #     Rails.logger.info("Internal Server Error for source: #{source.name}")
+    #     return false
+    #   end
       
-      if response.status == 304
-        Rails.logger.info("Feed not modified for source: #{source.name}")
-        return false
-      end
+    #   if response.status == 304
+    #     Rails.logger.info("Feed not modified for source: #{source.name}")
+    #     return false
+    #   end
       
-      true
-    end
+    #   true
+    # end
 
-    def not_modified?(response, feed, source)
+    def feed_not_modified?(response, feed, source)
       if (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
           (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
           (feed.last_modified == source.last_modified)
-        Rails.logger.info("Feed not modified for source: #{source.name}")
         return true
+      else
+        return false
       end
-      
-      false
     end
 
     def parse_feed(response, source: nil)
@@ -95,9 +112,13 @@ module Sources
     end
 
     def process_feed(feed, source, response)
-      if feed.nil? || feed.entries.empty?
-        handle_empty_feed(source, feed)
-        return false
+      if feed.nil?
+        handle_fetch_error(source, :feed_not_available)
+        return
+      elsif
+        feed.entries.empty?
+        handle_fetch_error(source, :empty_feed)
+        return
       end
       
       process_entries(feed.entries, source)
@@ -105,11 +126,11 @@ module Sources
       true
     end
 
-    def handle_empty_feed(source, feed)
-      message = feed.nil? ? 'Feed not available' : 'Feed appears to be empty'
-      source.update(last_error_status: message)
-      Rails.logger.warn("#{message} for source: #{source.name}")
-    end
+    # def handle_empty_feed(source, feed)
+    #   message = feed.nil? ? 'Feed not available' : 'Feed appears to be empty'
+    #   source.update(last_error_status: message)
+    #   Rails.logger.warn("#{message} for source: #{source.name}")
+    # end
 
     def process_entries(entries, source)
       Rails.logger.info("Processing #{entries.count} entries for source: #{source.name}")
