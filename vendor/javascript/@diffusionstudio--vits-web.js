@@ -239,7 +239,7 @@ function b(e, m, n) {
 }
 let h, _;
 async function N(e, m) {
-  (h = h ?? (await import("./piper-DeOu3H9E-7ff88f56"))),
+  (h = h ?? (await import("./piper-DeOu3H9E-7ff88f56.js"))),
     (_ = _ ?? (await import("onnxruntime-web")));
   const n = c[e.voiceId],
     o = JSON.stringify([{ text: e.text.trim() }]);
