@@ -7,7 +7,10 @@ ruby "3.3.6"
 gem "rails", "~> 8.0.1"
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-gem "sprockets-rails"
+# gem "sprockets-rails"
+
+# The modern asset pipeline for Rails [https://github.com/rails/propshaft]
+gem 'propshaft'
 
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"

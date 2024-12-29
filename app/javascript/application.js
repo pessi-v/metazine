@@ -1,4 +1,4 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
 import "@hotwired/turbo-rails";
 import "controllers";
-import "@diffusionstudio/vits-web";
+import "piper-DeOu3H9E";
