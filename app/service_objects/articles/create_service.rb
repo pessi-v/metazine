@@ -166,7 +166,7 @@ module Articles
     def find_og_image
       return unless og_data&.image&.url.present?
       
-      url = og_data.image.url
+      url = sanitize_url(og_data.image.url)
       return url if valid_image_url?(url)
       nil
     end
