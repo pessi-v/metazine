@@ -33,9 +33,11 @@ class ArticlesController < ApplicationController
     @content = readability_output['content'].gsub('class="page"', '')
 
     @text_to_speech_content = readability_output['content']
-      .scan(/<p>(.*?)<\/p>/m)
+      .scan(/<(?:p|h\d+)>(.*?)<\/(?:p|h\d+)>/m)
       .flatten
       .map { |text| text.gsub(/<\/?[^>]*>/, '') }
+      .unshift(@author)
+      .unshift(@title)
       .to_json
 
     # headers['Cross-Origin-Opener-Policy'] = 'same-origin'

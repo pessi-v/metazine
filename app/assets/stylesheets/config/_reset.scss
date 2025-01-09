@@ -42,6 +42,13 @@ select {
   font: inherit;
 }
 
+select {
+  border: var(--border);
+  height: 2.5rem;
+  font-size: var(--font-size-s);
+  background-color: var(--color-light);
+}
+
 h1,
 h2,
 h3,
@@ -120,6 +127,7 @@ ol {
 
 button,
 .button {
+  min-height: 2.5rem;
   border: var(--border);
   margin: var(--space-xxxs) 0 var(--space-xxxs) 0;
   padding: var(--space-xxxs);
@@ -127,4 +135,22 @@ button,
   color: var(--color-text-header);
   background-color: var(--color-light);
   cursor: unset;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.gap-s {
+  gap: var(--space-s);
 }
