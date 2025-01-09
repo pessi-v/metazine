@@ -12,7 +12,6 @@ Rails.application.routes.draw do
   root "articles#frontpage", as: :frontpage
 
   get 'reader/(:id)', to: 'articles#reader', as: :reader
-  get 'vits', to: 'articles#vits', as: :vits
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
   post 'fetch_feed', to: 'sources#fetch_feed', as: :fetch_feed
   get 'list', to: 'articles#list', as: :list
