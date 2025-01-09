@@ -10,3 +10,4 @@ pin "@rails/request.js", to: "@rails--request.js.js" # @0.0.9
 pin "onnxruntime-web" # @1.18.0
 pin "piper"
 pin "piper_worker"
+pin "@mintplex-labs--piper-tts-web"

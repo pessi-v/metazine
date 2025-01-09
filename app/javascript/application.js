@@ -3,3 +3,4 @@ import "@hotwired/turbo-rails";
 import "controllers";
 import "piper";
 import "piper_worker";
+import "@mintplex-labs--piper-tts-web";

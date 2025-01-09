@@ -34,7 +34,6 @@ self.onmessage = async function main(event) {
     session.voiceId = event.data.voiceId;
     await session.init();
   }
-  const start = performance.now();
   session
     .predict(event.data.text)
     .then((res) => {
@@ -46,7 +45,6 @@ self.onmessage = async function main(event) {
     .catch((error) => {
       self.postMessage({ type: "error", message: error.message, error });
     });
-  console.log("Time taken:", performance.now() - start + " ms");
 };
 
 // self.addEventListener("message", main);
