@@ -35,10 +35,29 @@ class ArticlesController < ApplicationController
     @text_to_speech_content = readability_output['content']
       .scan(/<(?:p|h\d+)>(.*?)<\/(?:p|h\d+)>/m)
       .flatten
-      .map { |text| text.gsub(/<\/?[^>]*>/, '') }
+      .map { |text| 
+        text
+          .gsub(/<\/?[^>]*>/, '')          # Remove leftover tags
+          .gsub(/~/, '')                   # Remove tildes
+          .gsub(/\\[a-z]/, '')             # Remove escaped characters
+          .gsub(/&[a-z]+;/, ' ')           # Replace HTML entities with space
+          .gsub(/\\u[0-9a-fA-F]{4}/, ' ')  # Replace hex codes with space
+          .strip
+      }
       .unshift(@author)
       .unshift(@title)
-      .to_json
+      # .to_json
+
+
+    # @text_to_speech_content = readability_output['content']
+    #   .scan(/<(?:p|h\d+)>(.*?)<\/(?:p|h\d+)>/m)
+    #   .flatten
+    #   .map { |text| text.gsub(/<\/?[^>]*>/, '') }
+    #   .unshift(@author)
+    #   .unshift(@title)
+    #   # .to_json
+    
+    # binding.break
 
     # headers['Cross-Origin-Opener-Policy'] = 'same-origin'
     # headers['Cross-Origin-Embedder-Policy'] = 'require-corp'

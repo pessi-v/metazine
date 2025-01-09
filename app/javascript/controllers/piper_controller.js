@@ -51,17 +51,12 @@ export default class extends Controller {
         "en_US-lessac-low": "en/en_US/lessac/low/en_US-lessac-low.onnx",
         "en_US-lessac-medium":
           "en/en_US/lessac/medium/en_US-lessac-medium.onnx",
-        "en_US-libritts-high":
-          "en/en_US/libritts/high/en_US-libritts-high.onnx",
-        "en_US-libritts_r-medium":
-          "en/en_US/libritts_r/medium/en_US-libritts_r-medium.onnx",
         "en_US-ljspeech-high":
           "en/en_US/ljspeech/high/en_US-ljspeech-high.onnx",
         "en_US-ljspeech-medium":
           "en/en_US/ljspeech/medium/en_US-ljspeech-medium.onnx",
         "en_US-ryan-high": "en/en_US/ryan/high/en_US-ryan-high.onnx",
         "en_US-ryan-low": "en/en_US/ryan/low/en_US-ryan-low.onnx",
-        "en_US-ryan-medium": "en/en_US/ryan/medium/en_US-ryan-medium.onnx",
       },
     },
   };
@@ -147,39 +142,82 @@ export default class extends Controller {
     });
   }
 
+  // async predict() {
+  //   this.handlingPrediction = true;
+
+  //   // Process each text sequentially
+  //   for (const text of this.textValue) {
+  //     await new Promise((resolve) => {
+  //       const messageHandler = (event) => {
+  //         if (event.data.type === "result") {
+  //           this.worker.removeEventListener("message", messageHandler);
+
+  //           const audio = new Audio();
+  //           audio.src = URL.createObjectURL(event.data.audio);
+
+  //           audio.onended = () => {
+  //             resolve();
+  //           };
+
+  //           audio.play();
+  //         }
+  //       };
+
+  //       this.worker.addEventListener("message", messageHandler);
+
+  //       this.worker.postMessage({
+  //         type: "init",
+  //         text: text,
+  //         voiceId: this.voiceSelectTarget.value,
+  //       });
+  //     });
+  //   }
+
+  //   // Reset flag after all texts have been processed
+  //   this.handlingPrediction = false;
+  // }
+
   async predict() {
     this.handlingPrediction = true;
+    let nextTextIndex = 0;
 
-    // Process each text sequentially
-    for (const text of this.textValue) {
-      await new Promise((resolve) => {
-        const messageHandler = (event) => {
-          if (event.data.type === "result") {
-            this.worker.removeEventListener("message", messageHandler);
-
-            const audio = new Audio();
-            audio.src = URL.createObjectURL(event.data.audio);
-
-            audio.onended = () => {
-              resolve();
-            };
-
-            audio.play();
-          }
-        };
-
-        this.worker.addEventListener("message", messageHandler);
-
+    const processNextText = () => {
+      if (nextTextIndex < this.textValue.length) {
         this.worker.postMessage({
           type: "init",
-          text: text,
+          text: this.textValue[nextTextIndex],
           voiceId: this.voiceSelectTarget.value,
         });
-      });
-    }
+      }
+    };
 
-    // Reset flag after all texts have been processed
-    this.handlingPrediction = false;
+    const messageHandler = (event) => {
+      if (event.data.type === "result") {
+        const audio = new Audio();
+        audio.src = URL.createObjectURL(event.data.audio);
+
+        audio.onended = () => {
+          nextTextIndex++;
+          processNextText();
+        };
+
+        audio.play();
+      }
+    };
+
+    this.worker.addEventListener("message", messageHandler);
+    processNextText();
+
+    return new Promise((resolve) => {
+      const checkCompletion = setInterval(() => {
+        if (nextTextIndex >= this.textValue.length) {
+          clearInterval(checkCompletion);
+          this.worker.removeEventListener("message", messageHandler);
+          this.handlingPrediction = false;
+          resolve();
+        }
+      }, 100);
+    });
   }
 
   flush() {

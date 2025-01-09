@@ -1,15 +1,15 @@
 .reader
   - if @article.image_url && !@content.match?(@article.image_url)
     = image_tag(@article.image_url)
-    = render 'article_headline', article: @article, with_timestamp: true
-    .flex-row.justify-end.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
-      button data-action="click->piper#predict"
-        'Read article out loud
-      select data-piper-target="voiceSelect"
-      / p Stored Voices
-      ul data-piper-target="storedList" style="display:none;"
-      / button data-action="click->piper#flush" data-piper-target="flushButton"
-      /   'Flush storage
+  = render 'article_headline', article: @article, with_timestamp: true
+  .flex-row.justify-end.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
+    button data-action="click->piper#predict"
+      'Read article out loud
+    select data-piper-target="voiceSelect"
+    / p Stored Voices
+    ul data-piper-target="storedList" style="display:none;"
+    / button data-action="click->piper#flush" data-piper-target="flushButton"
+    /   'Flush storage
 
       
 

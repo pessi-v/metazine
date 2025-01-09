@@ -137,6 +137,11 @@ button,
   cursor: unset;
 }
 
+button:active,
+.button:active {
+  transform: translateY(2px);
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;
