@@ -16,13 +16,10 @@ export default class extends Controller {
   };
 
   connect() {
-    console.log(this.textValue);
-
     this.worker = new Worker(
-      new URL("/assets/piper_worker-abf6dab4.js", import.meta.url),
+      new URL("/assets/piper_worker-7e62feb9.js", import.meta.url),
       {
         type: "module",
-        credentials: "same-origin",
       }
     );
     this.setupWorkerListeners();
@@ -89,12 +86,6 @@ export default class extends Controller {
   }
 
   async predict() {
-    // this.worker.postMessage({
-    //   type: "init",
-    //   text: this.textValue,
-    //   voiceId: this.voiceSelectTarget.value,
-    // });
-
     this.handlingPrediction = true;
 
     // Process each text sequentially

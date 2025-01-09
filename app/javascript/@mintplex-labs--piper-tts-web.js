@@ -342,11 +342,9 @@ const _TtsSession = class _TtsSession {
     return session;
   }
   async init() {
-    // const { createPiperPhonemize } = await import("./piper-o91UDS6e.js");
     const { createPiperPhonemize } = await import("./piper-6d04dfc8.js");
-    // const { createPiperPhonemize } = await import("piper");
     __privateSet(this, _createPiperPhonemize, createPiperPhonemize);
-    __privateSet(this, _ort, await import("./onnxruntime-web-4b541072.js"));
+    __privateSet(this, _ort, await import("./onnxruntime-web-3f6d09b4.js"));
     __privateGet(this, _ort).env.allowLocalModels = false;
     __privateGet(this, _ort).env.wasm.numThreads =
       navigator.hardwareConcurrency;
