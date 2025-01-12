@@ -16,52 +16,19 @@ export default class extends Controller {
     voiceOptions: {
       type: Object,
       default: {
-        "en_GB-alan-low": "en/en_GB/alan/low/en_GB-alan-low.onnx",
-        "en_GB-alan-medium": "en/en_GB/alan/medium/en_GB-alan-medium.onnx",
-        "en_GB-alba-medium": "en/en_GB/alba/medium/en_GB-alba-medium.onnx",
-        "en_GB-aru-medium": "en/en_GB/aru/medium/en_GB-aru-medium.onnx",
-        "en_GB-cori-high": "en/en_GB/cori/high/en_GB-cori-high.onnx",
-        "en_GB-cori-medium": "en/en_GB/cori/medium/en_GB-cori-medium.onnx",
-        "en_GB-jenny_dioco-medium":
-          "en/en_GB/jenny_dioco/medium/en_GB-jenny_dioco-medium.onnx",
-        "en_GB-northern_english_male-medium":
-          "en/en_GB/northern_english_male/medium/en_GB-northern_english_male-medium.onnx",
-        "en_GB-semaine-medium":
-          "en/en_GB/semaine/medium/en_GB-semaine-medium.onnx",
-        "en_GB-southern_english_female-low":
-          "en/en_GB/southern_english_female/low/en_GB-southern_english_female-low.onnx",
-        "en_GB-vctk-medium": "en/en_GB/vctk/medium/en_GB-vctk-medium.onnx",
-        "en_US-amy-low": "en/en_US/amy/low/en_US-amy-low.onnx",
-        "en_US-amy-medium": "en/en_US/amy/medium/en_US-amy-medium.onnx",
-        "en_US-arctic-medium":
-          "en/en_US/arctic/medium/en_US-arctic-medium.onnx",
-        "en_US-danny-low": "en/en_US/danny/low/en_US-danny-low.onnx",
         "en_US-hfc_female-medium":
           "en/en_US/hfc_female/medium/en_US-hfc_female-medium.onnx",
         "en_US-hfc_male-medium":
           "en/en_US/hfc_male/medium/en_US-hfc_male-medium.onnx",
-        "en_US-joe-medium": "en/en_US/joe/medium/en_US-joe-medium.onnx",
-        "en_US-kathleen-low": "en/en_US/kathleen/low/en_US-kathleen-low.onnx",
-        "en_US-kristin-medium":
-          "en/en_US/kristin/medium/en_US-kristin-medium.onnx",
-        "en_US-kusal-medium": "en/en_US/kusal/medium/en_US-kusal-medium.onnx",
-        "en_US-l2arctic-medium":
-          "en/en_US/l2arctic/medium/en_US-l2arctic-medium.onnx",
-        "en_US-lessac-high": "en/en_US/lessac/high/en_US-lessac-high.onnx",
-        "en_US-lessac-low": "en/en_US/lessac/low/en_US-lessac-low.onnx",
-        "en_US-lessac-medium":
-          "en/en_US/lessac/medium/en_US-lessac-medium.onnx",
-        "en_US-ljspeech-high":
-          "en/en_US/ljspeech/high/en_US-ljspeech-high.onnx",
-        "en_US-ljspeech-medium":
-          "en/en_US/ljspeech/medium/en_US-ljspeech-medium.onnx",
-        "en_US-ryan-high": "en/en_US/ryan/high/en_US-ryan-high.onnx",
-        "en_US-ryan-low": "en/en_US/ryan/low/en_US-ryan-low.onnx",
       },
+      isPlaying: { type: Boolean, default: false },
+      isPaused: { type: Boolean, default: false },
     },
   };
 
   connect() {
+    this.currentAudio = null;
+    this.currentTextIndex = 0;
     this.worker = new Worker(
       new URL("/assets/piper_worker-edd4a480.js", import.meta.url),
       {
@@ -97,6 +64,84 @@ export default class extends Controller {
           break;
       }
     });
+  }
+
+  async startPlayingFromIndex(index) {
+    this.currentTextIndex = index;
+
+    const processNextText = () => {
+      if (
+        !this.isPausedValue &&
+        this.currentTextIndex < this.textValue.length
+      ) {
+        this.worker.postMessage({
+          type: "init",
+          text: this.textValue[this.currentTextIndex],
+          voiceId: this.voiceSelectTarget.value,
+        });
+      }
+    };
+
+    const messageHandler = (event) => {
+      if (event.data.type === "result" && !this.isPausedValue) {
+        this.playAudio(event.data.audio, () => {
+          if (!this.isPausedValue) {
+            this.currentTextIndex++;
+            processNextText();
+          }
+        });
+      }
+    };
+
+    this.worker.addEventListener("message", messageHandler);
+    processNextText();
+
+    return new Promise((resolve) => {
+      const checkCompletion = setInterval(() => {
+        if (this.currentTextIndex >= this.textValue.length) {
+          clearInterval(checkCompletion);
+          this.worker.removeEventListener("message", messageHandler);
+          this.handlingPrediction = false;
+          this.isPlayingValue = false;
+          this.updateButtonText();
+          resolve();
+        }
+      }, 100);
+    });
+  }
+
+  playAudio(audioBlob, onEnded) {
+    this.currentAudio = new Audio();
+    this.currentAudio.src = URL.createObjectURL(audioBlob);
+    this.currentAudio.onended = onEnded;
+    this.currentAudio.play();
+    this.isPlayingValue = true;
+    this.updateButtonText();
+  }
+
+  pauseAudio() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.isPlayingValue = false;
+      this.updateButtonText();
+    }
+  }
+
+  resumeAudio() {
+    if (this.currentAudio) {
+      this.currentAudio.play();
+      this.isPlayingValue = true;
+      this.updateButtonText();
+    }
+  }
+
+  updateButtonText() {
+    const button = this.predictButtonTarget;
+    button.textContent = this.isPlayingValue
+      ? "Pause"
+      : this.currentAudio && this.currentAudio.paused
+      ? "Continue"
+      : "Read article out loud";
   }
 
   loadVoices() {
@@ -177,47 +222,86 @@ export default class extends Controller {
   //   this.handlingPrediction = false;
   // }
 
+  // async predict() {
+  //   this.handlingPrediction = true;
+  //   let nextTextIndex = 0;
+
+  //   const processNextText = () => {
+  //     if (nextTextIndex < this.textValue.length) {
+  //       this.worker.postMessage({
+  //         type: "init",
+  //         text: this.textValue[nextTextIndex],
+  //         voiceId: this.voiceSelectTarget.value,
+  //       });
+  //     }
+  //   };
+
+  //   const messageHandler = (event) => {
+  //     if (event.data.type === "result") {
+  //       const audio = new Audio();
+  //       audio.src = URL.createObjectURL(event.data.audio);
+
+  //       audio.onended = () => {
+  //         nextTextIndex++;
+  //         processNextText();
+  //       };
+
+  //       audio.play();
+  //     }
+  //   };
+
+  //   this.worker.addEventListener("message", messageHandler);
+  //   processNextText();
+
+  //   return new Promise((resolve) => {
+  //     const checkCompletion = setInterval(() => {
+  //       if (nextTextIndex >= this.textValue.length) {
+  //         clearInterval(checkCompletion);
+  //         this.worker.removeEventListener("message", messageHandler);
+  //         this.handlingPrediction = false;
+  //         resolve();
+  //       }
+  //     }, 100);
+  //   });
+  // }
+
+  // async predict() {
+  //   if (this.isPlayingValue) {
+  //     this.pauseAudio();
+  //     return;
+  //   }
+
+  //   if (
+  //     this.currentAudio?.paused &&
+  //     this.currentAudio.currentTime < this.currentAudio.duration
+  //   ) {
+  //     this.resumeAudio();
+  //     return;
+  //   }
+
+  //   this.handlingPrediction = true;
+  //   await this.startPlayingFromIndex(this.currentTextIndex);
+  // }
+
   async predict() {
+    if (this.isPlayingValue) {
+      this.isPausedValue = true;
+      this.pauseAudio();
+      return;
+    }
+
+    if (
+      this.currentAudio?.paused &&
+      this.currentAudio.currentTime < this.currentAudio.duration
+    ) {
+      this.isPausedValue = false;
+      this.resumeAudio();
+      return;
+    }
+
     this.handlingPrediction = true;
-    let nextTextIndex = 0;
-
-    const processNextText = () => {
-      if (nextTextIndex < this.textValue.length) {
-        this.worker.postMessage({
-          type: "init",
-          text: this.textValue[nextTextIndex],
-          voiceId: this.voiceSelectTarget.value,
-        });
-      }
-    };
-
-    const messageHandler = (event) => {
-      if (event.data.type === "result") {
-        const audio = new Audio();
-        audio.src = URL.createObjectURL(event.data.audio);
-
-        audio.onended = () => {
-          nextTextIndex++;
-          processNextText();
-        };
-
-        audio.play();
-      }
-    };
-
-    this.worker.addEventListener("message", messageHandler);
-    processNextText();
-
-    return new Promise((resolve) => {
-      const checkCompletion = setInterval(() => {
-        if (nextTextIndex >= this.textValue.length) {
-          clearInterval(checkCompletion);
-          this.worker.removeEventListener("message", messageHandler);
-          this.handlingPrediction = false;
-          resolve();
-        }
-      }, 100);
-    });
+    this.isPausedValue = false;
+    await this.startPlayingFromIndex(this.currentTextIndex);
   }
 
   flush() {
@@ -227,10 +311,25 @@ export default class extends Controller {
     }, 2000);
   }
 
-  playAudio(audioBlob) {
-    const audio = new Audio();
-    audio.src = URL.createObjectURL(audioBlob);
-    audio.play();
+  // playAudio(audioBlob) {
+  //   const audio = new Audio();
+  //   audio.src = URL.createObjectURL(audioBlob);
+  //   audio.play();
+  // }
+
+  playAudio(audioBlob, onEnded) {
+    const wasPlaying = this.currentAudio && !this.currentAudio.ended;
+    const previousTime = wasPlaying ? this.currentAudio.currentTime : 0;
+
+    this.currentAudio = new Audio();
+    this.currentAudio.src = URL.createObjectURL(audioBlob);
+    if (wasPlaying) {
+      this.currentAudio.currentTime = previousTime;
+    }
+    this.currentAudio.onended = onEnded;
+    this.currentAudio.play();
+    this.isPlayingValue = true;
+    this.updateButtonText();
   }
 
   disconnect() {

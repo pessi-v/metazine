@@ -10,7 +10,6 @@ class ArticlesController < ApplicationController
   end
   
   def articles_by_source
-    # binding.break
     @articles = Article.where(source_name: params[:source_name]).order(published_at: :desc)
     render :list
   end
@@ -44,7 +43,6 @@ class ArticlesController < ApplicationController
           .gsub(/\\u[0-9a-fA-F]{4}/, ' ')  # Replace hex codes with space
           .strip
       }
-      .unshift(@author)
       .unshift(@title)
       # .to_json
 

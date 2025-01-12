@@ -3,7 +3,9 @@
     = image_tag(@article.image_url)
   = render 'article_headline', article: @article, with_timestamp: true
   .flex-row.justify-end.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
-    button data-action="click->piper#predict"
+    / button data-action="click->piper#predict"
+      'Read article out loud
+    button data-piper-target="predictButton" data-action="click->piper#predict"
       'Read article out loud
     select data-piper-target="voiceSelect"
     / p Stored Voices

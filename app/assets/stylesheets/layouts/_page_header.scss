@@ -19,7 +19,8 @@
     font-size: var(--font-size-xxxl);
 
     @include media.media(tabletAndUp) {
-      font-size: 5rem;
+      // font-size: 5rem;
+      font-size: 100cqmin;
     }
   }
 }
@@ -30,6 +31,7 @@
     height: 100%;
     display: flex;
     align-items: stretch;
+    container-type: size;
   }
 }
 
