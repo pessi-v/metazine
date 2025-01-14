@@ -7,13 +7,14 @@ export default class extends Controller {
     "predictButton",
     "flushButton",
   ];
+
   static values = {
     selectedVoice: { type: String, default: "en_US-hfc_female-medium" },
     text: {
       type: Array,
       default: ["Looks like there is no text"],
     },
-    voiceOptions: {
+    allowedVoices: {
       type: Object,
       default: {
         "en_US-hfc_female-medium":
@@ -21,20 +22,23 @@ export default class extends Controller {
         "en_US-hfc_male-medium":
           "en/en_US/hfc_male/medium/en_US-hfc_male-medium.onnx",
       },
-      isPlaying: { type: Boolean, default: false },
-      isPaused: { type: Boolean, default: false },
     },
+    isPlaying: { type: Boolean, default: false },
+    isPaused: { type: Boolean, default: false },
   };
 
   connect() {
     this.currentAudio = null;
     this.currentTextIndex = 0;
+    this.audioQueue = [];
+    this.isProcessing = false;
+    this.handlingPrediction = false;
+
     this.worker = new Worker(
       new URL("/assets/piper_worker-edd4a480.js", import.meta.url),
-      {
-        type: "module",
-      }
+      { type: "module" }
     );
+
     this.setupWorkerListeners();
     this.loadVoices();
     this.loadStoredVoices();
@@ -42,115 +46,128 @@ export default class extends Controller {
 
   setupWorkerListeners() {
     this.worker.addEventListener("message", (event) => {
-      if (event.data.type === "debug") {
-        console.log("Worker says:", event.data.message);
-        return;
-      }
-
       if (event.data.type === "error") {
         console.error(event.data.message);
         return;
       }
 
       switch (event.data.type) {
-        case "voices":
-          this.renderVoiceOptions(event.data.voices);
-          break;
         case "stored":
           this.renderStoredVoices(event.data.voiceIds);
           break;
         case "result":
-          this.playAudio(event.data.audio);
+          this.handleAudioSegment(event.data.audio);
           break;
       }
     });
   }
 
-  async startPlayingFromIndex(index) {
-    this.currentTextIndex = index;
+  handleAudioSegment(audioBlob) {
+    this.audioQueue.push(audioBlob);
 
-    const processNextText = () => {
-      if (
-        !this.isPausedValue &&
-        this.currentTextIndex < this.textValue.length
-      ) {
-        this.worker.postMessage({
-          type: "init",
-          text: this.textValue[this.currentTextIndex],
-          voiceId: this.voiceSelectTarget.value,
-        });
-      }
-    };
+    // Start playing if we have at least 2 segments and haven't started playing yet
+    if (
+      this.audioQueue.length === 2 &&
+      !this.currentAudio &&
+      !this.isPausedValue
+    ) {
+      this.playNextSegment();
+    }
 
-    const messageHandler = (event) => {
-      if (event.data.type === "result" && !this.isPausedValue) {
-        this.playAudio(event.data.audio, () => {
-          if (!this.isPausedValue) {
-            this.currentTextIndex++;
-            processNextText();
-          }
-        });
-      }
-    };
+    // Request next segment if there's more text
+    if (this.currentTextIndex < this.textValue.length - 1) {
+      this.currentTextIndex++;
+      this.requestNextSegment();
+    }
+  }
 
-    this.worker.addEventListener("message", messageHandler);
-    processNextText();
-
-    return new Promise((resolve) => {
-      const checkCompletion = setInterval(() => {
-        if (this.currentTextIndex >= this.textValue.length) {
-          clearInterval(checkCompletion);
-          this.worker.removeEventListener("message", messageHandler);
-          this.handlingPrediction = false;
-          this.isPlayingValue = false;
-          this.updateButtonText();
-          resolve();
-        }
-      }, 100);
+  requestNextSegment() {
+    this.worker.postMessage({
+      type: "init",
+      text: this.textValue[this.currentTextIndex],
+      voiceId: this.voiceSelectTarget.value,
     });
   }
 
-  playAudio(audioBlob, onEnded) {
+  playNextSegment() {
+    if (this.audioQueue.length === 0 || this.isPausedValue) {
+      return;
+    }
+
+    const audioBlob = this.audioQueue[0];
     this.currentAudio = new Audio();
     this.currentAudio.src = URL.createObjectURL(audioBlob);
-    this.currentAudio.onended = onEnded;
+
+    this.currentAudio.onended = () => {
+      // Remove the played segment
+      this.audioQueue.shift();
+      URL.revokeObjectURL(this.currentAudio.src);
+      this.currentAudio = null;
+
+      // Play next segment if available and not paused, with 1 second delay
+      if (this.audioQueue.length > 0 && !this.isPausedValue) {
+        setTimeout(() => {
+          if (!this.isPausedValue) {
+            // Recheck pause state after timeout
+            this.playNextSegment();
+          }
+        }, 1000);
+      } else if (
+        this.audioQueue.length === 0 &&
+        this.currentTextIndex >= this.textValue.length - 1
+      ) {
+        // All done
+        this.isPlayingValue = false;
+        this.handlingPrediction = false;
+        this.updateButtonText();
+      }
+    };
+
     this.currentAudio.play();
     this.isPlayingValue = true;
     this.updateButtonText();
   }
 
-  pauseAudio() {
-    if (this.currentAudio) {
-      this.currentAudio.pause();
+  async predict() {
+    // If currently playing, pause
+    if (this.isPlayingValue) {
+      this.isPausedValue = true;
+      if (this.currentAudio) {
+        this.currentAudio.pause();
+      }
       this.isPlayingValue = false;
       this.updateButtonText();
+      return;
     }
-  }
 
-  resumeAudio() {
-    if (this.currentAudio) {
-      this.currentAudio.play();
+    // If paused, resume
+    if (this.isPausedValue) {
+      this.isPausedValue = false;
+      if (this.currentAudio) {
+        this.currentAudio.play();
+      } else if (this.audioQueue.length > 0) {
+        this.playNextSegment();
+      }
       this.isPlayingValue = true;
       this.updateButtonText();
+      return;
     }
-  }
 
-  updateButtonText() {
-    const button = this.predictButtonTarget;
-    button.textContent = this.isPlayingValue
-      ? "Pause"
-      : this.currentAudio && this.currentAudio.paused
-      ? "Continue"
-      : "Read article out loud";
+    // Start fresh
+    this.handlingPrediction = true;
+    this.isPausedValue = false;
+    this.currentTextIndex = 0;
+    this.audioQueue = [];
+
+    // Request first segment
+    this.requestNextSegment();
   }
 
   loadVoices() {
-    // this.worker.postMessage({ type: "voices" });
-
     const select = this.voiceSelectTarget;
     select.innerHTML = "";
 
-    Object.entries(this.voiceOptionsValue).forEach(([key, value]) => {
+    Object.entries(this.allowedVoicesValue).forEach(([key, value]) => {
       const option = document.createElement("option");
       option.value = key;
       option.label = key;
@@ -161,19 +178,6 @@ export default class extends Controller {
 
   loadStoredVoices() {
     this.worker.postMessage({ type: "stored" });
-  }
-
-  renderVoiceOptions(voices) {
-    const select = this.voiceSelectTarget;
-    select.innerHTML = "";
-
-    voices.forEach((voice) => {
-      const option = document.createElement("option");
-      option.value = voice.key;
-      option.label = voice.key;
-      option.selected = this.selectedVoiceValue === voice.key;
-      select.appendChild(option);
-    });
   }
 
   renderStoredVoices(voiceIds) {
@@ -187,123 +191,6 @@ export default class extends Controller {
     });
   }
 
-  // async predict() {
-  //   this.handlingPrediction = true;
-
-  //   // Process each text sequentially
-  //   for (const text of this.textValue) {
-  //     await new Promise((resolve) => {
-  //       const messageHandler = (event) => {
-  //         if (event.data.type === "result") {
-  //           this.worker.removeEventListener("message", messageHandler);
-
-  //           const audio = new Audio();
-  //           audio.src = URL.createObjectURL(event.data.audio);
-
-  //           audio.onended = () => {
-  //             resolve();
-  //           };
-
-  //           audio.play();
-  //         }
-  //       };
-
-  //       this.worker.addEventListener("message", messageHandler);
-
-  //       this.worker.postMessage({
-  //         type: "init",
-  //         text: text,
-  //         voiceId: this.voiceSelectTarget.value,
-  //       });
-  //     });
-  //   }
-
-  //   // Reset flag after all texts have been processed
-  //   this.handlingPrediction = false;
-  // }
-
-  // async predict() {
-  //   this.handlingPrediction = true;
-  //   let nextTextIndex = 0;
-
-  //   const processNextText = () => {
-  //     if (nextTextIndex < this.textValue.length) {
-  //       this.worker.postMessage({
-  //         type: "init",
-  //         text: this.textValue[nextTextIndex],
-  //         voiceId: this.voiceSelectTarget.value,
-  //       });
-  //     }
-  //   };
-
-  //   const messageHandler = (event) => {
-  //     if (event.data.type === "result") {
-  //       const audio = new Audio();
-  //       audio.src = URL.createObjectURL(event.data.audio);
-
-  //       audio.onended = () => {
-  //         nextTextIndex++;
-  //         processNextText();
-  //       };
-
-  //       audio.play();
-  //     }
-  //   };
-
-  //   this.worker.addEventListener("message", messageHandler);
-  //   processNextText();
-
-  //   return new Promise((resolve) => {
-  //     const checkCompletion = setInterval(() => {
-  //       if (nextTextIndex >= this.textValue.length) {
-  //         clearInterval(checkCompletion);
-  //         this.worker.removeEventListener("message", messageHandler);
-  //         this.handlingPrediction = false;
-  //         resolve();
-  //       }
-  //     }, 100);
-  //   });
-  // }
-
-  // async predict() {
-  //   if (this.isPlayingValue) {
-  //     this.pauseAudio();
-  //     return;
-  //   }
-
-  //   if (
-  //     this.currentAudio?.paused &&
-  //     this.currentAudio.currentTime < this.currentAudio.duration
-  //   ) {
-  //     this.resumeAudio();
-  //     return;
-  //   }
-
-  //   this.handlingPrediction = true;
-  //   await this.startPlayingFromIndex(this.currentTextIndex);
-  // }
-
-  async predict() {
-    if (this.isPlayingValue) {
-      this.isPausedValue = true;
-      this.pauseAudio();
-      return;
-    }
-
-    if (
-      this.currentAudio?.paused &&
-      this.currentAudio.currentTime < this.currentAudio.duration
-    ) {
-      this.isPausedValue = false;
-      this.resumeAudio();
-      return;
-    }
-
-    this.handlingPrediction = true;
-    this.isPausedValue = false;
-    await this.startPlayingFromIndex(this.currentTextIndex);
-  }
-
   flush() {
     this.worker.postMessage({ type: "flush" });
     setTimeout(() => {
@@ -311,30 +198,26 @@ export default class extends Controller {
     }, 2000);
   }
 
-  // playAudio(audioBlob) {
-  //   const audio = new Audio();
-  //   audio.src = URL.createObjectURL(audioBlob);
-  //   audio.play();
-  // }
-
-  playAudio(audioBlob, onEnded) {
-    const wasPlaying = this.currentAudio && !this.currentAudio.ended;
-    const previousTime = wasPlaying ? this.currentAudio.currentTime : 0;
-
-    this.currentAudio = new Audio();
-    this.currentAudio.src = URL.createObjectURL(audioBlob);
-    if (wasPlaying) {
-      this.currentAudio.currentTime = previousTime;
-    }
-    this.currentAudio.onended = onEnded;
-    this.currentAudio.play();
-    this.isPlayingValue = true;
-    this.updateButtonText();
+  updateButtonText() {
+    const button = this.predictButtonTarget;
+    button.textContent = this.isPlayingValue
+      ? "Pause"
+      : this.isPausedValue
+      ? "Continue"
+      : "Read article out loud";
   }
 
+  // Not really necessary in our case - disconnect() is used for the Stimulus controller in some cases (content update, modal close etc.)
   disconnect() {
     if (this.worker) {
       this.worker.terminate();
     }
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      URL.revokeObjectURL(this.currentAudio.src);
+    }
+    this.audioQueue.forEach((blob) => {
+      URL.revokeObjectURL(URL.createObjectURL(blob));
+    });
   }
 }
