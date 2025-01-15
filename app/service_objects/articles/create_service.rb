@@ -157,7 +157,7 @@ module Articles
 
     def find_url
       url = find_og_image || find_entry_image
-      url.match?(/\Ahttp:\/\//) ? nil : url
+      url&.match?(/\Ahttp:\/\//) ? nil : url
     end
 
     private
