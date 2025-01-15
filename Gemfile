@@ -116,6 +116,7 @@ group :development do
 
   gem "ruby-readability", :require => 'readability' # Similar to MOzilla's Readability JS package
   gem 'fastimage' # required for readability
+  gem 'hotwire-spark'
 end
 
 group :test do

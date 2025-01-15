@@ -35,7 +35,8 @@ export default class extends Controller {
     this.handlingPrediction = false;
 
     this.worker = new Worker(
-      new URL("/assets/piper_worker-edd4a480.js", import.meta.url),
+      // new URL("/assets/piper_worker-edd4a480.js", import.meta.url),
+      new URL(RAILS_ASSET_URL("../piper_worker.js"), import.meta.url),
       { type: "module" }
     );
 
