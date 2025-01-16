@@ -156,6 +156,14 @@ button:active,
   justify-content: flex-end;
 }
 
+.justify-space-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+}
+
 .gap-s {
   gap: var(--space-s);
 }

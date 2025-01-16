@@ -159,6 +159,7 @@ export default class extends Controller {
     this.isPausedValue = false;
     this.currentTextIndex = 0;
     this.audioQueue = [];
+    this.predictButtonTarget.textContent = "Loading";
 
     // Request first segment
     this.requestNextSegment();
@@ -202,10 +203,10 @@ export default class extends Controller {
   updateButtonText() {
     const button = this.predictButtonTarget;
     button.textContent = this.isPlayingValue
-      ? "Pause"
+      ? "Pause ⏸"
       : this.isPausedValue
-      ? "Continue"
-      : "Read article out loud";
+      ? "Play ⏵"
+      : "Read out loud";
   }
 
   // Not really necessary in our case - disconnect() is used for the Stimulus controller in some cases (content update, modal close etc.)

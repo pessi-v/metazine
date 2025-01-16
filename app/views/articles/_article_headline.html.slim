@@ -1,18 +1,9 @@
-- with_timestamp = with_timestamp || false
-
 .article_headline
-  - if request.original_url.match?(reader_path) # in Reader
-    = link_to(article.url) do  
-      h2.headline
-        = article.title
-  - else # in Frontpage
-    = link_to(reader_path(article)) do
-      h4.headline
-        = article.title
+  
+  = link_to(reader_path(article)) do
+    h4.headline
+      = article.title
   .source_and_reader_link
     = link_to(articles_by_source_path(article.source_name))
       p.source
         = article.source_name
-  - if with_timestamp
-    p.source 
-      = article.published_at.strftime('%A %-d.%-m.%Y')

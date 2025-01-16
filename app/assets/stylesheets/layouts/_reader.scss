@@ -72,3 +72,13 @@
     margin-top: var(--space-m);
   }
 }
+
+.predict_button {
+  width: 8rem;
+  height: var(--space-xxl);
+}
+
+.tts_voices {
+  padding: 0 var(--space-xs) 0 var(--space-s);
+  height: var(--space-xxl);
+}
