@@ -36,19 +36,22 @@ css:
                 next_article_with_short_title(@articles)]
 
 
-  / .item-c
-  = render 'article_headline_summary', article: next_article_with_long_description(@articles), style: "grid-area: C"
-  
-  .item-b style="grid-area: H"
-    = render 'many_articles_headline',
-      articles: [next_article_without_image(@articles),
-                next_article_without_image(@articles),
-                next_article_without_image(@articles)]
-   
-  = render 'article_headline_summary', article: next_article_with_long_description(@articles), style: "grid-area: I"
-
-  .item-d style="grid-area: J"
+  .item-c
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    .item-b style="flex-grow: 2; max-height: 33%;"
+      = render 'many_articles_headline',
+        articles: [next_article_without_image(@articles),
+                  next_article_without_image(@articles),
+                  next_article_without_image(@articles)]
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+   
+  
+  / .item-b style="grid-area: H"
+  / = render 'article_headline_summary', article: next_article_with_long_description(@articles), style: "grid-area: I"
+
+  / .item-d style="grid-area: J"
+  /   = render 'article_headline_summary', article: next_article_with_long_description(@articles)
 
   .item-d style="grid-area: D"
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)

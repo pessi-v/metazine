@@ -48,7 +48,7 @@ class ArticlesController < ApplicationController
           .gsub(/(?<![.!?])$/, '.')
       }
       .unshift(@title)
-        .to_json
+      .to_json
 
     # binding.break
 

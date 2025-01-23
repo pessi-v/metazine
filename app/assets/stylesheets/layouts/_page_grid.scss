@@ -18,15 +18,25 @@
     grid-template-rows: repeat(8, var(--space-7xl));
     row-gap: var(--space-xl);
 
+    // grid-template-areas:
+    //   "A A A B C C"
+    //   "A A A B C C"
+    //   "A A A B I I"
+    //   "D D E E I I"
+    //   "D D E E H H"
+    //   "F F G G H H"
+    //   "F F G G J J"
+    //   "F F G G J J";
+
     grid-template-areas:
       "A A A B C C"
       "A A A B C C"
-      "A A A B I I"
-      "D D E E I I"
-      "D D E E H H"
-      "F F G G H H"
-      "F F G G J J"
-      "F F G G J J";
+      "A A A B C C"
+      "D D E E C C"
+      "D D E E C C"
+      "F F G G C C"
+      "F F G G C C"
+      "F F G G C C";
   }
 }
 
@@ -48,6 +58,18 @@
   .item-c {
     //  in it's own file
     grid-area: C;
+    display: flex;
+    flex-direction: column;
+    row-gap: var(--space-l);
+
+    @include media.media(tabletAndUp) {
+      row-gap: var(--space-xl);
+      justify-content: space-between;
+    }
+
+    .one_third {
+      max-height: 33.33%;
+    }
   }
 
   .item-d {
