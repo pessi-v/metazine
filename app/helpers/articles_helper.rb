@@ -1,6 +1,7 @@
 module ArticlesHelper
   def next_article_with_image(articles)
-    index = articles.index { |article| article.image_url }
+    @articles = @articles.sort_by { |article| article.description_length || article.description.length }.reverse # TODO remove " || article.description.length"
+    index = @articles.index { |article| article.image_url }
     @articles.delete_at(index)
   end
 

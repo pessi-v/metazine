@@ -18,25 +18,15 @@
     grid-template-rows: repeat(8, var(--space-7xl));
     row-gap: var(--space-xl);
 
-    // grid-template-areas:
-    //   "A A A B C C"
-    //   "A A A B C C"
-    //   "A A A B I I"
-    //   "D D E E I I"
-    //   "D D E E H H"
-    //   "F F G G H H"
-    //   "F F G G J J"
-    //   "F F G G J J";
-
     grid-template-areas:
       "A A A B C C"
       "A A A B C C"
       "A A A B C C"
-      "D D E E C C"
-      "D D E E C C"
-      "F F G G C C"
-      "F F G G C C"
-      "F F G G C C";
+      "D D D D C C"
+      "D D D D C C"
+      "D D D D C C"
+      "D D D D C C"
+      "D D D D C C";
   }
 }
 
@@ -56,7 +46,6 @@
   }
 
   .item-c {
-    //  in it's own file
     grid-area: C;
     display: flex;
     flex-direction: column;
@@ -73,8 +62,29 @@
   }
 
   .item-d {
-    //  in it's own file
     grid-area: D;
+    display: flex;
+    row-gap: var(--space-xl);
+    column-gap: var(--space-m);
+
+    @include media.media(tabletAndUp) {
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding-top: var(--space-m);
+
+      .article {
+        // width: 50% !important;
+        width: calc(50% - var(--space-m) / 2) !important;
+      }
+
+      .without_image {
+        height: 30% !important;
+      }
+
+      .with_image {
+        height: 70% !important;
+      }
+    }
   }
 
   .item-e {
