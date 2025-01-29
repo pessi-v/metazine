@@ -33,7 +33,6 @@ module Articles
     end
 
     def allowed_media_type?
-      # binding.break
       return false if @entry.categories.include?('Video') && !@source.allow_video
       return false if (@entry.categories.intersect?(['Podcast', 'Audio'])) && !@source.allow_audio
       true
@@ -146,6 +145,21 @@ module Articles
       return true if intro_section&.strip&.end_with?("[…]")
       
       false
+    end
+
+    def set_article_readability_output
+      runner = NodeRunner.new(
+        <<~JAVASCRIPT
+        const { Readability } = require('@mozilla/readability');
+        const jsdom = require("jsdom");
+        const { JSDOM } = jsdom;        
+        const parse = (document) => {
+          const dom = new JSDOM(document);
+          return new Readability(dom.window.document).parse()
+        }
+        JAVASCRIPT
+      )
+      @readability_output = runner.parse @original_page.body
     end
   end
 
