@@ -129,7 +129,7 @@ button,
 .button {
   min-height: 2.5rem;
   border: var(--border);
-  margin: var(--space-xxxs) 0 var(--space-xxxs) 0;
+  // margin: var(--space-xxxs) 0 var(--space-xxxs) 0;
   padding: var(--space-xxxs);
   font-family: var(--font-family-headlines);
   color: var(--color-text-header);
@@ -154,6 +154,10 @@ button:active,
 
 .justify-end {
   justify-content: flex-end;
+}
+
+.justify-center {
+  justify-content: center;
 }
 
 .justify-space-between {

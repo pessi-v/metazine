@@ -92,10 +92,12 @@ gem 'pg_search'
 # gem 'pundit'
 
 gem "dockerfile-rails", ">= 1.6", :group => :development
-gem "pagy", "~> 9.1"
+gem "pagy", "~> 9.1" # pagination
 
 gem 'faraday-gzip', '~> 3' # request compressed http responses
 gem 'brotli' # decode compressed http responses
+gem "lograge" # hide partial rendering logs
+
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -116,7 +118,6 @@ group :development do
 
   gem "ruby-readability", :require => 'readability' # Similar to MOzilla's Readability JS package
   gem 'fastimage' # required for readability
-  gem 'hotwire-spark'
 end
 
 group :test do

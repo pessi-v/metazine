@@ -5,12 +5,13 @@ class ArticlesController < ApplicationController
   end
 
   def search
-    @articles = Article.search_by_title_source_and_readability_output(params[:query]).to_a.sort_by { |a| a.published_at }.reverse
+    @pagy, @articles = pagy(Article.search_by_title_source_and_readability_output(params[:query])
+      .order(published_at: :desc), limit: 14)
     render :list
   end
   
   def articles_by_source
-    @articles = Article.where(source_name: params[:source_name]).order(published_at: :desc)
+    @pagy, @articles = pagy(Article.where(source_name: params[:source_name]).order(published_at: :desc), limit: 14)
     render :list
   end
 
@@ -49,8 +50,6 @@ class ArticlesController < ApplicationController
       }
       .unshift(@title)
       .to_json
-
-    # binding.break
 
     # headers['Cross-Origin-Opener-Policy'] = 'same-origin'
     # headers['Cross-Origin-Embedder-Policy'] = 'require-corp'

@@ -1,6 +1,8 @@
 = render 'layouts/page_header'
 
 .list_view_desktop
+  .flex-row.justify-center
+    == pagy_nav(@pagy) if @pagy
   - @articles.each do |article|
     = render 'article_small_image_headline_summary_preview', article: article
     - unless article == @articles.last

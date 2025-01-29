@@ -1,0 +1,9 @@
+.pagy.nav {
+  font-family: var(--font-family-headlines);
+  display: flex;
+  gap: var(--space-s);
+
+  .current {
+    font-weight: bold;
+  }
+}
