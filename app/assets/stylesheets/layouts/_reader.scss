@@ -71,6 +71,12 @@
   .reader h4 {
     margin-top: var(--space-m);
   }
+
+  .reader .content h2,
+  .reader .content h3,
+  .reader .content h4 {
+    font-size: var(--font-size-xxl);
+  }
 }
 
 .predict_button {
