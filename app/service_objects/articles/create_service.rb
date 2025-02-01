@@ -149,7 +149,11 @@ module Articles
     end
 
     def article_readability_output(html)
-      Readability.new(html).parse
+      readability_output = Readability.new(html).parse
+
+      if @source && @source.url.match?('https://chuangcn.org')
+        ChuangHelper.new(readability_output).remove_chinese_section
+      end
     end
   end
 

@@ -34,6 +34,10 @@ class Source < ApplicationRecord
     feed_fetcher = Sources::FeedFetcher.new.consume(self)
   end
 
+  def reset
+    update(last_modified:nil, etag:nil, last_built: nil)
+  end
+
   private
 
   def add_description_and_image

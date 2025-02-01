@@ -36,6 +36,7 @@ class ArticlesController < ApplicationController
     @title = @article.title
     @author = readability_output['byline']
     @content = readability_output['content'].gsub('class="page"', '')
+    # @content = readability_output['textContent']
     @text_to_speech_content = prepare_readability_output_for_tts(readability_output)
 
     # headers['Cross-Origin-Opener-Policy'] = 'same-origin'

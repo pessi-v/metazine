@@ -12,6 +12,7 @@ module Articles
         .then { |t| fix_spacing(t) }
         .then { |t| handle_ellipsis(t) }
         .then { |t| remove_head_tag(t) }
+        .then { |t| t.gsub(/[\u4e00-\u9fff《》]/, '') } # Remove Chinese characters and brackets
         .then { |t| capitalize(t) }
         .strip
     end
