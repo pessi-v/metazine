@@ -27,6 +27,7 @@ module Sources
         return
       end
 
+      response = decode_response(response)
       feed = parse_feed(response, source: source)
 
       if feed_not_modified?(response, feed, source)
@@ -40,18 +41,6 @@ module Sources
 
       process_feed(feed, source, response)
     end
-
-    # # Debug method for development use
-    # def debug(url)
-    #   response = make_request(url: url)
-    #   return unless response
-
-    #   Rails.logger.debug("Debug request for URL: #{url}")
-    #   Rails.logger.debug("Response status: #{response.status}")
-    #   Rails.logger.debug("Response headers: #{response.headers}")
-      
-    #   parse_feed(response)
-    # end
 
     private
 
@@ -80,19 +69,33 @@ module Sources
       false
     end
 
-    # def response_status_ok?(response, source)
-    #   if response.status == 500
-    #     Rails.logger.info("Internal Server Error for source: #{source.name}")
-    #     return false
-    #   end
+    def decode_response(response)
+      return response unless response.headers['Content-Encoding']
+    
+      decoded_body = case response.headers['Content-Encoding'].downcase
+      when 'gzip'
+        Zlib::GzipReader.new(StringIO.new(response.body)).read
+      when 'deflate'
+        Zlib::Inflate.inflate(response.body)
+      when 'br'
+        Brotli.inflate(response.body)
+      when 'zstd'
+        Zstd.decode(response.body)
+      when 'compress'
+        Zlib::Inflate.inflate(response.body)
+      else
+        response.body
+      end
+    
+      # Create a new response object with the decoded body
+      env = response.env.dup
+      env.response_body = decoded_body
+      Faraday::Response.new(env)
       
-    #   if response.status == 304
-    #     Rails.logger.info("Feed not modified for source: #{source.name}")
-    #     return false
-    #   end
-      
-    #   true
-    # end
+    rescue => e
+      Rails.logger.error "Failed to decode response body: #{e.message}"
+      response
+    end
 
     def feed_not_modified?(response, feed, source)
       if (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
@@ -125,12 +128,6 @@ module Sources
       update_source_metadata(source, feed, response)
       true
     end
-
-    # def handle_empty_feed(source, feed)
-    #   message = feed.nil? ? 'Feed not available' : 'Feed appears to be empty'
-    #   source.update(last_error_status: message)
-    #   Rails.logger.warn("#{message} for source: #{source.name}")
-    # end
 
     def process_entries(entries, source)
       Rails.logger.info("Processing #{entries.count} entries for source: #{source.name}")

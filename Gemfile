@@ -97,6 +97,7 @@ gem "pagy", "~> 9.1" # pagination
 
 gem 'faraday-gzip', '~> 3' # request compressed http responses
 gem 'brotli' # decode compressed http responses
+gem 'zstd-ruby' # decode compressed http responses
 gem "lograge" # hide partial rendering logs
 
 

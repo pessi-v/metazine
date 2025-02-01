@@ -113,7 +113,8 @@ sup {
 }
 
 hr {
-  border: var(--border);
+  // border: var(--border);
+  color: var(--color-background);
   border-radius: var(--border-radius);
 }
 
