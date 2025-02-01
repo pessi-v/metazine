@@ -13,7 +13,8 @@
           = @article.source_name
       p.source
         = @article.published_at.strftime('%A %-d.%-m.%Y')
-    .flex-row.justify-end.align-center.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
+    / .flex-row.justify-end.align-center.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
+    .tts_button data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
       / button data-action="click->piper#predict"
         'Read article out loud
       button.predict_button data-piper-target="predictButton" data-action="click->piper#predict"

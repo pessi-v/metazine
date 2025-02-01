@@ -86,7 +86,8 @@ gem 'cld'
 gem 'pg_search'
 
 # ActivityPub
-# gem 'activitypub', git: 'https://github.com/rauversion/activitypub'
+# gem 'activitypub', git: 'https://github.com/rauversion/activitypub' # last update autumn 23
+# gem 'activitypub', git: 'https://github.com/vidarh/activitypub' # last update autumn 24
 # gem 'federails', git: 'https://gitlab.com/experimentslabs/federails', branch: 'main'
 # gem 'federails', git: 'https://github.com/pessi-v/federails', branch: 'main'
 # gem 'pundit'
