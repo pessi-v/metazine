@@ -49,7 +49,8 @@ module Articles
         source_id: @source.id,
         published_at: determine_published_at,
         image_url: find_image_url,
-        paywalled: paywalled?
+        paywalled: paywalled?,
+        readability_output: article_readability_output(@original_page.body)
       }
     end
 
@@ -147,19 +148,8 @@ module Articles
       false
     end
 
-    def set_article_readability_output
-      runner = NodeRunner.new(
-        <<~JAVASCRIPT
-        const { Readability } = require('@mozilla/readability');
-        const jsdom = require("jsdom");
-        const { JSDOM } = jsdom;        
-        const parse = (document) => {
-          const dom = new JSDOM(document);
-          return new Readability(dom.window.document).parse()
-        }
-        JAVASCRIPT
-      )
-      @readability_output = runner.parse @original_page.body
+    def article_readability_output(html)
+      Readability.new(html).parse
     end
   end
 

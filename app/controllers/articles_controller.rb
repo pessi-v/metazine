@@ -33,7 +33,7 @@ class ArticlesController < ApplicationController
 
     readability_output = eval @article.readability_output
     
-    @title = readability_output['title']
+    @title = @article.title
     @author = readability_output['byline']
     @content = readability_output['content'].gsub('class="page"', '')
     @text_to_speech_content = prepare_readability_output_for_tts(readability_output)
@@ -68,22 +68,10 @@ class ArticlesController < ApplicationController
     Article.order(published_at: :desc).limit(30)
   end
 
+  # TODO: remove after a few days (1.2.25)
   def set_article_readability_output(article)
     response = Faraday.get(article.url)
-    
-    runner = NodeRunner.new(
-      <<~JAVASCRIPT
-      const { Readability } = require('@mozilla/readability');
-      const jsdom = require("jsdom");
-      const { JSDOM } = jsdom;        
-      const parse = (document) => {
-        const dom = new JSDOM(document);
-        return new Readability(dom.window.document).parse()
-      }
-      JAVASCRIPT
-    )
-    readability_output = runner.parse response.body
-    article.readability_output = readability_output
+    article.readability_output = Articles::Readability.new(response.body)
     article.save
   end
 
