@@ -99,6 +99,7 @@ gem 'faraday-gzip', '~> 3' # request compressed http responses
 gem 'brotli' # decode compressed http responses
 gem 'zstd-ruby' # decode compressed http responses
 gem "lograge" # hide partial rendering logs
+gem "ruby-readability", :require => 'readability' # Similar to Mozilla's Readability JS package
 
 
 group :development, :test do
@@ -117,8 +118,6 @@ group :development do
   # gem "spring"
 
   gem 'webfinger'
-
-  gem "ruby-readability", :require => 'readability' # Similar to MOzilla's Readability JS package
   gem 'fastimage' # required for readability
 end
 

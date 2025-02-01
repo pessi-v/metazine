@@ -34,8 +34,10 @@ class Source < ApplicationRecord
     feed_fetcher = Sources::FeedFetcher.new.consume(self)
   end
 
-  def reset
+  def reset_articles
+    articles.destroy_all
     update(last_modified:nil, etag:nil, last_built: nil)
+    consume_feed
   end
 
   private

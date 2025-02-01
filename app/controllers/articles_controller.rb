@@ -26,6 +26,7 @@ class ArticlesController < ApplicationController
 
   def reader
     @article = Article.find(params[:id])
+    # binding.break
 
     if !@article.readability_output
       set_article_readability_output(@article)
