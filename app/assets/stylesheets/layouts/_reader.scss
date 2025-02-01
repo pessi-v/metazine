@@ -110,6 +110,10 @@
   .reader span[role="tooltip"] {
     display: none;
   }
+
+  .reader img[src*="gravatar.com"] {
+    display: none;
+  }
 }
 
 .predict_button {
