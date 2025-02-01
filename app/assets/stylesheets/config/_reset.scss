@@ -44,6 +44,7 @@ select {
 
 select {
   border: var(--border);
+  border-radius: var(--border-radius);
   height: 2.5rem;
   font-size: var(--font-size-s);
   background-color: var(--color-light);
@@ -113,11 +114,13 @@ sup {
 
 hr {
   border: var(--border);
+  border-radius: var(--border-radius);
 }
 
 .line {
   height: 1px;
   border-top: var(--border);
+  border-radius: var(--border-radius);
 }
 
 ul,
@@ -129,6 +132,7 @@ button,
 .button {
   height: 2.5rem;
   border: var(--border);
+  border-radius: var(--border-radius);
   // margin: var(--space-xxxs) 0 var(--space-xxxs) 0;
   padding: var(--space-xxxs);
   font-family: var(--font-family-headlines);
@@ -143,14 +147,6 @@ button,
     display: inline-block;
   }
 }
-
-// .button {
-//   border: var(--border);
-//   font-family: var(--font-family-headlines);
-//   color: var(--color-text-header);
-//   background-color: var(--color-light);
-//   height: 2.5rem;
-// }
 
 button:active,
 .button:active {

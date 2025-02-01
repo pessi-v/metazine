@@ -107,9 +107,9 @@
   .reader a[href="void(0)"] {
     display: none;
   }
-  // .reader span[role="tooltip"] {
-  //   display: none;
-  // }
+  .reader span[role="tooltip"] {
+    display: none;
+  }
 }
 
 .predict_button {
