@@ -35,10 +35,24 @@ module Articles
       text.delete("\t").delete("\n")
     end
 
+    # def fix_spacing(text)
+    #   text = text.squeeze(' ').squeeze('*')
+    #   text = text.gsub(/\&nbsp;/, " ")
+    #   text.gsub(/([,\.!?:;])(\S)/, '\1 \2')
+    # end
+
+    # Normalizes text spacing by:
+    # 1. Removing duplicate spaces and asterisks
+    # 2. Converting HTML non-breaking spaces to regular spaces
+    # 3. Adding spaces after punctuation marks
     def fix_spacing(text)
       text = text.squeeze(' ').squeeze('*')
       text = text.gsub(/\&nbsp;/, " ")
-      text.gsub(/([,\.!?:;])(\S)/, '\1 \2')
+      # Only add spaces after punctuation when:
+      # - For periods: not preceded by a period (for acronyms) and not between digits
+      # - For commas: not between digits
+      # - Always add space after other punctuation marks
+      text.gsub(/([!?:;]|(?<!\.|\d)\.|(?<!\d),(?!\d))(\S)/, '\1 \2')
     end
 
     def handle_ellipsis(text)

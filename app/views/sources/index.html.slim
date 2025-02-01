@@ -9,8 +9,16 @@ css:
     align-items: center;
     justify-content: space-around;
     border: var(--border);
-    
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      gap: var(--space-xxs)
+    }
   }
+  
 
 .index
   .list_view_desktop
@@ -23,10 +31,12 @@ css:
           'Sources
         = link_to('← back to front page', frontpage_path)
       
-      div
+      .buttons
         = button_to('Reload all feeds', fetch_feeds_path)
         = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
-          = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }, class: 'button'
+          .button
+            / = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
+            = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
 
       div id="article_counts"
         table

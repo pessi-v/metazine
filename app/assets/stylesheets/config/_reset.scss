@@ -127,7 +127,7 @@ ol {
 
 button,
 .button {
-  min-height: 2.5rem;
+  height: 2.5rem;
   border: var(--border);
   // margin: var(--space-xxxs) 0 var(--space-xxxs) 0;
   padding: var(--space-xxxs);
@@ -135,7 +135,22 @@ button,
   color: var(--color-text-header);
   background-color: var(--color-light);
   cursor: unset;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  a {
+    display: inline-block;
+  }
 }
+
+// .button {
+//   border: var(--border);
+//   font-family: var(--font-family-headlines);
+//   color: var(--color-text-header);
+//   background-color: var(--color-light);
+//   height: 2.5rem;
+// }
 
 button:active,
 .button:active {

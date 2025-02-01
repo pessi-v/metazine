@@ -159,7 +159,7 @@ export default class extends Controller {
     this.isPausedValue = false;
     this.currentTextIndex = 0;
     this.audioQueue = [];
-    this.predictButtonTarget.textContent = "Loading";
+    this.predictButtonTarget.textContent = "Preparing";
 
     // Request first segment
     this.requestNextSegment();
