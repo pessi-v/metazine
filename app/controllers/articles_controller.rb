@@ -26,17 +26,17 @@ class ArticlesController < ApplicationController
 
   def reader
     @article = Article.find(params[:id])
-    # binding.break
 
     if !@article.readability_output
       set_article_readability_output(@article)
     end
-
-    readability_output = eval @article.readability_output
     
+    readability_output = eval @article.readability_output
+
     @title = @article.title
     @author = readability_output['byline']
     @content = readability_output['content'].gsub('class="page"', '')
+
     # @content = readability_output['textContent']
     @text_to_speech_content = prepare_readability_output_for_tts(readability_output)
 
@@ -67,13 +67,13 @@ class ArticlesController < ApplicationController
     # end
 
   def latest_articles
-    Article.order(published_at: :desc).limit(30)
+    Article.order(published_at: :desc).limit(14)
   end
 
   # TODO: remove after a few days (1.2.25)
   def set_article_readability_output(article)
     response = Faraday.get(article.url)
-    article.readability_output = Articles::Readability.new(response.body)
+    article.readability_output = Articles::ReadabilityService.new(response.body)
     article.save
   end
 

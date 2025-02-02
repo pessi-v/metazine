@@ -1,5 +1,5 @@
 module Articles
-  class Readability
+  class ReadabilityService
     def initialize(html_content)
       @html_content = html_content
 
@@ -28,18 +28,17 @@ module Articles
 
     # In some cases the Javascript parsing can fail
     def parse_with_readability_gem
-      binding.break
       readability_gem_output = Readability::Document.new(@html_content)
-      {"title": readability_gem_output.title,
-        "byline": readability_gem_output.author,
-        "dir": nil,
-        "lang": 'en-US',
-        "content": readability_gem_output.content,
-        "textContent": readability_gem_output.content,
-        "length": readability_gem_output.content.length,
-        "excerpt": nil,
-        "siteName": nil,
-        "publishedTime": nil}
+      {"title" => readability_gem_output.title,
+        "byline" => readability_gem_output.author,
+        "dir" => nil,
+        "lang" => 'en-US',
+        "content" => readability_gem_output.content,
+        "textContent" => readability_gem_output.content,
+        "length" => readability_gem_output.content.length,
+        "excerpt" => nil,
+        "siteName" => nil,
+        "publishedTime" => nil}
         .to_s
     end
   end
