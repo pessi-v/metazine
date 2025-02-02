@@ -45,24 +45,6 @@
     max-width: 100%;
   }
 
-  .reader img {
-    // margin-top: var(--space-m);
-    // margin-left: auto;
-    // margin-right: auto;
-    max-width: 100%;
-    min-width: 100%; // will this work?
-    height: auto;
-    object-fit: contain;
-  }
-
-  .reader .content img {
-    margin-top: var(--space-m);
-    max-width: 100%;
-    min-width: 100%; // will this work?
-    height: auto;
-    object-fit: contain;
-  }
-
   .reader figcaption {
     margin-left: auto;
     margin-right: auto;
@@ -88,7 +70,8 @@
 
   .reader .content h2,
   .reader .content h3,
-  .reader .content h4 {
+  .reader .content h4,
+  .reader .content h5 {
     font-size: var(--font-size-xxl);
   }
 
@@ -111,9 +94,9 @@
     display: none;
   }
 
-  .reader img[src*="gravatar.com"] {
-    display: none;
-  }
+  // .reader img[src*="gravatar.com"] {
+  //   display: none;
+  // }
 }
 
 .predict_button {
@@ -124,4 +107,31 @@
 .tts_voices {
   padding: 0 var(--space-xs) 0 var(--space-s);
   height: var(--space-xxl);
+}
+
+.header-image {
+  width: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+
+  &[style*="--width-category"] {
+    // Apply height limit and object-fit only to portrait images
+    &[style*="--is-wide: 'no'"] {
+      max-height: 50vh;
+      object-fit: cover;
+      object-position: center 20%;
+    }
+  }
+}
+
+.custom-prop-image {
+  max-width: 100%;
+  height: auto;
+
+  &[style*="--width-category"] {
+    // Hide tiny images
+    &[style*="--width-category: 'hide'"] {
+      display: none;
+    }
+  }
 }

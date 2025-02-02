@@ -1,7 +1,7 @@
 .reader
   - if @article.image_url && !@content.match?(@article.image_url)
-    = image_tag(@article.image_url)
-  / = render 'article_headline', article: @article, with_timestamp: true
+    = image_tag(@article.image_url, class: 'header-image custom-prop-image', data: { controller: "reader-image" })
+
   .article_headline
     = link_to(@article.url) do
       h2.headline
@@ -18,7 +18,7 @@
       / button data-action="click->piper#predict"
         'Read article out loud
       button.predict_button data-piper-target="predictButton" data-action="click->piper#predict"
-        'Read out loud
+        'Listen
       select.tts_voices data-piper-target="voiceSelect" style="display:none;"
       / p Stored Voices
       ul data-piper-target="storedList" style="display:none;"

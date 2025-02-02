@@ -34,8 +34,8 @@ class ArticlesController < ApplicationController
     readability_output = eval @article.readability_output
 
     @title = @article.title
-    @author = readability_output['byline']
     @content = readability_output['content'].gsub('class="page"', '')
+    @content = add_image_attributes(@content)
 
     # @content = readability_output['textContent']
     @text_to_speech_content = prepare_readability_output_for_tts(readability_output)
@@ -50,6 +50,25 @@ class ArticlesController < ApplicationController
   end
   
   private
+  def add_image_attributes(html_string)
+    # Create a new Nokogiri HTML document
+    doc = Nokogiri::HTML(html_string)
+    
+    # Find all img tags
+    doc.css('img').each do |img|
+      # Add class attribute
+      existing_classes = img['class']&.split(' ') || []
+      new_classes = existing_classes + ['custom-prop-image']
+      img['class'] = new_classes.uniq.join(' ')
+      
+      # Add data controller attribute
+      img['data-controller'] = 'reader-image'
+    end
+    
+    # Return the modified HTML as a string
+    doc.to_html
+  end
+
     # def add_crossorigin_to_images(content)
     #   # Parse the HTML content
     #   doc = Nokogiri::HTML(content)

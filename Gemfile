@@ -67,7 +67,7 @@ gem 'ogp'
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
 gem 'addressable'
 
-# gem 'nokogiri'
+gem 'nokogiri'
 
 # Run backend JS code with Node
 gem "node-runner", "~> 1.2"

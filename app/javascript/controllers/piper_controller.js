@@ -206,7 +206,7 @@ export default class extends Controller {
       ? "Pause ⏸"
       : this.isPausedValue
       ? "Play ⏵"
-      : "Read out loud";
+      : "Listen";
   }
 
   // Not really necessary in our case - disconnect() is used for the Stimulus controller in some cases (content update, modal close etc.)
