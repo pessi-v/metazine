@@ -132,7 +132,12 @@ module Sources
     def process_entries(entries, source)
       Rails.logger.info("Processing #{entries.count} entries for source: #{source.name}")
       entries.each do |entry|
-        Articles::CreateService.new(source, entry).create_article
+        begin
+          Articles::CreateService.new(source, entry).create_article
+        rescue ActiveRecord::RecordNotUnique => e
+          Rails.logger.info "Skipping duplicate article: #{entry.url}"
+          next
+        end
       end
     end
 
