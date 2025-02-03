@@ -1,7 +1,15 @@
+@use "../mixins/media";
+
 .pagy.nav {
+  width: 100%;
   font-family: var(--font-family-headlines);
   display: flex;
-  gap: var(--space-s);
+  // gap: var(--space-s);
+  justify-content: space-between;
+
+  @include media.media(tabletAndUp) {
+    width: 35%;
+  }
 
   .current {
     font-weight: bold;

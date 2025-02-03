@@ -1,15 +1,45 @@
+/ = render 'layouts/page_header'
+
+/ .list_view_desktop
+/   .flex-row.justify-center
+/     == pagy_nav(@pagy) if @pagy
+/   - @articles.each do |article|
+/     = render 'article_small_image_headline_summary_preview', article: article
+/     - unless article == @articles.last
+/       .line
+
+/ .list_view_mobile
+/   - @articles.each do |article|
+/     = render 'article_image_headline_summary', article: article
+/     - unless article == @articles.last
+/       .line
+
 = render 'layouts/page_header'
 
-.list_view_desktop
+.list_view
   .flex-row.justify-center
     == pagy_nav(@pagy) if @pagy
-  - @articles.each do |article|
+  - @articles.each_with_index do |article, index|
+    
+    / If article is the first on the page, or if article was published a day earlier than the last, show a Date line
+    / - if index == 0 || (next_article && article.published_at.to_date != next_article.published_at.to_date)
+    - if index == 0 || (@articles[index - 1].published_at.day != article.published_at.to_date.day)
+      - if article.published_at.to_date == Date.today
+        - date_text = 'Today'.upcase
+      - elsif article.published_at.to_date == Date.yesterday
+        - date_text = 'Yesterday'.upcase
+      - elsif article.published_at.to_date < Date.yesterday
+        - date_text = article.published_at.strftime("%e. %B '%y")
+      / Date line
+      div
+        h3= date_text
+        .line
     = render 'article_small_image_headline_summary_preview', article: article
     - unless article == @articles.last
       .line
 
-.list_view_mobile
-  - @articles.each do |article|
-    = render 'article_image_headline_summary', article: article
-    - unless article == @articles.last
-      .line
+/  .list_view_mobile
+/   - @articles.each do |article|
+/     = render 'article_image_headline_summary', article: article
+/     - unless article == @articles.last
+/       .line

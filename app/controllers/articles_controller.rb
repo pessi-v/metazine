@@ -1,8 +1,9 @@
 class ArticlesController < ApplicationController
 
   def frontpage
-    @articles = latest_articles
-      .select(Article.column_names - ['readability_output'])
+    @articles = latest_articles.limit(14)
+    # @articles = latest_articles
+    #   .select(Article.column_names - ['readability_output'])
   end
 
   def search
@@ -20,8 +21,8 @@ class ArticlesController < ApplicationController
   end
 
   def list
-    @articles = latest_articles
-      .select(Article.column_names - ['readability_output'])
+    @list_view = true
+    @pagy, @articles = pagy(latest_articles, limit: 20)
   end
 
   def reader
@@ -86,7 +87,10 @@ class ArticlesController < ApplicationController
     # end
 
   def latest_articles
-    Article.order(published_at: :desc).limit(14)
+    # @pagy, @articles = pagy(Article.order(published_at: :desc)
+    #   .select(Article.column_names - ['readability_output']), limit: 14)
+    Article.order(published_at: :desc)
+      .select(Article.column_names - ['readability_output'])
   end
 
   # TODO: remove after a few days (1.2.25)

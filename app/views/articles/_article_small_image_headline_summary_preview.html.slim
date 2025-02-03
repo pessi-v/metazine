@@ -1,10 +1,19 @@
 .article_small_image_headline_summary_preview
-  = link_to(article.url) do
+  = link_to(article.url, class: 'image') do
     - if article.image_url
       img.image src=article.image_url
     - else
       .image
-  .headline_source_summary_preview
-    = render 'article_headline', article: article, with_timestamp: true
-    p.truncate-overflow
+  .headline_source_summary_and_preview
+    .article_headline
+      = link_to(reader_path(article)) do
+        h4.headline
+          = article.title
+      .source_and_reader_link
+        = link_to(articles_by_source_path(article.source_name))
+          p.source
+            = article.source_name
+
+    / = render 'article_headline', article: article, with_timestamp: true
+    p.preview
       = article.description

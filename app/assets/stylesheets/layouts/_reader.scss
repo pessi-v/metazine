@@ -133,5 +133,16 @@
     &[style*="--width-category: 'hide'"] {
       display: none;
     }
+
+    // Center medium images
+    &[style*="--width-category: 'center'"] {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    // Fit large images to page
+    &[style*="--width-category: 'full'"] {
+      width: 100%;
+    }
   }
 }
