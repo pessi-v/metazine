@@ -9,14 +9,15 @@ class ArticlesController < ApplicationController
   def search
     @pagy, @articles = pagy(Article.search_by_title_source_and_readability_output(params[:query])
       .select(Article.column_names - ['readability_output'])
-      .order(published_at: :desc), limit: 14)
+      .reorder('published_at DESC'), limit: 14) # for some reason pagy doesn't like .order
+    # binding.break
     render :list
   end
   
   def articles_by_source
     @pagy, @articles = pagy(Article.where(source_name: params[:source_name])
       .select(Article.column_names - ['readability_output'])
-      .order(published_at: :desc), limit: 14)
+      .reorder('published_at DESC'), limit: 14) # for some reason pagy doesn't like .order
     render :list
   end
 
@@ -89,8 +90,9 @@ class ArticlesController < ApplicationController
   def latest_articles
     # @pagy, @articles = pagy(Article.order(published_at: :desc)
     #   .select(Article.column_names - ['readability_output']), limit: 14)
-    Article.order(published_at: :desc)
+    Article
       .select(Article.column_names - ['readability_output'])
+      .reorder('published_at DESC')  # for some reason pagy doesn't like .order
   end
 
   # TODO: remove after a few days (1.2.25)

@@ -1,0 +1,25 @@
+module Articles
+  class ApprovalHelper
+    FORBIDDEN_STRINGS = [
+      'Of the principles and themes outlined in this issue, Tribune readers will easily discern. ‘Gastropolitics’ discusses how food matters to socialist politics. Food institutions historic, existing or imagined, are discussed, as well as the transformative urges behind their establishment.',
+
+    ]
+
+    def initialize(article)
+      @article = article
+    end
+
+    def approve?
+
+      html_string = @article.readability_output
+      
+      if html_string.length < 1000 } # filters some cases where no article is shown without Javascript or cookies, and some cases of actually Video/Podcast content
+        return false
+      elsif FORBIDDEN_STRINGS.any? { |string| html_string.include?(string) }
+        return false
+      end
+
+      return true
+    end
+  end
+end

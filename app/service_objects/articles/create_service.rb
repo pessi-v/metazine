@@ -15,11 +15,19 @@ module Articles
     def create_article
       return if article_exists? || !english? || !allowed_media_type?
 
-      # Article.create!(article_attributes) # will raise an error 
-      Article.create(article_attributes) # don't raise errors such as ActiveRecord::RecordNotUnique, just move on
+      article = Article.new(article_attributes)
+      if ApprovalHelper.new(article).approve?
+        article.save
+      else
+        return
+      end
     end
 
     private
+
+    def disapprove?
+      ApprovalHelper
+    end
 
     # attr_reader :source, :entry, :original_page
 
