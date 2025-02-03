@@ -92,7 +92,7 @@ class ArticlesController < ApplicationController
   # TODO: remove after a few days (1.2.25)
   def set_article_readability_output(article)
     response = Faraday.get(article.url)
-    article.readability_output = Articles::ReadabilityService.new(response.body)
+    article.readability_output = Articles::ReadabilityService.new(response.body).parse
     article.save
   end
 
