@@ -4,6 +4,18 @@ module Articles
       @text = text
     end
 
+    def clean_title
+      title = clean_parentheses(clean)
+
+      # if it's a long title and contains a dash,
+      # the latter part can probably be edited out safely
+      if title.length > 100 && title.match?(' - ')
+        title = title.split(/\s[\u2014\u2013-]\s/, 2).first
+      end
+
+      return title
+    end
+
     def clean
       text
         .force_encoding('utf-8')
@@ -15,10 +27,6 @@ module Articles
         .then { |t| t.gsub(/[\u4e00-\u9fff《》]/, '') } # Remove Chinese characters and brackets
         .then { |t| capitalize(t) }
         .strip
-    end
-
-    def clean_with_parentheses
-      clean_parentheses(clean)
     end
 
     private

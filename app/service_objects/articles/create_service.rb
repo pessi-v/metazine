@@ -63,7 +63,7 @@ module Articles
     end
 
     def clean_title
-      TextCleaner.new(@entry.title).clean_with_parentheses
+      TextCleaner.new(@entry.title).clean_title
     end
 
     def description
