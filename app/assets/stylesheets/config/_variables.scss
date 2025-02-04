@@ -76,4 +76,10 @@
   // Shadows
   --shadow-large: 2px 4px 10px hsl(0 0% 0% / 0.1);
   --shadow-small: 1px 3px 6px hsl(0 0% 0% / 0.1);
+
+  // Column Gap
+  --column-gap: var(--space-m);
+
+  // One Column
+  --column: calc((1 / 6) * (100% - 5 * var(--column-gap)));
 }

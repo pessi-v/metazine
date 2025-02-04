@@ -1,4 +1,12 @@
+.instance-title
+  = link_to('/') do
+    h4.desktop
+      = ENV['INSTANCE_NAME'].upcase.gsub(' ', '<br>').html_safe
+    h4.mobile
+      = ENV['INSTANCE_NAME'].upcase
+
 .reader
+
   - if @article.image_url && !@content.match?(@article.image_url)
     = image_tag(@article.image_url, class: 'header-image custom-prop-image', data: { controller: "reader-image" })
 

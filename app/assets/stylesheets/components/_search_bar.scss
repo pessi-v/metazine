@@ -1,0 +1,25 @@
+@use "../mixins/media";
+
+.search_bar {
+  padding-top: var(--space-m);
+  // width: calc((1 / 6) * (100% - (5 * var(--space-l))));
+  // width: calc((1 / 6) * (100% - 5 * var(--column-gap)));
+  width: 33.3%;
+
+  @include media.media(tabletAndUp) {
+    width: var(--column);
+  }
+
+  input[type="text"] {
+    width: 100%;
+    border-bottom: var(--border);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 1px;
+    padding-left: var(--space-xxxs);
+    font-weight: bold;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-headlines);
+  }
+}

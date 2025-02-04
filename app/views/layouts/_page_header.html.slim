@@ -1,9 +1,15 @@
 .page_header
   .page_header_split
     .page_header_split_half.left
-      .title
-        h1
-          = ENV['INSTANCE_NAME']
+      - if current_page?('/')
+        .title
+          h1
+            = ENV['INSTANCE_NAME']
+      - else
+        = link_to('/') do
+          .title
+            h1
+              = ENV['INSTANCE_NAME']
     .page_header_split_half.right
       .subtitle
         h6

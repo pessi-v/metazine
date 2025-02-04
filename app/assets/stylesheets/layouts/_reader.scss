@@ -1,13 +1,42 @@
 @use "../mixins/media";
 
 .page {
+  .instance-title {
+    @include media.media(tabletAndUp) {
+      position: absolute;
+      color: var(--color-text-muted);
+      opacity: 0.3;
+      padding-top: var(--space-xxxs);
+      z-index: 1312;
+    }
+
+    h4.mobile {
+      display: block;
+      font-size: var(--font-size-xs);
+      @include media.media(tabletAndUp) {
+        display: none;
+      }
+    }
+
+    h4.desktop {
+      display: none;
+      @include media.media(tabletAndUp) {
+        display: block;
+      }
+    }
+  }
+
   .reader {
+    position: relative;
+
     display: flex;
     flex-direction: column;
     gap: var(--space-m);
 
     @include media.media(tabletAndUp) {
-      padding: var(--space-xs) 17% 2% 17%;
+      padding: var(--space-xs) calc(var(--column) + var(--column-gap)) 2%
+        calc(var(--column) + var(--column-gap));
+      // padding: var(--space-xs) 17% 2% 17%;
     }
   }
 
