@@ -18,6 +18,7 @@ class ArticlesController < ApplicationController
     @pagy, @articles = pagy(Article.where(source_name: params[:source_name])
       .select(Article.column_names - ['readability_output'])
       .reorder('published_at DESC'), limit: 14) # for some reason pagy doesn't like .order
+    @source_name = params[:source_name]
     render :list
   end
 
@@ -169,6 +170,7 @@ class ArticlesController < ApplicationController
           end
         else
           # Handle unordered lists
+          # TODO: Some Content has a <ul> tag for each <li> element (!)
           blocks << "Summary:"
           
           block.scan(/<li>(.*?)<\/li>/m).flatten.each do |item|

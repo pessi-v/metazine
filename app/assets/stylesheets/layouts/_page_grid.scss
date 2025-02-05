@@ -3,11 +3,8 @@
 .page_grid {
   width: 100%;
   height: auto;
-  // border-bottom: var(--border);
-  // padding: var(--space-l);
   display: flex;
   flex-direction: column;
-  // row-gap: var(--space-l);
   row-gap: var(--column-gap);
 
   @include media.media(tabletAndUp) {

@@ -17,7 +17,7 @@ Rails.application.routes.draw do
   get 'list', to: 'articles#list', as: :list
   get 'search', to: 'articles#search', as: :search
   # some Sources contain a period or some other special character in the name
-  get 'articles_by_source/:source_name', to: 'articles#articles_by_source', 
+  get ':source_name', to: 'articles#articles_by_source', 
     constraints: { source_name: /[^\/]+/ }, as: :articles_by_source
   get '/.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
   get '/@(:fediverse_user)', to: 'federation#fediverse_user', as: :fediverse_user

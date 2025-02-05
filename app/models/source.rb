@@ -1,6 +1,11 @@
 class Source < ApplicationRecord
   validates :name, :url, presence: true
   validates :name, :url, uniqueness: true
+  validates :name, exclusion: 
+    {
+      in: %(search source sources articles article user users list fetch_feeds fetch_feed reader .well-known editor following followers),
+      message: "%{value} is a reserved keyword"
+    }
   # validate :valid_feed, on: :create
 
   scope :active, -> { where(active: true) }

@@ -1,35 +1,51 @@
 @use "../mixins/media";
 
-.list_view_desktop {
-  display: none;
-
-  @include media.media(tabletAndUp) {
-    display: flex;
-    flex-direction: column;
-    padding-left: 17%;
-    padding-right: 17%;
-    gap: var(--space-m);
-  }
-}
-
-.list_view_mobile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-l);
-
-  @include media.media(tabletAndUp) {
-    display: none;
-  }
-}
-
 .list_view {
   display: flex;
   flex-direction: column;
   gap: var(--space-m);
 
+  .content_container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-m);
+  }
+
+  .source_title {
+    color: var(--color-text-muted);
+    opacity: 0.3;
+
+    @include media.media(tabletAndUp) {
+      word-spacing: 50vw; // This will force each word to be on a new line
+      text-align: right;
+    }
+  }
+
   @include media.media(tabletAndUp) {
-    padding-left: 17%;
-    padding-right: 17%;
-    // gap: var(--space-m);
+    display: grid;
+    // grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: [left-edge] 1fr [gap1] 1fr [gap2] 1fr [gap3] 1fr [gap4] 1fr [gap5] 1fr [right-edge];
+    grid-template-rows: [top-edge] auto [gap1] auto [gap2] auto [bottom-edge];
+    column-gap: var(--column-gap);
+
+    .pagy_container {
+      // grid-column: left-edge / gap1;
+      grid-column: gap5 / right-edge;
+      grid-row: top-edge / gap1;
+
+      .pagy.nav {
+        width: 100%;
+      }
+    }
+
+    .content_container {
+      // grid-column: <start-line> / <end-line> | <start-line> / span <value>;
+      // grid-area: <name> | <row-start> / <column-start> / <row-end> / <column-end>;
+      grid-column: gap1 / gap5;
+      grid-row: top-edge / bottom-edge;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-m);
+    }
   }
 }

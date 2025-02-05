@@ -2,7 +2,6 @@ module Articles
   class ReadabilityService
     def initialize(html_content)
       @html_content = html_content
-
     end
 
     def parse
@@ -43,3 +42,5 @@ module Articles
     end
   end
 end
+
+# TODO: strip links to x.com/twitter.com, maybe facebook.com & instagram.com
