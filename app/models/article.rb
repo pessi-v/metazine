@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Article < ApplicationRecord
   include PgSearch::Model
 
@@ -13,20 +15,20 @@ class Article < ApplicationRecord
 
   scope :today, -> { where('DATE(published_at) = CURRENT_DATE') }
   scope :yesterday, -> { where('DATE(published_at) = CURRENT_DATE - 1') }
-  scope :days_ago, ->(days) { where("DATE(published_at) = CURRENT_DATE - #{days}") } 
+  scope :days_ago, ->(days) { where("DATE(published_at) = CURRENT_DATE - #{days}") }
 
   def fedi_object
     {
-      "@context": "https://www.w3.org/ns/activitystreams",
+      "@context": 'https://www.w3.org/ns/activitystreams',
       "id": "https://newfutu.re/reader/#{id}",
-      "type": "Note",
+      "type": 'Note',
       "content": summary,
       "url": url,
       "attributedTo": [
         { "name": source_name }
       ],
       "to": [
-        "https://www.w3.org/ns/activitystreams#Public"
+        'https://www.w3.org/ns/activitystreams#Public'
       ],
       "cc": [],
       "published": published_at.iso8601
@@ -35,12 +37,12 @@ class Article < ApplicationRecord
 
   def fedi_activity_and_object
     {
-      "@context": "https://www.w3.org/ns/activitystreams",
-      "type": "Create",
+      "@context": 'https://www.w3.org/ns/activitystreams',
+      "type": 'Create',
       "id": "https://newfutu.re/reader/#{id}",
-      "actor": "https://newfutu.re/@editor",
+      "actor": 'https://newfutu.re/@editor',
       "to": [
-        "https://www.w3.org/ns/activitystreams#Public"
+        'https://www.w3.org/ns/activitystreams#Public'
       ],
       "cc": [],
       "published": published_at.iso8601,

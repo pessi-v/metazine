@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 gem 'faraday-follow_redirects'
 
 module Sources
   module Concerns
     module HTTPRequestsHelper
       def connection(source: nil, url: nil)
-        connection = Faraday.new(
+        Faraday.new(
           url: url,
           headers: {
             'If-Modified-Since': source&.last_modified,
@@ -21,4 +23,3 @@ module Sources
     end
   end
 end
-

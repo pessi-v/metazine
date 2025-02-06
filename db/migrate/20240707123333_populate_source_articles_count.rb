@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PopulateSourceArticlesCount < ActiveRecord::Migration[7.1]
   def up
     Source.find_each do |source|

@@ -13,10 +13,10 @@ module Sources
           xml_parse_error: 'XML parsing error',
           internal_server_error: 'Internal server error (HTTP error 500)'
         }
-        
+
         Rails.logger.error("#{error_messages[error_type]} for source: #{source&.name} (#{source&.url})")
         Rails.logger.error(error.message) if error
-        
+
         source&.update(last_error_status: error_type.to_s)
       end
     end

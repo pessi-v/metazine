@@ -1,5 +1,6 @@
-class ArticlesController < ApplicationController
+# frozen_string_literal: true
 
+class ArticlesController < ApplicationController
   def frontpage
     @articles = latest_articles.limit(14)
     # @articles = latest_articles
@@ -13,7 +14,7 @@ class ArticlesController < ApplicationController
     # binding.break
     render :list
   end
-  
+
   def articles_by_source
     @pagy, @articles = pagy(Article.where(source_name: params[:source_name])
       .select(Article.column_names - ['readability_output'])
@@ -30,10 +31,8 @@ class ArticlesController < ApplicationController
   def reader
     @article = Article.find(params[:id])
 
-    if !@article.readability_output
-      set_article_readability_output(@article)
-    end
-    
+    set_article_readability_output(@article) unless @article.readability_output
+
     readability_output = eval @article.readability_output
 
     @title = @article.title
@@ -45,55 +44,56 @@ class ArticlesController < ApplicationController
 
     # headers['Cross-Origin-Opener-Policy'] = 'same-origin'
     # headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
-    
+
     respond_to do |format|
       format.html
       format.json { render json: @article }
     end
   end
-  
+
   private
+
   def add_image_attributes(html_string)
     # Create a new Nokogiri HTML document
     doc = Nokogiri::HTML(html_string)
-    
+
     # Find all img tags
     doc.css('img').each do |img|
       # Add class attribute
       existing_classes = img['class']&.split(' ') || []
       new_classes = existing_classes + ['custom-prop-image']
       img['class'] = new_classes.uniq.join(' ')
-      
+
       # Add data controller attribute
       img['data-controller'] = 'reader-image'
     end
-    
+
     # Return the modified HTML as a string
     doc.to_html
   end
 
-    # def add_crossorigin_to_images(content)
-    #   # Parse the HTML content
-    #   doc = Nokogiri::HTML(content)
-      
-    #   # Find all img tags
-    #   doc.css('img').each do |img|
-    #     # Add crossorigin attribute if it doesn't exist
-    #     unless img.has_attribute?('crossorigin')
-    #       img['crossorigin'] = 'anonymous'
-    #     end
-    #   end
-      
-    #   # Return the modified HTML
-    #   doc.to_html
-    # end
+  # def add_crossorigin_to_images(content)
+  #   # Parse the HTML content
+  #   doc = Nokogiri::HTML(content)
+
+  #   # Find all img tags
+  #   doc.css('img').each do |img|
+  #     # Add crossorigin attribute if it doesn't exist
+  #     unless img.has_attribute?('crossorigin')
+  #       img['crossorigin'] = 'anonymous'
+  #     end
+  #   end
+
+  #   # Return the modified HTML
+  #   doc.to_html
+  # end
 
   def latest_articles
     # @pagy, @articles = pagy(Article.order(published_at: :desc)
     #   .select(Article.column_names - ['readability_output']), limit: 14)
     Article
       .select(Article.column_names - ['readability_output'])
-      .reorder('published_at DESC')  # for some reason pagy doesn't like .order
+      .reorder('published_at DESC') # for some reason pagy doesn't like .order
   end
 
   # TODO: remove after a few days (1.2.25)
@@ -138,30 +138,30 @@ class ArticlesController < ApplicationController
 
     # Remove tooltip spans and sup tags before processing other content
     content = content
-      .gsub(/<span[^>]*role="tooltip"[^>]*>.*?<\/span>/m, '')
-      # .gsub(/<sup>(?:(?!<\/sup>).)*?<a[^>]*>(?:(?!<\/sup>).)*?<\/a>(?:(?!<\/sup>).)*?<\/sup>/m, '')  # TODO: this doesn't seem to work (the intent was to remove superscipts)
+              .gsub(%r{<span[^>]*role="tooltip"[^>]*>.*?</span>}m, '')
+    # .gsub(/<sup>(?:(?!<\/sup>).)*?<a[^>]*>(?:(?!<\/sup>).)*?<\/a>(?:(?!<\/sup>).)*?<\/sup>/m, '')  # TODO: this doesn't seem to work (the intent was to remove superscipts)
 
     def process_string(item)
       item
-        .gsub(/<\/?[^>]*>/, '')            # Remove leftover tags (including <em>)
-        .gsub(/~/, '')                     # Remove tildes
+        .gsub(%r{</?[^>]*>}, '') # Remove leftover tags (including <em>)
+        .delete('~') # Remove tildes
         .gsub(/\\[a-z]/, '')               # Remove escaped characters
         .gsub(/&[a-z]+;/, ' ')             # Replace HTML entities with space
         .gsub(/\\u[0-9a-fA-F]{4}/, ' ')    # Replace hex codes with space
-        .gsub(/\((.*?)\)/) { |match| ", #{$1}, " }  # Add commas around parenthetical content
-        .gsub(/“(.*?)”/) { |match| ", quote, #{$1}, end quote, " }  # Make quotations explicitly readable
-        .gsub(/"(.*?)"/) { |match| ", quote, #{$1}, end quote, " }  # Make quotations explicitly readable
+        .gsub(/\((.*?)\)/) { |_match| ", #{::Regexp.last_match(1)}, " } # Add commas around parenthetical content
+        .gsub(/“(.*?)”/) { |_match| ", quote, #{::Regexp.last_match(1)}, end quote, " }  # Make quotations explicitly readable
+        .gsub(/"(.*?)"/) { |_match| ", quote, #{::Regexp.last_match(1)}, end quote, " }  # Make quotations explicitly readable
         .strip
         .gsub(/(?<![.!?])$/, '.')
     end
-  
+
     # Process the content in order of appearance
-    content.scan(/<(?:p|h\d+|ul|ol)>(.*?)<\/(?:p|h\d+|ul|ol)>/m).flatten.each do |block|
+    content.scan(%r{<(?:p|h\d+|ul|ol)>(.*?)</(?:p|h\d+|ul|ol)>}m).flatten.each do |block|
       if block.include?('<li>')
         if block.match?(/<ol/)
           # Process ordered list items with their index
           index = 1
-          block.scan(/<li>(.*?)<\/li>/m).flatten.each do |item|
+          block.scan(%r{<li>(.*?)</li>}m).flatten.each do |item|
             # Add the index as a separate block
             blocks << "Number #{index}."
 
@@ -171,20 +171,20 @@ class ArticlesController < ApplicationController
         else
           # Handle unordered lists
           # TODO: Some Content has a <ul> tag for each <li> element (!)
-          blocks << "Summary:"
-          
-          block.scan(/<li>(.*?)<\/li>/m).flatten.each do |item|
+          blocks << 'Summary:'
+
+          block.scan(%r{<li>(.*?)</li>}m).flatten.each do |item|
             blocks << process_string(item)
           end
-          
-          blocks << "End of summary."
+
+          blocks << 'End of summary.'
         end
       else
         # Process regular paragraphs and headers
         blocks << process_string(block)
       end
     end
-  
+
     # Add title at the beginning
     blocks.unshift(@title)
     blocks.to_json

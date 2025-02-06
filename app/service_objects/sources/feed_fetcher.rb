@@ -4,11 +4,11 @@ module Sources
   class FeedFetcher
     include Concerns::ErrorHandler
     include Concerns::HTTPRequestsHelper
-    
+
     def consume_all
-      Rails.logger.info("Starting feed consumption for all active sources")
+      Rails.logger.info('Starting feed consumption for all active sources')
       Source.active.each { |source| consume(source) }
-      Rails.logger.info("Completed feed consumption for all active sources")
+      Rails.logger.info('Completed feed consumption for all active sources')
     end
 
     def consume(source)
@@ -71,39 +71,38 @@ module Sources
 
     def decode_response(response)
       return response unless response.headers['Content-Encoding']
-    
+
       decoded_body = case response.headers['Content-Encoding'].downcase
-      when 'gzip'
-        Zlib::GzipReader.new(StringIO.new(response.body)).read
-      when 'deflate'
-        Zlib::Inflate.inflate(response.body)
-      when 'br'
-        Brotli.inflate(response.body)
-      when 'zstd'
-        Zstd.decode(response.body)
-      when 'compress'
-        Zlib::Inflate.inflate(response.body)
-      else
-        response.body
-      end
-    
+                     when 'gzip'
+                       Zlib::GzipReader.new(StringIO.new(response.body)).read
+                     when 'deflate'
+                       Zlib::Inflate.inflate(response.body)
+                     when 'br'
+                       Brotli.inflate(response.body)
+                     when 'zstd'
+                       Zstd.decode(response.body)
+                     when 'compress'
+                       Zlib::Inflate.inflate(response.body)
+                     else
+                       response.body
+                     end
+
       # Create a new response object with the decoded body
       env = response.env.dup
       env.response_body = decoded_body
       Faraday::Response.new(env)
-      
-    rescue => e
+    rescue StandardError => e
       Rails.logger.error "Failed to decode response body: #{e.message}"
       response
     end
 
     def feed_not_modified?(response, feed, source)
       if (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
-          (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
-          (feed.last_modified == source.last_modified)
-        return true
+         (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
+         (feed.last_modified == source.last_modified)
+        true
       else
-        return false
+        false
       end
     end
 
@@ -118,12 +117,11 @@ module Sources
       if feed.nil?
         handle_fetch_error(source, :feed_not_available)
         return
-      elsif
-        feed.entries.empty?
+      elsif feed.entries.empty?
         handle_fetch_error(source, :empty_feed)
         return
       end
-      
+
       process_entries(feed.entries, source)
       update_source_metadata(source, feed, response)
       true
@@ -132,12 +130,10 @@ module Sources
     def process_entries(entries, source)
       Rails.logger.info("Processing #{entries.count} entries for source: #{source.name}")
       entries.each do |entry|
-        begin
-          Articles::CreateService.new(source, entry).create_article
-        rescue ActiveRecord::RecordNotUnique => e
-          Rails.logger.info "Skipping duplicate article: #{entry.url}"
-          next
-        end
+        Articles::CreateService.new(source, entry).create_article
+      rescue ActiveRecord::RecordNotUnique
+        Rails.logger.info "Skipping duplicate article: #{entry.url}"
+        next
       end
     end
 

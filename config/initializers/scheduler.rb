@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rufus-scheduler'
 
 # do not schedule when Rails is run from its console, for a test/spec, or from a Rake task

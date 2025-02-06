@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class Source < ApplicationRecord
   validates :name, :url, presence: true
   validates :name, :url, uniqueness: true
-  validates :name, exclusion: 
+  validates :name, exclusion:
     {
       in: %(search source sources articles article user users list fetch_feeds fetch_feed reader .well-known editor following followers),
-      message: "%{value} is a reserved keyword"
+      message: '%<value>s is a reserved keyword'
     }
   # validate :valid_feed, on: :create
 
@@ -15,33 +17,32 @@ class Source < ApplicationRecord
   after_update :update_articles_source_name, if: :saved_change_to_name?
 
   # def valid_feed
-    # Check feed validity
-    # validator = W3CValidators::FeedValidator.new
-    # result = validator.validate_uri(url)
+  # Check feed validity
+  # validator = W3CValidators::FeedValidator.new
+  # result = validator.validate_uri(url)
 
-    # Check if feed can be parsed for entries
-    # feed_fetcher = Sources::FeedFetcher.new
+  # Check if feed can be parsed for entries
+  # feed_fetcher = Sources::FeedFetcher.new
 
-    # response = feed_fetcher.make_request(url: url)
-    # feed = feed_fetcher.parse_feed(response)
+  # response = feed_fetcher.make_request(url: url)
+  # feed = feed_fetcher.parse_feed(response)
 
-    # if !feed || (!result.validity && feed.entries.empty?)
-    #   errors.add(:url, 'not a valid feed')
-    # end
+  # if !feed || (!result.validity && feed.entries.empty?)
+  #   errors.add(:url, 'not a valid feed')
+  # end
 
-  
   # rescue Net::HTTPFatalError => e
   #   update(last_error_status: 'Internal Server Error (500)')
   #   return
   # end
 
   def consume_feed
-    feed_fetcher = Sources::FeedFetcher.new.consume(self)
+    Sources::FeedFetcher.new.consume(self)
   end
 
   def reset_articles
     articles.destroy_all
-    update(last_modified:nil, etag:nil, last_built: nil)
+    update(last_modified: nil, etag: nil, last_built: nil)
     consume_feed
   end
 
@@ -52,12 +53,11 @@ class Source < ApplicationRecord
     response = Faraday.get(uri.origin)
     ogp = OGP::OpenGraph.new(response.body, required_attributes: [])
 
-    image_url = ogp&.image
-    description = ogp&.description
-
-  rescue OGP::MalformedSourceError => e
-    puts 'source url does not have ogp metadata'
-    return
+    ogp&.image
+    ogp&.description
+  rescue OGP::MalformedSourceError
+    Rails.logger.debug 'source url does not have ogp metadata'
+    nil
   end
 
   def update_articles_source_name

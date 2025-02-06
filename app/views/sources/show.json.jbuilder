@@ -1,1 +1,3 @@
-json.partial! "sources/source", source: @source
+# frozen_string_literal: true
+
+json.partial! 'sources/source', source: @source

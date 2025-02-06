@@ -1,11 +1,12 @@
-ENV["RAILS_ENV"] ||= "test"
-require_relative "../config/environment"
-require "rails/test_help"
+# frozen_string_literal: true
+
+ENV['RAILS_ENV'] ||= 'test'
+require_relative '../config/environment'
+require 'rails/test_help'
 require 'webmock/minitest'
 require 'mocha/minitest'
 require 'minitest/mock'
 require_relative 'support/feed_test_helpers'
-
 
 module ActiveSupport
   class TestCase

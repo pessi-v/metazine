@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # test/support/feed_test_helpers.rb
 
 module FeedTestHelpers

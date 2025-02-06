@@ -1,17 +1,19 @@
-require "application_system_test_case"
+# frozen_string_literal: true
+
+require 'application_system_test_case'
 
 class ArticlesTest < ApplicationSystemTestCase
   setup do
     # @article = articles(:one)
   end
 
-  test "visiting the index" do
+  test 'visiting the index' do
     skip
     # visit articles_url
     # assert_selector "h1", text: "Articles"
   end
 
-  test "should create article" do
+  test 'should create article' do
     skip
     # visit articles_url
     # click_on "New article"
@@ -26,7 +28,7 @@ class ArticlesTest < ApplicationSystemTestCase
     # click_on "Back"
   end
 
-  test "should update Article" do
+  test 'should update Article' do
     skip
     # visit article_url(@article)
     # click_on "Edit this article", match: :first
@@ -41,7 +43,7 @@ class ArticlesTest < ApplicationSystemTestCase
     # click_on "Back"
   end
 
-  test "should destroy Article" do
+  test 'should destroy Article' do
     skip
     # visit article_url(@article)
     # click_on "Destroy this article", match: :first

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Articles
   class TextCleaner
     def initialize(text)
@@ -9,11 +11,9 @@ module Articles
 
       # if it's a long title and contains a dash,
       # the latter part can probably be edited out safely
-      if title.length > 100 && title.match?(' - ')
-        title = title.split(/\s[\u2014\u2013-]\s/, 2).first
-      end
+      title = title.split(/\s[\u2014\u2013-]\s/, 2).first if title.length > 100 && title.match?(' - ')
 
-      return title
+      title
     end
 
     def clean
@@ -56,7 +56,7 @@ module Articles
     # 3. Adding spaces after punctuation marks
     def fix_spacing(text)
       text = text.squeeze(' ').squeeze('*')
-      text = text.gsub(/\&nbsp;/, " ")
+      text = text.gsub(/&nbsp;/, ' ')
       # Only add spaces after punctuation when:
       # - For periods: not preceded by a period (for acronyms) and not between digits
       # - For commas: not between digits
@@ -66,6 +66,7 @@ module Articles
 
     def handle_ellipsis(text)
       return remove_last_sentence(text) if text.match?('…')
+
       text
     end
 
@@ -76,7 +77,7 @@ module Articles
 
     def remove_head_tag(text)
       return text unless text.start_with?('[') && text.match?(']')
-      
+
       closure = text.index(']')
       text[(closure + 1)..]
     end
