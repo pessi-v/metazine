@@ -46,6 +46,16 @@
     gap: var(--space-m);
   }
 
+  .reader blockquote {
+    background-color: var(--color-two);
+    padding: var(--space-m);
+    border-radius: var(--border-radius);
+
+    * {
+      font-weight: normal;
+    }
+  }
+
   .reader #readability-page-1 div {
     display: flex;
     flex-direction: column;
@@ -80,11 +90,16 @@
     text-align: center;
   }
 
+  .reader iframe,
   .reader video {
     margin-top: var(--space-m);
     margin-left: auto !important;
     margin-right: auto !important;
     width: 100%;
+
+    @include media.media(tabletAndUp) {
+      min-height: 300px;
+    }
   }
 
   .reader .headline {

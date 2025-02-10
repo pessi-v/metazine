@@ -1,12 +1,29 @@
 = render 'layouts/page_header'
 
 .list_view
-  .pagy_container
-    == pagy_nav(@pagy) if @pagy
+  - if @pagy && @pagy.last > 1
+    .pagy_container
+      / h3
+      /   = 'PAGE:'
+      / == pagy_nav(@pagy)
+      == render 'pagy', pagy: @pagy
   - if @source_name # i.e. this is the articles_by_source_path
-    .source_title
+    - if @articles.nil?
       h3
-        = @source_name.upcase
+        = "No articles from #{@source_name}".upcase
+    - else
+      .source_title
+        h3
+          = @source_name.upcase
+  - if @search_term # i.e. this is the articles_by_source_path
+    - if @articles.nil?
+      .source_title
+        h3
+          = "No results for '#{@search_term}'".upcase
+    - else 
+      .source_title
+        h3
+          = "results for: '#{@search_term}'".upcase
   .content_container
     - @articles.each_with_index do |article, index|
       

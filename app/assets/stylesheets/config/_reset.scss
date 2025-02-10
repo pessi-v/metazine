@@ -83,10 +83,28 @@ a {
   text-decoration: none;
   transition: color 200ms;
 
-  &:hover,
-  &:focus,
-  &:active {
-    // color: var(--color-primary-rotate);
+  &:not([href*="var(--app-url)"]) {
+    &:hover,
+    &:focus,
+    &:active {
+      color: var(--color-two);
+
+      * {
+        color: inherit;
+      }
+    }
+  }
+
+  &[href*="var(--app-url)"] {
+    &:hover,
+    &:focus,
+    &:active {
+      color: var(--color-one);
+
+      * {
+        color: inherit;
+      }
+    }
   }
 }
 

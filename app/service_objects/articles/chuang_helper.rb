@@ -4,7 +4,6 @@ module Articles
   class ChuangHelper
     # This is a custom helper for creating Articles, intended to use for https://chuangcn.org
     def initialize(readability_output)
-      # binding.break
       @readability_output = readability_output
       @text = readability_output['content']
     end
