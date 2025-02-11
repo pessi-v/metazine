@@ -83,7 +83,8 @@ a {
   text-decoration: none;
   transition: color 200ms;
 
-  &:not([href*="var(--app-url)"]) {
+  &[href^="http"],
+  &[href^="www"] {
     &:hover,
     &:focus,
     &:active {
@@ -95,7 +96,7 @@ a {
     }
   }
 
-  &[href*="var(--app-url)"] {
+  &:not([href^="http"]):not([href^="www"]) {
     &:hover,
     &:focus,
     &:active {

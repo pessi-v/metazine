@@ -10,18 +10,17 @@ nav.pagy.nav aria-label="Pages"
   
   / Page links (series example: [1, :gap, 7, 8, "9", 10, 11, :gap, 36])
   .flex-row.gap-s style="width: 100%;"
-    h3
-      = 'PAGE'
     
-    .page_numbers.flex-column style="width: 100%;"
+    .page_numbers.flex-column.align-center style="width: 100%;"
       - pagy.series.each do |item|
         - if item.is_a?(Integer)
-          == a.(item)
+          h3
+            == a.(item, classes: 'another-page')
         - elsif item.is_a?(String)
           h3
             a role="link" aria-disabled="true" aria-current="page" class="current" = item
         - elsif item == :gap
-          a role="link" aria-disabled="true" class="gap" &hellip;
+          a role="link" aria-disabled="true" class="gap another-page" &hellip;
     
   / Next page link
   / - if pagy.next
