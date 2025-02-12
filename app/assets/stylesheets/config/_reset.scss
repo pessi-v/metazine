@@ -150,6 +150,9 @@ hr {
 ul,
 ol {
   padding-left: var(--space-m);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s); /* Adds consistent spacing between items */
 }
 
 button,

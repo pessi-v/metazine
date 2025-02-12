@@ -40,6 +40,10 @@
     }
   }
 
+  .reader hr {
+    opacity: 0.2;
+  }
+
   #post-content {
     display: flex;
     flex-direction: column;

@@ -1,0 +1,90 @@
+@use "../mixins/media";
+
+.frontpage {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  // row-gap: var(--column-gap);
+  row-gap: var(--space-xl);
+
+  @include media.media(tabletAndUp) {
+    display: grid;
+
+    grid-template-columns: repeat(6, 1fr);
+    column-gap: var(--space-m);
+
+    grid-template-rows: repeat(8, var(--space-7xl));
+    row-gap: var(--space-xl);
+
+    grid-template-areas:
+      "A A A B C C"
+      "A A A B C C"
+      "A A A B C C"
+      "D D D D C C"
+      "D D D D C C"
+      "D D D D C C"
+      "D D D D C C"
+      "D D D D C C";
+  }
+}
+
+// NOTE: column-start, column-end, row-start, row-end TAKE IN LINE NUMBERS (not column numbers)
+@include media.media(tabletAndUp) {
+  .item-a {
+    grid-area: A;
+  }
+
+  //  in it's own file
+  .item-b {
+    grid-area: B;
+  }
+
+  //  in it's own file
+  .item-e {
+    grid-area: E;
+  }
+}
+
+.item-c {
+  grid-area: C;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+
+  @include media.media(tabletAndUp) {
+    .item-c {
+      grid-area: C;
+      justify-content: space-between;
+    }
+  }
+}
+
+.item-d {
+  display: flex;
+  row-gap: var(--space-xl);
+  flex-direction: column;
+
+  @include media.media(tabletAndUp) {
+    grid-area: D;
+    display: flex;
+    row-gap: var(--space-xl);
+    column-gap: var(--space-m);
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-top: var(--space-m);
+
+    .article {
+      // width: 50% !important;
+      width: calc(50% - var(--space-m) / 2) !important;
+    }
+
+    .without_image {
+      height: 30% !important;
+    }
+
+    .with_image {
+      height: 70% !important;
+    }
+  }
+}
