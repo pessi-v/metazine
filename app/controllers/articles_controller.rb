@@ -34,7 +34,11 @@ class ArticlesController < ApplicationController
 
     set_article_readability_output(@article) unless @article.readability_output
 
-    readability_output = eval @article.readability_output
+    readability_output = @article.readability_output_jsonb
+    if readability_output == '{}'
+      readability_output = eval @article.readability_output
+    end
+
 
     @title = @article.title
     @content = readability_output['content'].gsub('class="page"', '')

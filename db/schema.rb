@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2024_12_27_202937) do
+ActiveRecord::Schema[8.0].define(version: 2025_02_12_214854) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -30,6 +30,7 @@ ActiveRecord::Schema[8.0].define(version: 2024_12_27_202937) do
     t.integer "source_id"
     t.boolean "paywalled", default: false
     t.integer "description_length"
+    t.jsonb "readability_output_jsonb", default: "{}", null: false
     t.index ["url", "title"], name: "index_articles_on_url_and_title", unique: true
   end
 

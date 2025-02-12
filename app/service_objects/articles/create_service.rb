@@ -57,7 +57,8 @@ module Articles
         published_at: determine_published_at,
         image_url: find_image_url,
         paywalled: paywalled?,
-        readability_output: article_readability_output(@original_page.body)
+        readability_output: article_readability_output(@original_page.body),
+        readability_output_jsonb: article_readability_output(@original_page.body)
       }
     end
 
