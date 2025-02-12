@@ -36,13 +36,23 @@
   }
 
   //  in it's own file
-  .item-b {
-    grid-area: B;
-  }
-
-  //  in it's own file
   .item-e {
     grid-area: E;
+  }
+}
+
+.item-b {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  border-left: var(--border);
+  border-radius: var(--border-radius);
+  padding-left: var(--space-s);
+  row-gap: var(--space-xl);
+
+  @include media.media(tabletAndUp) {
+    grid-area: B;
+    row-gap: var(--space-l);
   }
 }
 
@@ -67,7 +77,7 @@
 
   @include media.media(tabletAndUp) {
     grid-area: D;
-    display: flex;
+    flex-direction: row;
     row-gap: var(--space-xl);
     column-gap: var(--space-m);
     flex-wrap: wrap;
