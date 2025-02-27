@@ -56,6 +56,11 @@ class ArticlesController < ApplicationController
     end
   end
 
+  # def discuss
+  #   article = Article.find(params(:id))
+  #   article.create
+  # end
+
   private
 
   def add_image_attributes(html_string)

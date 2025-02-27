@@ -1,0 +1,33 @@
+h1 Start a Discussion
+
+.article-reference
+  h3
+    = @article.title
+  p
+    = "From: #{@article.source_name}"
+  p
+    = @article.published_at.strftime('%A %-d.%-m.%Y')
+
+.line
+
+= form_with(model: [@article, @discussion], url: article_discussion_index_path(@article), class: 'discussion-form') do |form|
+  - if @discussion.errors.any?
+    .error-messages
+      h2
+        = pluralize(@discussion.errors.count, "error")
+        |  prohibited this discussion from being saved:
+      ul
+        - @discussion.errors.full_messages.each do |message|
+          li = message
+
+  .field
+    = form.label :title
+    = form.text_field :title, placeholder: 'Discussion title'
+
+  .field
+    = form.label :content
+    = form.text_area :content, rows: 6, placeholder: 'Start the discussion with your thoughts or questions about this article...'
+
+  .actions
+    = form.submit 'Start Discussion', class: 'btn btn-primary'
+    = link_to 'Cancel', reader_path(@article), class: 'btn btn-secondary'

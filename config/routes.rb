@@ -4,7 +4,11 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :sources
-  # resources :articles
+  resources :articles, only: [:show] do
+    resources :discussions, only: [:new, :create, :show, :index]
+  end
+
+  mount Federails::Engine => '/'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -21,11 +25,13 @@ Rails.application.routes.draw do
   # some Sources contain a period or some other special character in the name
   get ':source_name', to: 'articles#articles_by_source',
                       constraints: { source_name: %r{[^/]+} }, as: :articles_by_source
-  get '/.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
-  get '/@(:fediverse_user)', to: 'federation#fediverse_user', as: :fediverse_user
-  # get "@aggregator", to: 'federation#fediverse_user'
-  get '/@(:fediverse_user)/outbox', to: 'federation#outbox', as: :fediverse_outbox
-  post '/@(:fediverse_user)/inbox', to: 'federation#inbox', as: :fediverse_inbox
-  get 'following', to: 'federation#following', as: :fediverse_following
-  get 'followers', to: 'federation#followers', as: :fediverse_followers
+  # get '/.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
+  # get '/@(:fediverse_user)', to: 'federation#fediverse_user', as: :fediverse_user
+  # # get "@aggregator", to: 'federation#fediverse_user'
+  # get '/@(:fediverse_user)/outbox', to: 'federation#outbox', as: :fediverse_outbox
+  # post '/@(:fediverse_user)/inbox', to: 'federation#inbox', as: :fediverse_inbox
+  # get 'following', to: 'federation#following', as: :fediverse_following
+  # get 'followers', to: 'federation#followers', as: :fediverse_followers
+  # Legacy route - redirects to new discussions path
+  post 'discuss/(:id)', to: 'discussions#discuss', as: :discuss
 end
