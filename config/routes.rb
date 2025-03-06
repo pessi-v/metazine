@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  default_url_options :host => "example.com"
+  
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :sources
@@ -34,4 +36,5 @@ Rails.application.routes.draw do
   # get 'followers', to: 'federation#followers', as: :fediverse_followers
   # Legacy route - redirects to new discussions path
   post 'discuss/(:id)', to: 'discussions#discuss', as: :discuss
+  get 'user', to: 'users#show'
 end

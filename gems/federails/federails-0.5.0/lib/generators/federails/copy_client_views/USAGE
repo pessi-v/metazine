@@ -1,0 +1,8 @@
+Description:
+    Copies the client views to be overridden in main application
+
+Example:
+    bin/rails generate copy_client_views
+
+    This will create:
+        app/views/federails/client/**/*

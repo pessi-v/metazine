@@ -133,3 +133,10 @@ group :test do
   gem 'selenium-webdriver'
   gem 'webmock'  # For mocking HTTP requests
 end
+
+gem "federails", path: './gems/federails/federails-0.5.0'
+# gem "federails", "~> 0.5.0"
+
+gem "pundit", "~> 2.4"
+
+gem "pry", "~> 0.15.2"

@@ -15,8 +15,9 @@ class User < ApplicationRecord
     auto_create_actors: true
   )
 
-  after_create :create_federails_actor, if: :create_federails_actor?
-  after_update :create_or_destroy_federails_actor!
+  # after_create :create_federails_actor, if: :create_federails_actor?
+  after_create :create_federails_actor
+  # after_update :create_or_destroy_federails_actor!
 
   private
 
@@ -30,9 +31,4 @@ class User < ApplicationRecord
     actor.destroy!
     # actor.destroy! if role != :community_manager && role_previously_was == :community_manager && self.federails_actor.present?
   end
-
-  def user_url
-    "WOBOWDBWBOBD"
-  end
-
 end
