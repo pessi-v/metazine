@@ -11,7 +11,8 @@ module Sources
           timeout: 'Timeout Error',
           redirect_limit_reached: 'Redirect limit reached',
           xml_parse_error: 'XML parsing error',
-          internal_server_error: 'Internal server error (HTTP error 500)'
+          internal_server_error: 'Internal server error (HTTP error 500)',
+          not_found: 'Not found (404)'
         }
 
         Rails.logger.error("#{error_messages[error_type]} for source: #{source&.name} (#{source&.url})")

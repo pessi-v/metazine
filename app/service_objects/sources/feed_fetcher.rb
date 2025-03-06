@@ -27,6 +27,13 @@ module Sources
         return
       end
 
+      if response.status == 404
+        # Sad path: feed not found
+        Rails.logger.info("Feed not found for source: #{source.name}")
+        handle_fetch_error(source, :not_found)
+        return
+      end
+
       response = decode_response(response)
       feed = parse_feed(response, source: source)
 
