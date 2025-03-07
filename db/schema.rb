@@ -50,10 +50,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_181308) do
     t.datetime "updated_at", null: false
     t.bigint "article_id"
     t.bigint "user_id"
+    t.bigint "federails_actor_id"
     t.string "federated_url"
     t.string "content"
-    t.bigint "federails_actor_id"
     t.index ["article_id"], name: "index_discussions_on_article_id"
+    t.index ["federails_actor_id"], name: "index_discussions_on_federails_actor_id"
     t.index ["user_id"], name: "index_discussions_on_user_id"
   end
 
@@ -131,6 +132,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_181308) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "discussions", "federails_actors"
   add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
