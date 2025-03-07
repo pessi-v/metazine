@@ -11,6 +11,10 @@ module Federails
 
     private
 
+    def pundit_user
+      User.last
+    end
+
     def error_fallback(exception, fallback_message, status)
       message = exception&.message || fallback_message
       respond_to do |format|
