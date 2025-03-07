@@ -1,9 +1,9 @@
 ---
 defaults: &defaults
-  app_name: New Future
+  app_name: <%= ENV['INSTANCE_NAME'] %>
   app_version: 0.1
   force_ssl: false
-  site_host: http://localhost
+  site_host: <%= ENV['APP_HOST'] %>
   site_port: 3000
   enable_discovery: true
   open_registrations: false

@@ -5,33 +5,31 @@ class DiscussionsController < ApplicationController
 
   def discuss
     article = Article.find(params[:id])
-    unless article.has_discussion?
-      article.start_discussion
+    # article.start_discussion unless article.has_discussion?
+    if article.has_discussion?
+      article.discussion.add_comment(params[:content])
+    else
+      article.start_discussion(params[:content])
     end
-    
-    # binding.break
-    article.discussion.add_comment(params[:content])
-    # binding.break
-    # binding.pry
     redirect_to reader_path(params[:id])
   end
-  
+
   def index
     @discussions = Discussion.all.order(created_at: :desc)
   end
-  
+
   def new
     @discussion = Discussion.new
   end
   
   def create
     @discussion = @article.discussions.build(discussion_params)
-    
+  
     respond_to do |format|
       if @discussion.save
         # Handle ActivityPub federation here
         # publish_to_federation(@discussion)
-        
+
         format.html { redirect_to article_discussion_path(@article, @discussion), notice: 'Discussion started successfully.' }
         format.json { render :show, status: :created, location: article_discussion_path(@article, @discussion) }
       else

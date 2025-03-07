@@ -5,6 +5,7 @@ class CreateComments < ActiveRecord::Migration[8.0]
       t.references :discussion
       t.string :content
       t.bigint :federails_actor_id
+      t.references :article
     end
   end
 end

@@ -40,6 +40,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_181308) do
     t.bigint "discussion_id"
     t.string "content"
     t.bigint "federails_actor_id"
+    t.bigint "article_id"
+    t.index ["article_id"], name: "index_comments_on_article_id"
     t.index ["discussion_id"], name: "index_comments_on_discussion_id"
   end
 
@@ -50,6 +52,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_181308) do
     t.bigint "user_id"
     t.string "federated_url"
     t.string "content"
+    t.bigint "federails_actor_id"
     t.index ["article_id"], name: "index_discussions_on_article_id"
     t.index ["user_id"], name: "index_discussions_on_user_id"
   end
@@ -103,16 +106,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_181308) do
     t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
   end
 
-  create_table "messages", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "user_id"
-    t.string "federated_url"
-    t.bigint "federails_actor_id"
-    t.index ["federails_actor_id"], name: "index_messages_on_federails_actor_id"
-    t.index ["user_id"], name: "index_messages_on_user_id"
-  end
-
   create_table "sources", force: :cascade do |t|
     t.string "name"
     t.string "url"
@@ -141,5 +134,4 @@ ActiveRecord::Schema[8.0].define(version: 2025_02_22_181308) do
   add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
-  add_foreign_key "messages", "federails_actors"
 end

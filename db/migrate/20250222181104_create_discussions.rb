@@ -6,6 +6,7 @@ class CreateDiscussions < ActiveRecord::Migration[8.0]
       t.references :user
       t.string :federated_url
       t.string :content
+      t.bigint :federails_actor_id
     end
   end
 end

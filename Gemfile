@@ -4,18 +4,21 @@ source 'https://rubygems.org'
 
 ruby '3.3.6'
 
-# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-# gem "rails", "~> 7.1.3", ">= 7.1.3.3"
+# Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
+# gem 'rails', '~> 7.1.3', '>= 7.1.3.3'
 gem 'rails', '~> 8.0.1'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
-# gem "sprockets-rails"
+# gem 'sprockets-rails'
 
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem 'propshaft'
 
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'
+
+# Postgres full-text search
+gem 'pg_search'
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem 'puma', '>= 5.0'
@@ -39,10 +42,10 @@ gem 'jbuilder'
 gem 'redis', '>= 4.0.1'
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
-# gem "kredis"
+# gem 'kredis'
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+# gem 'bcrypt', '~> 3.1.7'
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[windows jruby]
@@ -75,7 +78,7 @@ gem 'nokogiri'
 gem 'node-runner', '~> 1.2'
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
+# gem 'image_processing', '~> 1.2'
 
 gem 'dotenv'
 
@@ -84,24 +87,19 @@ gem 'rufus-scheduler'
 # Compact language detection
 gem 'cld'
 
-# Postgres full-text search
-gem 'pg_search'
-
-# ActivityPub
-# gem 'activitypub', git: 'https://github.com/rauversion/activitypub' # last update autumn 23
-# gem 'activitypub', git: 'https://github.com/vidarh/activitypub' # last update autumn 24
-# gem 'federails', git: 'https://gitlab.com/experimentslabs/federails', branch: 'main'
-# gem 'federails', git: 'https://github.com/pessi-v/federails', branch: 'main'
-# gem 'pundit'
-
-gem 'dockerfile-rails', '>= 1.6', group: :development
-gem 'pagy', '~> 9.1' # pagination
-
 gem 'brotli' # decode compressed http responses
+gem 'dockerfile-rails', '>= 1.6', group: :development
 gem 'faraday-gzip', '~> 3' # request compressed http responses
 gem 'lograge' # hide partial rendering logs
+gem 'pagy', '~> 9.1' # pagination
 gem 'ruby-readability', require: 'readability' # Similar to Mozilla's Readability JS package
 gem 'zstd-ruby' # decode compressed http responses
+
+# Federails & dependencies
+gem 'federails', path: './gems/federails/federails-0.5.0'
+# gem 'federails', '~> 0.5.0'
+gem 'pundit', '~> 2.4'
+gem 'kaminari', '~> 1.2'
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -113,10 +111,10 @@ group :development do
   gem 'web-console'
 
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
-  # gem "rack-mini-profiler"
+  # gem 'rack-mini-profiler'
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
-  # gem "spring"
+  # gem 'spring'
 
   gem 'fastimage' # required for readability
   gem 'rubocop', require: false
@@ -133,10 +131,3 @@ group :test do
   gem 'selenium-webdriver'
   gem 'webmock'  # For mocking HTTP requests
 end
-
-gem "federails", path: './gems/federails/federails-0.5.0'
-# gem "federails", "~> 0.5.0"
-
-gem "pundit", "~> 2.4"
-
-gem "pry", "~> 0.15.2"

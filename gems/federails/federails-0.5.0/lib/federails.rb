@@ -2,6 +2,7 @@ require 'federails/version'
 require 'federails/engine'
 require 'federails/configuration'
 require 'federails/utils/object'
+require 'federails/data_transformer/note'
 
 # rubocop:disable Style/ClassVars
 

@@ -36,31 +36,38 @@
   .line
   .content
     = @content.html_safe
-  .article-actions.mt-4
-    = link_to('← back to front page', frontpage_path, class: 'back-link')
+  / .article-actions.mt-4
+  /   = link_to('← back to front page', frontpage_path, class: 'back-link')
     / .button
     /   = link_to('Start discussion', new_article_discussion_path(@article), class: 'btn btn-primary discussion-button')
 
-  .article-discussion.mt-4
-    h3 Discussion
-    
-    // Simple comment form
-    / = form_with(url: new_article_discussion_path(@article), method: :post, id: 'discussion-form', class: 'comment-form') do |form|
-    = form_with(url: discuss_path(@article), method: :post, id: 'discussion-form', class: 'comment-form') do |form|
-      .field
-        = form.text_field :content, placeholder: 'Add your thoughts', required: true, class: 'comment-input'
-      .actions
-        = form.submit 'Start discussion', class: 'btn btn-primary'
-    / = form_with(url: discuss_path(@article), method: :post, id: 'discussion-form', class: 'comment-form') do |form|
-      
-    
-    // Comments display area
-    .comments-container id="article-comments"
+
+  .line
+
+  .article-discussion
+    - if @article.discussion
+      h3 Discussion started
+
       - if @article.discussion&.comments&.any?
         - @article.discussion.comments.order(created_at: :asc).each do |comment|
           .comment
             .comment-content= comment.content
             .comment-meta= comment.created_at.strftime("%B %d, %Y at %H:%M")
-      - else
-        .no-comments
-          p Be the first to start the discussion!
+  
+      // Simple comment form
+      / = form_with(url: new_article_discussion_path(@article), method: :post, id: 'discussion-form', class: 'comment-form') do |form|
+    = form_with(url: discuss_path(@article), method: :post, id: 'discussion-form', class: 'comment-form') do |form|
+      .field
+        = form.text_field :content, placeholder: 'Add your thoughts', required: true, class: 'comment-input'
+      .actions
+        = form.submit 'Add comment', class: 'btn btn-primary'
+      / = form_with(url: discuss_path(@article), method: :post, id: 'discussion-form', class: 'comment-form') do |form|
+          
+    
+    // Comments display area
+    / .comments-container id="article-comments"
+    /   / - if @article.discussion
+    /   /   = 'Discussion started'
+    /   - else
+    /     .no-comments
+    /       p Be the first to start the discussion!

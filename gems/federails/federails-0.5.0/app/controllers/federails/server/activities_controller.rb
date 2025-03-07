@@ -4,7 +4,7 @@ module Federails
   module Server
     class ActivitiesController < Federails::ServerController
       before_action :set_activity, only: [:show]
-      # before_action :skip_authorization, only: [:outbox]
+      before_action :skip_authorization, only: [:outbox]
 
       # GET /federation/activities
       # GET /federation/actors/1/outbox.json
