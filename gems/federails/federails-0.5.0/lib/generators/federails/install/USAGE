@@ -1,0 +1,9 @@
+Description:
+    Copies configuration file and initializer
+
+Example:
+    bin/rails generate federails:install
+
+    This will create:
+        config/federails.yml
+        config/initializers/federails.rb

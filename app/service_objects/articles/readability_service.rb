@@ -21,6 +21,9 @@ module Articles
       
       # this returns a hash
       readability_output = runner.parse(@html_content)
+      if readability_output.nil?
+        return
+      end
       readability_output.delete('textContent')
       # strip whitespace and newlines from in between html elements
       readability_output['content'] = readability_output['content'].gsub(/>\s+</, '><')
