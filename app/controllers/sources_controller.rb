@@ -6,17 +6,8 @@ class SourcesController < ApplicationController
 
   # GET /sources or /sources.json
   def index
-    @sources = Source.all.order(articles_count: :desc)
-    @article_counts_by_day = [
-      Article.today.count,
-      Article.yesterday.count,
-      Article.days_ago(2).count,
-      Article.days_ago(3).count,
-      Article.days_ago(4).count,
-      Article.days_ago(5).count,
-      Article.days_ago(6).count,
-      Article.days_ago(7).count
-    ]
+    @sources = Source.order(articles_count: :desc)
+    @article_counts_by_day = article_counts_by_day
   end
 
   # GET /sources/1 or /sources/1.json
@@ -84,6 +75,19 @@ class SourcesController < ApplicationController
 
   private
 
+  def article_counts_by_day
+    [
+      Article.today.count,
+      Article.yesterday.count,
+      Article.days_ago(2).count,
+      Article.days_ago(3).count,
+      Article.days_ago(4).count,
+      Article.days_ago(5).count,
+      Article.days_ago(6).count,
+      Article.days_ago(7).count
+    ]
+  end
+
   # Use callbacks to share common setup or constraints between actions.
   def set_source
     @source = Source.find(params[:id])
@@ -91,7 +95,7 @@ class SourcesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def source_params
-    params.require(:source).permit(:name, :url, :last_modified, :etag, :active, :show_images, :allow_video,
-                                   :allow_audio, :last_error_status)
+    params.expect(source: %i[name url last_modified etag active show_images allow_video
+                             allow_audio last_error_status])
   end
 end

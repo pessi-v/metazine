@@ -188,7 +188,6 @@ module Articles
     end
 
     def article_readability_output(html)
-      # binding.pry
       readability_output = ReadabilityService.new(html).parse
 
       if @source&.url&.match?('https://chuangcn.org')
