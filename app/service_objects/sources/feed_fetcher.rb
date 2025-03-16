@@ -36,6 +36,7 @@ module Sources
 
       response = decode_response(response)
       feed = parse_feed(response, source: source)
+      return unless feed
 
       if feed_not_modified?(response, feed, source)
         # Happy path: feed not modified
@@ -114,13 +115,8 @@ module Sources
     end
 
     def parse_feed(response, source: nil)
-      Feedjira.parse(response.body.force_encoding('utf-8'))
-    rescue Feedjira::NoParserAvailable => e
-      handle_fetch_error(source, :xml_parse_error, e)
-      nil
-    end
+      feed = Feedjira.parse(response.body.force_encoding('utf-8'))
 
-    def process_feed(feed, source, response)
       if feed.nil?
         handle_fetch_error(source, :feed_not_available)
         return
@@ -129,6 +125,15 @@ module Sources
         return
       end
 
+      feed
+
+    # response probably does not return an actual feed
+    rescue Feedjira::NoParserAvailable => e
+      handle_fetch_error(source, :xml_parse_error, e)
+      false
+    end
+
+    def process_feed(feed, source, response)
       process_entries(feed.entries, source)
       update_source_metadata(source, feed, response)
       true

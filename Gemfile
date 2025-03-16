@@ -51,9 +51,6 @@ gem 'bootsnap', require: false
 
 gem 'slim-rails' # Slim HTML templating engine
 
-# A Ruby wrapper for the World Wide Web Consortium’s online validation services.
-gem 'w3c_validators'
-
 # Simple, but flexible HTTP client library, with support for multiple backends.
 gem 'faraday', '~> 2.0'
 gem 'faraday-follow_redirects'
