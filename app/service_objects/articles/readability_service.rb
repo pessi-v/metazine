@@ -7,24 +7,13 @@ module Articles
     end
 
     def parse
-      runner = NodeRunner.new(
-        <<~JAVASCRIPT
-          const { Readability } = require('@mozilla/readability');
-          const jsdom = require("jsdom");
-          const { JSDOM } = jsdom;#{'        '}
-          const parse = (document) => {
-            const dom = new JSDOM(document);
-            return new Readability(dom.window.document).parse()
-          }
-        JAVASCRIPT
-      )
-      
-      # this returns a hash
-      readability_output = runner.parse(@html_content)
+      readability_output = parse_with_mozilla_readability
+
+      return if readability_output.nil?
+
       readability_output.delete('textContent')
       # strip whitespace and newlines from in between html elements
       readability_output['content'] = readability_output['content'].gsub(/>\s+</, '><')
-
       readability_output
     end
 
@@ -41,6 +30,25 @@ module Articles
         'excerpt' => nil,
         'siteName' => nil,
         'publishedTime' => nil }
+    end
+
+    private
+
+    # this returns a hash
+    def parse_with_mozilla_readability
+      runner = NodeRunner.new(
+        <<~JAVASCRIPT
+          const { Readability } = require('@mozilla/readability');
+          const jsdom = require("jsdom");
+          const { JSDOM } = jsdom;#{'        '}
+          const parse = (document) => {
+            const dom = new JSDOM(document);
+            return new Readability(dom.window.document).parse()
+          }
+        JAVASCRIPT
+      )
+
+      runner.parse(@html_content)
     end
   end
 end

@@ -23,12 +23,6 @@ module Articles
 
     private
 
-    def disapprove?
-      ApprovalHelper
-    end
-
-    # attr_reader :source, :entry, :original_page
-
     def article_exists?
       Article.where('articles.title = ? OR articles.url = ?', @clean_title, @entry.url).exists?
     end
@@ -111,25 +105,6 @@ module Articles
     end
 
     def fetch_original_page
-      # binding.break
-      # connection = Faraday.new do |conn|
-      #   conn.use Faraday::Gzip::Middleware
-      # end
-      # connection.get(@entry.url) do |req|
-      #   # Mimic a modern browser
-      #   req.headers['User-Agent'] =
-      #     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-      #   req.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-      #   req.headers['Accept-Language'] = 'en-US,en;q=0.5'
-      #   req.headers['Accept-Encoding'] = 'gzip, deflate, br'
-      #   req.headers['Connection'] = 'keep-alive'
-      #   req.headers['Upgrade-Insecure-Requests'] = '1'
-      #   req.headers['Sec-Fetch-Dest'] = 'document'
-      #   req.headers['Sec-Fetch-Mode'] = 'navigate'
-      #   req.headers['Sec-Fetch-Site'] = 'none'
-      #   req.headers['Sec-Fetch-User'] = '?1'
-      # end
-
       begin
         # Try your current approach first
         connection = Faraday.new do |conn|
@@ -137,7 +112,7 @@ module Articles
           conn.options.timeout = 30
           conn.options.open_timeout = 10
         end
-        
+
         response = connection.get(@entry.url) do |req|
           # Mimic a modern browser
           req.headers['User-Agent'] =
@@ -152,12 +127,12 @@ module Articles
           req.headers['Sec-Fetch-Site'] = 'none'
           req.headers['Sec-Fetch-User'] = '?1'
         end
-        
+
         return response if response.status == 200
       rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
         Rails.logger.warn("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
       end
-      
+
       # Fallback to a simpler request if the first attempt fails
       Faraday.get(@entry.url)
     end
