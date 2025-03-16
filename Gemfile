@@ -5,7 +5,6 @@ source 'https://rubygems.org'
 ruby '3.3.6'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-# gem "rails", "~> 7.1.3", ">= 7.1.3.3"
 gem 'rails', '~> 8.0.1'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
@@ -119,10 +118,8 @@ group :development do
   # gem "spring"
 
   gem 'fastimage' # required for readability
-  gem 'rubocop', require: false
-  gem 'rubocop-performance', require: false
-  gem 'rubocop-rails', require: false
-  gem 'webfinger'
+  gem 'webfinger' # Webfinger CLIENT
+  gem "standard"
 end
 
 group :test do
