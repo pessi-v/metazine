@@ -33,12 +33,25 @@
       / button data-action="click->piper#flush" data-piper-target="flushButton"
       /   'Flush storage
 
-      
-
-
   .line
   .content
     = @content.html_safe
-  = link_to('← back to front page', frontpage_path)
 
+  .line
+  .article-discussion
+    - if @article.discussion
+      h3 Discussion started
 
+      - if @article.discussion&.messages&.any?
+        - @article.discussion.messages.order(created_at: :asc).each do |message|
+          .message
+            .message-content= message.content
+            .message-meta= message.created_at.strftime("%B %d, %Y at %H:%M")
+
+      // Simple message form
+      / = form_with(url: new_article_discussion_path(@article), method: :post, id: 'discussion-form', class: 'message-form') do |form|
+    = form_with(url: discuss_path(@article), method: :post, id: 'discussion-form', class: 'message-form') do |form|
+      .field
+        = form.text_field :content, placeholder: 'Add your thoughts', required: true, class: 'message-input'
+      .actions
+        = form.submit 'Add message', class: 'btn btn-primary'

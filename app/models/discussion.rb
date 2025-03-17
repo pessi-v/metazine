@@ -1,5 +1,7 @@
 class Discussion < ApplicationRecord
+  include Rails.application.routes.url_helpers
   include Federails::DataEntity
+
   # Here, 'Note' refers to the ActivityPub concept
   acts_as_federails_data(
     handles: 'Note',
@@ -15,7 +17,7 @@ class Discussion < ApplicationRecord
   before_validation :set_content
 
   def add_message(message)
-    Message.create(discussion: self, content: message, article_id: article.id)
+    Message.create(discussion: self, content: message)
   end
 
   def set_content

@@ -1,12 +1,19 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  default_url_options :host => ENV['APP_URL']
+
   resources :messages
   resources :discussions
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :sources
-  # resources :articles
+  # resources :articles, only: [:show] do
+  #   resources :discussions, only: [:new, :create, :show, :index]
+  # end
+
+  post 'discuss/(:id)', to: 'discussions#discuss', as: :discuss
+  # get 'user', to: 'users#show'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.

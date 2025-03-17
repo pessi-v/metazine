@@ -1,6 +1,17 @@
 class DiscussionsController < ApplicationController
   before_action :set_discussion, only: %i[ show edit update destroy ]
 
+  def discuss
+    article = Article.find(params[:id])
+    # article.start_discussion unless article.has_discussion?
+    if article.has_discussion?
+      article.discussion.add_message(params[:content])
+    else
+      article.start_discussion(params[:content])
+    end
+    redirect_to reader_path(params[:id])
+  end
+
   # GET /discussions or /discussions.json
   def index
     @discussions = Discussion.all

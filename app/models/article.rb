@@ -18,4 +18,13 @@ class Article < ApplicationRecord
   scope :today, -> { where('DATE(published_at) = CURRENT_DATE') }
   scope :yesterday, -> { where('DATE(published_at) = CURRENT_DATE - 1') }
   scope :days_ago, ->(days) { where("DATE(published_at) = CURRENT_DATE - #{days}") }
+
+  def has_discussion?
+    discussion.present?
+  end
+
+  def start_discussion(message)
+    discussion = Discussion.create(article: self, user: User.last, content: url)
+    discussion.add_message(message)
+  end
 end
