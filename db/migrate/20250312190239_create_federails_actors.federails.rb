@@ -1,5 +1,5 @@
 # This migration comes from federails (originally 20200712133150)
-class CreateFederailsActors < ActiveRecord::Migration[7.0]
+class CreateFederailsActors < ActiveRecord::Migration[8.0]
   def change
     create_table :federails_actors do |t|
       t.string :name
@@ -11,13 +11,14 @@ class CreateFederailsActors < ActiveRecord::Migration[7.0]
       t.string :followers_url
       t.string :followings_url
       t.string :profile_url
+      t.boolean :local
 
       t.integer :entity_id, null: true
       t.string :entity_type, null: true
 
       t.timestamps
       t.index :federated_url, unique: true
-      t.index [:entity_type, :entity_id], name: 'index_federails_actors_on_entity', unique: true
+      t.index %i[entity_type entity_id], name: 'index_federails_actors_on_entity', unique: true
     end
   end
 end

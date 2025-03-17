@@ -1,0 +1,11 @@
+p style="color: green" = notice
+
+h1 Messages
+
+#messages
+  - @messages.each do |message|
+    == render message
+    p
+      = link_to "Show this message", message
+
+= link_to "New message", new_message_path

@@ -1,5 +1,5 @@
 # This migration comes from federails (originally 20200712143127)
-class CreateFederailsFollowings < ActiveRecord::Migration[7.0]
+class CreateFederailsFollowings < ActiveRecord::Migration[8.0]
   def change
     create_table :federails_followings do |t|
       t.references :actor, null: false, foreign_key: { to_table: :federails_actors }
@@ -9,7 +9,7 @@ class CreateFederailsFollowings < ActiveRecord::Migration[7.0]
 
       t.timestamps
 
-      t.index [:actor_id, :target_actor_id], unique: true
+      t.index %i[actor_id target_actor_id], unique: true
     end
   end
 end

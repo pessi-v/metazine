@@ -1,0 +1,11 @@
+p style="color: green" = notice
+
+h1 Discussions
+
+#discussions
+  - @discussions.each do |discussion|
+    == render discussion
+    p
+      = link_to "Show this discussion", discussion
+
+= link_to "New discussion", new_discussion_path
