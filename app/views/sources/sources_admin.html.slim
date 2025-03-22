@@ -1,0 +1,62 @@
+css:
+  .controls_box {
+    width: 40em;
+    height: 12em;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    border: var(--border);
+    border-radius: var(--border-radius);
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      gap: var(--space-xxs)
+    }
+  }
+  
+.instance-title
+  = link_to('/') do
+    h4.desktop
+      = ENV['INSTANCE_NAME'].upcase.gsub(' ', '<br>').html_safe
+    h4.mobile
+      = ENV['INSTANCE_NAME'].upcase
+
+.index
+  .list_view_desktop
+    .controls_box
+      p style="color: green"
+        = notice
+
+      div
+        h2
+          'Sources
+      
+      .buttons
+        = button_to('Reload all feeds', fetch_feeds_path)
+        = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
+          .button
+            / = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
+            = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
+
+      div id="article_counts"
+        table
+          - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
+            tr
+              th
+                p
+                  = date.strftime("%A %d.")
+              th
+                p
+                  = @article_counts_by_day[index]
+
+  
+  .list_view_desktop
+  = turbo_frame_tag 'sources', class: 'list_view_desktop'
+    = turbo_frame_tag 'new_source'
+    = render @sources

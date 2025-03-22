@@ -6,6 +6,15 @@ class SourcesController < ApplicationController
 
   # GET /sources or /sources.json
   def index
+    @sources = Source.active.order(:name).select(:id, :name, :url, :articles_count)
+    # Group sources by first letter and sort alphabetically
+    @sources_in_array = @sources.group_by { |source| source.name[0].upcase }
+                                .sort_by { |letter, _| letter }
+                                .map { |letter, sources| [letter, sources] }
+    # binding.break
+  end
+
+  def sources_admin
     @sources = Source.all.order(articles_count: :desc)
     @article_counts_by_day = [
       Article.today.count,

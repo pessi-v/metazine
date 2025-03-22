@@ -1,0 +1,6 @@
+.six_column_grid {
+  display: grid;
+  grid-template-columns: [left-edge] 1fr [gap1] 1fr [gap2] 1fr [gap3] 1fr [gap4] 1fr [gap5] 1fr [right-edge];
+  // grid-template-rows: [top-edge] auto [gap1] auto [gap2] auto [bottom-edge]; # define in the page if needed
+  column-gap: var(--column-gap);
+}

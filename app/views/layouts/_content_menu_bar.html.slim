@@ -5,3 +5,9 @@
   = link_to(list_path) do 
     h4
       = 'LIST VIEW'
+  = link_to(sources_path) do
+    h4
+      = 'SOURCES'
+  - if pagy
+    h4
+      = render 'layouts/header_pagy', pagy: pagy

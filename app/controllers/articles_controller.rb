@@ -2,16 +2,17 @@
 
 class ArticlesController < ApplicationController
   def frontpage
-    @articles = latest_articles.limit(14)
-    # @articles = latest_articles
-    #   .select(Article.column_names - ['readability_output'])
+    # @articles = latest_articles.limit(14)
+
+    # for some reason pagy doesn't like .order
+    @pagy, @articles = pagy(latest_articles.select(Article.column_names - ['readability_output']), limit: 14)
   end
 
   def search
     @pagy, @articles = pagy(Article.search_by_title_source_and_readability_output(params[:query])
       .select(Article.column_names - ['readability_output'])
       .reorder('published_at DESC'), limit: 14) # for some reason pagy doesn't like .order
-    
+
     @search_term = params[:query]
     render :list
   end

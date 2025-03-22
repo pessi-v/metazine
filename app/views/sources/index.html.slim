@@ -1,57 +1,15 @@
 css:
-  .controls_box {
-    width: 40em;
-    height: 12em;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-    border: var(--border);
-    border-radius: var(--border-radius);
 
-    .buttons {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 100%;
-      gap: var(--space-xxs)
-    }
-  }
-  
 
-.index
-  .list_view_desktop
-    .controls_box
-      p style="color: green"
-        = notice
-
-      div
-        h2
-          'Sources
-        = link_to('← back to front page', frontpage_path)
-      
-      .buttons
-        = button_to('Reload all feeds', fetch_feeds_path)
-        = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
-          .button
-            / = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
-            = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
-
-      div id="article_counts"
-        table
-          - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
-            tr
-              th
-                p
-                  = date.strftime("%A %d.")
-              th
-                p
-                  = @article_counts_by_day[index]
-
-  
-  .list_view_desktop
-  = turbo_frame_tag 'sources', class: 'list_view_desktop'
-    = turbo_frame_tag 'new_source'
-    = render @sources
+= render 'layouts/page_header', pagy: nil
+.six_column_grid
+  - @sources_in_array.each do |letter, sources|
+    div
+      h2
+        = letter
+      ul style='list-style-type:none'
+        - sources.each do |source|
+          li
+            h4
+              = link_to("#{source.name} #{source.articles_count}", source_path(source))
+end

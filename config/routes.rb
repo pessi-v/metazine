@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   get 'reader/(:id)', to: 'articles#reader', as: :reader
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
   post 'fetch_feed', to: 'sources#fetch_feed', as: :fetch_feed
+  get 'sources_', to: 'sources#sources_admin', as: :sources_admin
   get 'list', to: 'articles#list', as: :list
   get 'search', to: 'articles#search', as: :search
   # some Sources contain a period or some other special character in the name

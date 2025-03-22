@@ -109,6 +109,18 @@ a {
   }
 }
 
+a.hover-two {
+  &:hover,
+  &:focus,
+  &:active {
+    color: var(--color-two) !important;
+
+    * {
+      color: inherit;
+    }
+  }
+}
+
 label,
 p {
   font-size: var(--font-size-s);

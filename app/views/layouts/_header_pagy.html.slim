@@ -1,0 +1,24 @@
+/ The a variable below is set to a lambda that generates the a tag
+/ Usage: a_tag = a.(page_number, text, classes: nil, aria_label: nil)
+- if pagy
+  - a = pagy_anchor(pagy)
+  nav.pagy.nav aria-label="Pages"
+    / Page links (series example: [1, :gap, 7, 8, "9", 10, 11, :gap, 36])
+
+    - current_page_number = pagy.series.find { |item| item.is_a?(String) }
+    .flex-row.gap-s
+      - if current_page_number == pagy.series.first
+        = 'PAGE'
+      - else 
+        == a.(current_page_number.to_i - 1, 'PAGE', classes: 'hover-two')
+      
+      - if current_page_number == pagy.series.last
+        = pagy.series.last
+      - else
+        == a.(current_page_number.to_i + 1, current_page_number, classes: '')
+      
+      - if !current_page?('/')
+        h3
+          = '/'
+          == a.(pagy.series.last, pagy.series.last, classes: '')
+        
