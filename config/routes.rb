@@ -1,10 +1,19 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  default_url_options :host => ENV['APP_URL']
+
+  resources :messages
+  resources :discussions
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :sources
-  # resources :articles
+  # resources :articles, only: [:show] do
+  #   resources :discussions, only: [:new, :create, :show, :index]
+  # end
+
+  post 'discuss/(:id)', to: 'discussions#discuss', as: :discuss
+  # get 'user', to: 'users#show'
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -12,6 +21,8 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root 'articles#frontpage', as: :frontpage
+
+  mount Federails::Engine => '/'
 
   get 'reader/(:id)', to: 'articles#reader', as: :reader
   post 'fetch_feeds', to: 'sources#fetch_feeds', as: :fetch_feeds
@@ -21,11 +32,11 @@ Rails.application.routes.draw do
   # some Sources contain a period or some other special character in the name
   get ':source_name', to: 'articles#articles_by_source',
                       constraints: { source_name: %r{[^/]+} }, as: :articles_by_source
-  get '/.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
-  get '/@(:fediverse_user)', to: 'federation#fediverse_user', as: :fediverse_user
-  # get "@aggregator", to: 'federation#fediverse_user'
-  get '/@(:fediverse_user)/outbox', to: 'federation#outbox', as: :fediverse_outbox
-  post '/@(:fediverse_user)/inbox', to: 'federation#inbox', as: :fediverse_inbox
-  get 'following', to: 'federation#following', as: :fediverse_following
-  get 'followers', to: 'federation#followers', as: :fediverse_followers
+  # get '/.well-known/webfinger', to: 'federation#webfinger', as: :webfinger
+  # get '/@(:fediverse_user)', to: 'federation#fediverse_user', as: :fediverse_user
+  # # get "@aggregator", to: 'federation#fediverse_user'
+  # get '/@(:fediverse_user)/outbox', to: 'federation#outbox', as: :fediverse_outbox
+  # post '/@(:fediverse_user)/inbox', to: 'federation#inbox', as: :fediverse_inbox
+  # get 'following', to: 'federation#following', as: :fediverse_following
+  # get 'followers', to: 'federation#followers', as: :fediverse_followers
 end
