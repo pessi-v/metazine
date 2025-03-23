@@ -67,7 +67,7 @@ module Articles
 
       # Use entry Summary if present, or take a part of main text
       @description ||= begin
-        text = @entry.summary.presence || entry.content.presence
+        text = @entry.summary.presence || @entry.content.presence
         return nil unless text
 
         cleaned_text = TextCleaner.new(text).clean

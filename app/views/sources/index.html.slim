@@ -11,5 +11,5 @@ css:
         - sources.each do |source|
           li
             h4
-              = link_to("#{source.name} #{source.articles_count}", source_path(source))
+              = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
 end

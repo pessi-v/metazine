@@ -16,9 +16,3 @@
         = pagy.series.last
       - else
         == a.(current_page_number.to_i + 1, current_page_number, classes: '')
-      
-      - if !current_page?('/')
-        h3
-          = '/'
-          == a.(pagy.series.last, pagy.series.last, classes: '')
-        
