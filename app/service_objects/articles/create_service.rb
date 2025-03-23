@@ -18,6 +18,10 @@ module Articles
       article = Article.new(article_attributes)
       return unless ApprovalHelper.new(article).approve?
 
+      # clean up duplicate image, in case headline image is also in the text body
+      article = ImageHelper.compare_and_update_article_images(article)
+      
+
       article.save
     end
 

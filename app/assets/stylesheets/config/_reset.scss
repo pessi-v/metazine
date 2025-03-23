@@ -165,6 +165,7 @@ ol {
   display: flex;
   flex-direction: column;
   gap: var(--space-s); /* Adds consistent spacing between items */
+  list-style-position: inside;
 }
 
 button,

@@ -1,18 +1,37 @@
+/ .page_header
+/   .page_header_split
+/     .page_header_split_half.left
+/       - if current_page?('/')
+/         .title
+/           h1
+/             = ENV['INSTANCE_NAME']
+/       - else
+/         = link_to('/') do
+/           .title
+/             h1
+/               = ENV['INSTANCE_NAME']
+/     .page_header_split_half.right
+/       / .subtitle
+/       /   h6
+/       /     = ENV['APP_SHORT_DESCRIPTION']
+/       / = render 'search_bar'
+/   = render 'layouts/content_menu_bar', pagy: pagy
+
 .page_header
-  .page_header_split
-    .page_header_split_half.left
-      - if current_page?('/')
-        .title
-          h1
-            = ENV['INSTANCE_NAME']
-      - else
-        = link_to('/') do
-          .title
-            h1
-              = ENV['INSTANCE_NAME']
-    .page_header_split_half.right
-      .subtitle
-        h6
-          = ENV['APP_SHORT_DESCRIPTION']
+  - if current_page?('/')
+    .title
+      h1
+        = ENV['INSTANCE_NAME']
+  - else
+    = link_to('/') do
+      .title
+        h1
+          = ENV['INSTANCE_NAME']
+  / .page_header_split
+  /   .page_header_split_half.left
+  /   .page_header_split_half.right
+      / .subtitle
+      /   h6
+      /     = ENV['APP_SHORT_DESCRIPTION']
       / = render 'search_bar'
   = render 'layouts/content_menu_bar', pagy: pagy

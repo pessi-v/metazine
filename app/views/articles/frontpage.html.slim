@@ -25,19 +25,10 @@ css:
   
   .item-b style="grid-area: B"
     = render 'many_articles_headline',
-      articles: [next_article_with_short_title(@articles),
-                next_article_with_short_title(@articles),
-                next_article_with_short_title(@articles)]
-  
-  .item-c
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    .item-b style="flex-grow: 2; max-height: 33%;"
-      = render 'many_articles_headline',
-        articles: [next_article_without_image(@articles),
-                  next_article_without_image(@articles),
-                  next_article_without_image(@articles)]
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+      articles: three_short_titles
+      / articles: [next_article_with_short_title(@articles),
+      /           next_article_with_short_title(@articles),
+      /           next_article_with_short_title(@articles)]
    
   .item-d
     .article.without_image
@@ -48,3 +39,11 @@ css:
       = render 'article_image_headline_summary', article: next_article_with_image(@articles)
     .article.with_image
       = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+
+  .item-c
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    .item-b style="flex-grow: 2; max-height: 33%;"
+      = render 'many_articles_headline',
+        articles: 3.times.map { extract_shortest_description_article }
+    = render 'article_headline_summary', article: next_article_with_long_description(@articles)

@@ -27,8 +27,25 @@ module ArticlesHelper
     @articles.pop
   end
 
-  def next_article_with_short_title(_articles)
-    @articles.sort_by! { |article| article.title.length }
-    @articles.delete_at(rand(5))
+  def extract_shortest_description_article
+    return nil if @articles.empty?
+
+    # Find the index of the article with the shortest description
+    shortest_index = @articles.each_with_index.min_by { |article, _| article.description.to_s.length }[1]
+
+    # Remove and return the article
+    @articles.delete_at(shortest_index)
+  end
+
+  # def next_article_with_short_title(_articles)
+  #   shortest_five_titles = @articles.sort_by! { |article| article.title.length }[..5]
+  #   @articles.delete_at(rand(5))
+  # end
+
+  def three_short_titles
+    shortest_five_titles = @articles.sort_by! { |article| article.title.length }[..5]
+    three_short_titles = shortest_five_titles.sample(3)
+    @articles -= three_short_titles
+    three_short_titles
   end
 end

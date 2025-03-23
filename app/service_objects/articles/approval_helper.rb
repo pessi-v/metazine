@@ -20,7 +20,7 @@ module Articles
 
       # filters some cases where no article is shown without Javascript or cookies,
       # and some cases of actually Video/Podcast content
-      if html_string.nil? || html_string.length < 1900
+      if (@article.readability_output_jsonb['length'] && @article.readability_output_jsonb['length'] < 1900) || html_string.nil? || html_string.length < 1900
         return false
       elsif FORBIDDEN_STRINGS.any? { |string| html_string.include?(string) }
         return false

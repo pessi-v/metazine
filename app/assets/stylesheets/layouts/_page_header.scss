@@ -2,7 +2,8 @@
 
 .page_header {
   width: 100%;
-  height: 125px;
+  height: auto;
+
   padding-bottom: var(--space-l);
 
   display: flex;
@@ -15,7 +16,7 @@
 
   .title {
     text-transform: uppercase;
-    text-align: center;
+    text-align: left;
   }
 
   h1 {
@@ -23,15 +24,17 @@
 
     @include media.media(tabletAndUp) {
       // font-size: 5rem;
-      font-size: 100cqmin;
+      font-size: 6cqmin;
     }
   }
 }
 
 .page_header_split {
+  height: 85px;
+
   @include media.media(tabletAndUp) {
     width: 100%;
-    height: 100%;
+    height: 80px;
     display: flex;
     align-items: stretch;
     container-type: size;

@@ -6,10 +6,10 @@
   display: flex;
   flex-direction: row;
   gap: var(--space-l);
-  justify-content: center;
+  justify-content: flex-start;
 
   @include media.media(tabletAndUp) {
-    flex-direction: column;
+    // flex-direction: column;
     align-items: center;
     gap: var(--space-xxxs);
   }

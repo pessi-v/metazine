@@ -99,6 +99,9 @@ gem 'lograge' # hide partial rendering logs
 gem 'ruby-readability', require: 'readability' # Similar to Mozilla's Readability JS package
 gem 'zstd-ruby' # decode compressed http responses
 
+# gem 'mini_magick'
+gem 'dhash-vips'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem 'debug', platforms: %i[mri windows]

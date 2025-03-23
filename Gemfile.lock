@@ -108,6 +108,8 @@ GEM
     debug (1.9.2)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    dhash-vips (0.2.3.0)
+      ruby-vips (~> 2.0, != 2.1.1, != 2.1.0)
     dockerfile-rails (1.6.25)
       rails (>= 3.0.0)
     dotenv (3.1.6)
@@ -330,6 +332,9 @@ GEM
     ruby-readability (0.7.2)
       guess_html_encoding (>= 0.0.4)
       nokogiri (>= 1.6.0)
+    ruby-vips (2.2.3)
+      ffi (~> 1.12)
+      logger
     ruby2_keywords (0.0.5)
     rubyzip (2.3.2)
     rufus-scheduler (3.9.2)
@@ -445,6 +450,7 @@ DEPENDENCIES
   cld
   dartsass-rails
   debug
+  dhash-vips
   dockerfile-rails (>= 1.6)
   dotenv
   factory_bot (~> 6.5)
