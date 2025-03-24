@@ -1,16 +1,16 @@
 .content_menu_bar
-  div style="grid-area: 1 / 2 / 1 / 2"
+  .hide_on_mobile_show_on_desktop.col-1
     = link_to(frontpage_path) do
       h4
         = 'LATEST'
-  div style="grid-area: 1 / 3 / 1 / 3"
+  .col-2
     = link_to(list_path) do 
       h4
-        = 'LIST VIEW'
-  div style="grid-area: 1 / 4 / 1 / 4"      
+        = 'LIST'
+  .col-3     
     = link_to(sources_path) do
       h4
         = 'SOURCES'
   - if pagy
-    div style="grid-area: 1 / 6 / 1 / 6"
+    .col-6
       = render 'layouts/header_pagy', pagy: pagy      

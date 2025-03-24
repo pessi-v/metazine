@@ -43,9 +43,15 @@ module ArticlesHelper
   # end
 
   def three_short_titles
-    shortest_five_titles = @articles.sort_by! { |article| article.title.length }[..5]
-    three_short_titles = shortest_five_titles.sample(3)
+    # shortest_five_titles = @articles.sort_by! { |article| article.title.length }[..5]
+    # three_short_titles = shortest_five_titles.sample(3)
+    # @articles -= three_short_titles
+    # three_short_titles
+
+    three_short_titles = @articles.sort_by! { |article| article.title.length }[..2]
+    # three_short_titles = shortest_five_titles.sample(3)
     @articles -= three_short_titles
-    three_short_titles
+    three_short_titles.shuffle
+
   end
 end
