@@ -5,8 +5,9 @@
   font-family: var(--font-family-headlines);
   display: flex;
   flex-direction: row;
-  gap: var(--space-l);
-  justify-content: flex-start;
+  padding-right: var(--space-s);
+  // gap: var(--space-l);
+  justify-content: flex-end;
 
   @include media.media(tabletAndUp) {
     // flex-direction: column;

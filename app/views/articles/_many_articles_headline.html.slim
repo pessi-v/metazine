@@ -1,3 +1,2 @@
-= render 'article_headline', article: articles[0]
-= render 'article_headline', article: articles[1]
-= render 'article_headline', article: articles[2]
+- articles.each do |article|
+  = render 'article_headline', article: article

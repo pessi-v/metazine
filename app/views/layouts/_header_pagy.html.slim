@@ -6,13 +6,13 @@
     / Page links (series example: [1, :gap, 7, 8, "9", 10, 11, :gap, 36])
 
     - current_page_number = pagy.series.find { |item| item.is_a?(String) }
-    .flex-row.gap-s
-      - if current_page_number == pagy.series.first
-        = 'PAGE'
-      - else 
-        == a.(current_page_number.to_i - 1, 'PAGE', classes: 'hover-two')
+    - if current_page_number == pagy.series.first
+      h4 = 'PAGE'
+    - else 
+      h4 == a.(current_page_number.to_i - 1, 'PAGE', classes: 'hover-two')
+    
+    - if current_page_number == pagy.series.last
+      h4 = pagy.series.last
+    - else
+      h4 == a.(current_page_number.to_i + 1, current_page_number, classes: '')
       
-      - if current_page_number == pagy.series.last
-        = pagy.series.last
-      - else
-        == a.(current_page_number.to_i + 1, current_page_number, classes: '')

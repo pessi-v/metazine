@@ -1,22 +1,3 @@
-css:
-  .top_and_bottom_border {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--space-xl);
-    border-top: var(--border);
-    border-bottom: var(--border);
-    border-radius: var(--border-radius);
-    flex-grow: 1;
-    min-height: 0;
-  }
-
-  .line {
-    height: 0px;
-    border-top: var(--border);
-    border-radius: var(--border-radius);
-  }
-
 = render 'layouts/page_header', pagy: @pagy
 
 .frontpage
@@ -43,7 +24,7 @@ css:
   .item-c
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    .item-b style="flex-grow: 2; max-height: 33%;"
-      = render 'many_articles_headline',
-        articles: 3.times.map { extract_shortest_description_article }
     = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+    .item-b style="flex-grow: 2; max-height: 45%;"
+      = render 'many_articles_headline',
+        articles: 4.times.map { extract_shortest_description_article }

@@ -5,7 +5,7 @@ class ArticlesController < ApplicationController
     # @articles = latest_articles.limit(14)
 
     # for some reason pagy doesn't like .order
-    @pagy, @articles = pagy(latest_articles.select(Article.column_names - ['readability_output']), limit: 14)
+    @pagy, @articles = pagy(latest_articles.select(Article.column_names - ['readability_output']), limit: 15)
   end
 
   def search

@@ -204,7 +204,7 @@ button:active,
 }
 
 .justify-end {
-  justify-content: flex-end;
+  justify-content: flex-end !important;
 }
 
 .justify-center {
@@ -221,4 +221,12 @@ button:active,
 
 .gap-s {
   gap: var(--space-s);
+}
+
+.gap-m {
+  gap: var(--space-m);
+}
+
+.wrap {
+  flex-wrap: wrap;
 }

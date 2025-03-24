@@ -1,15 +1,29 @@
-css:
-
-
 = render 'layouts/page_header', pagy: nil
+
+/ Create the main six_column_grid container
 .six_column_grid
-  - @sources_in_array.each do |letter, sources|
-    div
-      h2
-        = letter
-      ul style='list-style-type:none'
-        - sources.each do |source|
-          li
-            h4
-              = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
+  / Create two column containers that use the vertical space efficiently
+  .column-left.flex-column.gap-m style="grid-column: 2 / span 2;"
+    / First half of items go here, sorted by index
+    - @sources_in_array.each_with_index do |(letter, sources), index|
+      - if index < (@sources_in_array.length / 2.0).ceil
+        .source-group
+          h2 = letter
+          ul style='list-style-type:none'
+            - sources.each do |source|
+              li
+                h4
+                  = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
+
+  .column-right.flex-column.gap-m style="grid-column: 4 / span 2;"
+    / Second half of items go here, sorted by index
+    - @sources_in_array.each_with_index do |(letter, sources), index|
+      - if index >= (@sources_in_array.length / 2.0).ceil
+        .source-group
+          h2 = letter
+          ul style='list-style-type:none'
+            - sources.each do |source|
+              li
+                h4
+                  = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
 end
