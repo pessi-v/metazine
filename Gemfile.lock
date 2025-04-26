@@ -1,5 +1,7 @@
-PATH
-  remote: /Users/pes/code/federails
+GIT
+  remote: https://gitlab.com/pessi-v/federails
+  revision: b68d32e2f2e46a69e8345dee2bd9653a82aaef91
+  branch: federails-cursor
   specs:
     federails (0.6.2)
       faraday
