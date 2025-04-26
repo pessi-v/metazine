@@ -40,4 +40,9 @@
   .content
     = @content.html_safe
 
-
+  .line
+    - @article.comments.each do |comment|
+      .flex-column
+        p = comment.content
+        p = comment.federails_actor.name
+        p = comment.federated_url

@@ -42,6 +42,11 @@ select {
   font: inherit;
 }
 
+// span {
+//   font-weight: bold;
+//   font-family: var(--font-family-headlines);
+// }
+
 select {
   border: var(--border);
   border-radius: var(--border-radius);
@@ -229,4 +234,8 @@ button:active,
 
 .wrap {
   flex-wrap: wrap;
+}
+
+.font-muted {
+  color: var(--color-text-muted);
 }
