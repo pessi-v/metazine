@@ -5,7 +5,7 @@ class CreateFederailsInstanceActors < ActiveRecord::Migration[8.0]
       t.timestamps
       t.string :name
     end
-  end
 
-  Federails::InstanceActor.create!(name: "Editor")
+    Federails::InstanceActor.create!(name: "Editor")
+  end
 end
