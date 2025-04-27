@@ -90,7 +90,7 @@ gem 'pg_search'
 # gem 'federails', git: 'https://github.com/pessi-v/federails', branch: 'main'
 
 # gem "federails", path: "/Users/pes/code/federails"
-# gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
+gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
 # gem 'pundit'
 # gem 'kaminari'
 # gem 'devise'
