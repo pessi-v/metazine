@@ -31,6 +31,7 @@ class Article < ApplicationRecord
   on_federails_delete_requested -> { Rails.logger.info "someone tried to Delete an Article via AP: #{self}" }
 
   def to_activitypub_object
+    Rails.logger.info "Article#to_activitypub_object: #{self}"
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
@@ -49,6 +50,7 @@ class Article < ApplicationRecord
   #
   # @return [self]
   def handle_incoming_fediverse_data(activity_hash_or_id)
+    Rails.logger.info "Article#handle_incoming_fediverse_data: #{activity_hash_or_id}"
     activity = Fediverse::Request.dereference(activity_hash_or_id)
     object = Fediverse::Request.dereference(activity["object"])
 
@@ -64,7 +66,10 @@ class Article < ApplicationRecord
     entity
   end
 
+  # This would be to create an Article from an incoming ActivityPub object? TODO: remove
   def self.from_activitypub_object(hash)
+    Rails.logger.info "Article#from_activitypub_object: #{hash}"
+
     Federails::Utils::Object.timestamp_attributes(hash)
       .merge(
         federated_url: hash["id"],
