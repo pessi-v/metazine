@@ -1,18 +1,3 @@
-GIT
-  remote: https://gitlab.com/pessi-v/federails
-  revision: b68d32e2f2e46a69e8345dee2bd9653a82aaef91
-  branch: federails-cursor
-  specs:
-    federails (0.6.2)
-      faraday
-      faraday-follow_redirects
-      jbuilder (~> 2.7)
-      json-ld (>= 3.2.0)
-      json-ld-preloaded (>= 3.2.0)
-      kaminari (>= 1.2.0)
-      pundit (>= 2.3.0)
-      rails (>= 7.0.4)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -92,7 +77,6 @@ GEM
     ansi (1.5.0)
     ast (2.4.2)
     base64 (0.2.0)
-    bcp47_spec (0.2.1)
     bcrypt (3.1.20)
     benchmark (0.4.0)
     bigdecimal (3.1.8)
@@ -186,7 +170,6 @@ GEM
       rake (>= 13)
     guess_html_encoding (0.0.11)
     hashdiff (1.1.2)
-    htmlentities (4.3.4)
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.0.3)
@@ -204,32 +187,7 @@ GEM
       actionview (>= 5.0.0)
       activesupport (>= 5.0.0)
     json (2.9.0)
-    json-canonicalization (1.0.0)
-    json-ld (3.3.2)
-      htmlentities (~> 4.3)
-      json-canonicalization (~> 1.0)
-      link_header (~> 0.0, >= 0.0.8)
-      multi_json (~> 1.15)
-      rack (>= 2.2, < 4)
-      rdf (~> 3.3)
-      rexml (~> 3.2)
-    json-ld-preloaded (3.3.1)
-      json-ld (~> 3.3)
-      rdf (~> 3.3)
-    kaminari (1.2.2)
-      activesupport (>= 4.1.0)
-      kaminari-actionview (= 1.2.2)
-      kaminari-activerecord (= 1.2.2)
-      kaminari-core (= 1.2.2)
-    kaminari-actionview (1.2.2)
-      actionview
-      kaminari-core (= 1.2.2)
-    kaminari-activerecord (1.2.2)
-      activerecord
-      kaminari-core (= 1.2.2)
-    kaminari-core (1.2.2)
     language_server-protocol (3.17.0.4)
-    link_header (0.0.8)
     lint_roller (1.1.0)
     logger (1.6.3)
     lograge (0.14.0)
@@ -252,7 +210,6 @@ GEM
     mocha (2.7.1)
       ruby2_keywords (>= 0.0.5)
     msgpack (1.7.5)
-    multi_json (1.15.0)
     net-http (0.6.0)
       uri
     net-imap (0.5.1)
@@ -313,8 +270,6 @@ GEM
     public_suffix (6.0.1)
     puma (6.5.0)
       nio4r (~> 2.0)
-    pundit (2.5.0)
-      activesupport (>= 3.0.0)
     raabro (1.4.0)
     racc (1.8.1)
     rack (3.1.8)
@@ -358,10 +313,6 @@ GEM
     rake-compiler-dock (1.9.1)
     rb_sys (0.9.111)
       rake-compiler-dock (= 1.9.1)
-    rdf (3.3.2)
-      bcp47_spec (~> 0.2)
-      bigdecimal (~> 3.1, >= 3.1.5)
-      link_header (~> 0.0, >= 0.0.8)
     rdoc (6.9.1)
       psych (>= 4.0.0)
     redis (5.3.0)
@@ -533,7 +484,6 @@ DEPENDENCIES
   faraday-follow_redirects
   faraday-gzip (~> 3)
   fastimage
-  federails!
   feedjira
   importmap-rails
   informers
