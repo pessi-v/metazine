@@ -51,3 +51,4 @@
 /.github
 .tool-versions
 /node_modules
+flip.sh
