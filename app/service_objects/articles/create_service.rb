@@ -5,7 +5,7 @@ module Articles
     require "faraday/gzip"
 
     def initialize(source, entry)
-      # @instance_actor = Federails::InstanceActor.first.federails_actor
+      @instance_actor = Federails::InstanceActor.first.federails_actor
       @source = source
       @entry = entry
       @original_page = fetch_original_page
@@ -60,8 +60,8 @@ module Articles
         paywalled: paywalled?,
         readability_output: readability_output,
         readability_output_jsonb: readability_output,
-        tags: readability_output["tags"]
-        # federails_actor: @instance_actor
+        tags: readability_output["tags"],
+        federails_actor: @instance_actor
       }
     end
 
