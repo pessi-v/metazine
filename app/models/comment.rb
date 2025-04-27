@@ -77,7 +77,7 @@ class Comment < ApplicationRecord
       )
 
     parent = Federails::Utils::Object.find_or_create! hash["inReplyTo"]
-    Rails.logger.info "Comment::from_activitypub_object: parent: #{parent.inscpect}"
+    Rails.logger.info "Comment::from_activitypub_object: parent: #{parent.inspect}"
     attrs[:parent_type] = parent.class.name
     attrs[:parent_id] = parent.id
 
