@@ -14,7 +14,7 @@ Federails.configure do |conf|
   # conf.server_routes_path = "federation"
   # conf.client_routes_path = "client"
 
-  conf.remote_follow_url_method = :new_follow_url
+  # conf.remote_follow_url_method = :new_follow_url
 end
 
 Rails.application.config.after_initialize do
