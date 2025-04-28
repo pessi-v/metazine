@@ -4,6 +4,10 @@ class Article < ApplicationRecord
   include PgSearch::Model
   include Federails::DataEntity
 
+  include ActionView::Helpers::TagHelper
+  include ActionView::Context
+  include Rails.application.routes.url_helpers
+
   acts_as_federails_data(
     handles: "Note",
     with: :handle_incoming_fediverse_data,
@@ -35,7 +39,29 @@ class Article < ApplicationRecord
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
-      content: description
+      content: federated_card_content
+    )
+  end
+
+  def federated_card_content
+    # Get host with potential port included
+    host_with_port = if Rails.env.development?
+      "localhost:3000"
+    else
+      Rails.application.routes.default_url_options[:host]
+    end
+
+    # Use ApplicationController renderer to handle template rendering
+    renderer = ApplicationController.renderer.new(
+      http_host: host_with_port,
+      https: Rails.application.routes.default_url_options[:protocol] == "https"
+    )
+
+    # NOTE: This will cache the result of the rendering
+    renderer.render(
+      partial: "articles/federated_card_content",
+      locals: {title: title, description: description, source_name: source_name, article_id: id, published_at: published_at},
+      layout: false
     )
   end
 
