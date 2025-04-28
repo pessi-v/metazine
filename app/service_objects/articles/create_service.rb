@@ -60,7 +60,7 @@ module Articles
         paywalled: paywalled?,
         readability_output: readability_output,
         readability_output_jsonb: readability_output,
-        tags: readability_output["tags"],
+        # tags: readability_output["tags"],
         federails_actor: @instance_actor
       }
     end

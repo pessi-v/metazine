@@ -54,7 +54,7 @@ class Article < ApplicationRecord
     # Use ApplicationController renderer to handle template rendering
     renderer = ApplicationController.renderer.new(
       http_host: host_with_port,
-      https: Rails.application.routes.default_url_options[:protocol] == "https"
+      https: Rails.application.config.force_ssl
     )
 
     # NOTE: This will cache the result of the rendering
