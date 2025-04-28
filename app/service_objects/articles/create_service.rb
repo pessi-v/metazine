@@ -5,7 +5,7 @@ module Articles
     require "faraday/gzip"
 
     def initialize(source, entry)
-      @instance_actor = Federails::InstanceActor.first.federails_actor
+      @instance_actor = Federails::Actor.where(entity_type: "InstanceActor").first
       @source = source
       @entry = entry
       @original_page = fetch_original_page

@@ -15,7 +15,7 @@ class Article < ApplicationRecord
   )
 
   belongs_to :source, counter_cache: true
-  belongs_to :federails_actor, optional: false, class_name: "Federails::Actor", default: -> { Federails::InstanceActor.first.federails_actor }
+  belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
 
   has_many :comments, dependent: :destroy, as: :parent
 
