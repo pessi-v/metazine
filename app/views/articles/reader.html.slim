@@ -41,8 +41,6 @@
     = @content.html_safe
 
   .line
-    - @article.comments.each do |comment|
-      .flex-column
-        p = comment.content
-        p = comment.federails_actor.name
-        p = comment.federated_url
+  h2 Discussion
+  - @article.comments.each do |comment|
+    = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }

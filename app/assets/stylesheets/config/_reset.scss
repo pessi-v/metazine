@@ -90,6 +90,7 @@ a {
 
   &[href^="http"],
   &[href^="www"] {
+
     &:hover,
     &:focus,
     &:active {
@@ -102,6 +103,7 @@ a {
   }
 
   &:not([href^="http"]):not([href^="www"]) {
+
     &:hover,
     &:focus,
     &:active {
@@ -115,6 +117,7 @@ a {
 }
 
 a.hover-two {
+
   &:hover,
   &:focus,
   &:active {
@@ -169,7 +172,8 @@ ol {
   padding-left: var(--space-m);
   display: flex;
   flex-direction: column;
-  gap: var(--space-s); /* Adds consistent spacing between items */
+  gap: var(--space-s);
+  /* Adds consistent spacing between items */
   list-style-position: inside;
 }
 
