@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 ruby '3.4.3'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
-gem 'rails', '~> 8.0.1'
+gem 'rails', '~> 8.0.2'
 
 # The original asset pipeline for Rails [https://github.com/rails/sprockets-rails]
 # gem "sprockets-rails"
@@ -58,8 +58,8 @@ gem 'faraday-follow_redirects'
 gem 'feedjira'
 
 # a ruby library to fetch and parse meta tags which represent OpenGraph Protocol and TwitterCard.
-# gem 'ogpr', git: 'https://github.com/pessi-v/ogpr', branch: 'master'
 gem 'ogp'
+gem 'ostruct'
 
 # Addressable is an alternative implementation to the URI implementation that is part of Ruby's standard library.
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
