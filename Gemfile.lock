@@ -1,6 +1,6 @@
 GIT
   remote: https://gitlab.com/pessi-v/federails
-  revision: 2a28c9888d2a08c4ee747afe62606a3239845a21
+  revision: 68ea81479215fd2812d3cbebf83b28e9fb00e971
   branch: federails-cursor
   specs:
     federails (0.6.2)
