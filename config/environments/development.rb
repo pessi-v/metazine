@@ -71,4 +71,4 @@ Rails.application.configure do
   # config.generators.apply_rubocop_autocorrect_after_generate!
 end
 
-Rails.application.default_url_options = {host: "xxx", port: 3000}
+Rails.application.default_url_options = {host: "localhost", port: 3000}
