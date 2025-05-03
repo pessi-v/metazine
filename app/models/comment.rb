@@ -7,15 +7,11 @@ class Comment < ApplicationRecord
     should_federate_method: :federate?
   )
 
+  belongs_to :parent, polymorphic: true
+  has_many :comments, dependent: :destroy, as: :parent
+
   validates :content, presence: true, allow_blank: false
   validates :parent_type, :parent_id, presence: true, allow_blank: false
-
-  # belongs_to :post, optional: true
-  # belongs_to :parent, optional: true, class_name: "Comment", inverse_of: :answers
-  belongs_to :parent, polymorphic: true
-
-  # has_many :answers, class_name: "Comment", foreign_key: :parent_id
-  has_many :comments, dependent: :destroy, as: :parent
 
   scope :top_level_comments, -> { where parent_id: nil }
 

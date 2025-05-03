@@ -2,14 +2,6 @@
 
 module Articles
   class ReadabilityService
-    LOCATION_TAGS = %w[Europe North-America South-America Africa Asia Oceania International Ukraine Palestine USA China].freeze
-
-    TAGS = %w[Theory Analysis Strategy Obituary
-      News Interview Socialism Feminism Ecology Climate Labor Justice Activism Parties Protest Solidarity
-      History Collapse Decolonization Commons Organizing
-      Fascism Democracy Culture Liberation Resources Indigenous Migration Poverty Healthcare Education Housing
-      Imperialism Cooperatives Community Strikes Economics Corruption Technology].freeze
-
     def initialize(html_content)
       @html_content = html_content
     end
@@ -18,14 +10,6 @@ module Articles
       readability_output = parse_with_mozilla_readability
 
       return if readability_output.nil?
-
-      # create tags from textContent
-      # classifier = Informers.pipeline('zero-shot-classification')
-      # location_tags = classifier.call(readability_output['textContent'], LOCATION_TAGS)
-      # tags = classifier.call(readability_output['textContent'], TAGS)
-      # # binding.break
-      # readability_output['tags'] = location_tags[:labels][..0]
-      # readability_output['tags'] += tags[:labels][..1]
 
       readability_output.delete("textContent")
       # strip whitespace and newlines from in between html elements

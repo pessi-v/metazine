@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_01_095916) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_03_093503) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -19,13 +19,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_01_095916) do
     t.string "title"
     t.string "image_url"
     t.string "url"
-    t.string "preview_text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "description"
-    t.string "summary"
     t.string "source_name"
-    t.text "readability_output"
     t.datetime "published_at"
     t.integer "source_id"
     t.boolean "paywalled", default: false
@@ -101,25 +98,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_01_095916) do
     t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
   end
 
-  create_table "federails_instance_actors", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "name"
-  end
-
   create_table "instance_actors", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
-  end
-
-  create_table "messages", force: :cascade do |t|
-    t.bigint "discussion_id"
-    t.string "content"
-    t.bigint "federails_actor_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["discussion_id"], name: "index_messages_on_discussion_id"
   end
 
   create_table "sources", force: :cascade do |t|
@@ -138,13 +120,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_01_095916) do
     t.string "image_url"
     t.integer "articles_count"
     t.string "last_built"
-  end
-
-  create_table "users", force: :cascade do |t|
-    t.string "name"
-    t.boolean "admin", default: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   add_foreign_key "articles", "federails_actors"
