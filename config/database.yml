@@ -78,8 +78,20 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  <<: *default
-  database: metazine_production
-  username: metazine
-  password: <%= ENV["POSTGRES_PASSWORD"] %>
-  host: <%= ENV["DB_HOST"] %>
+  primary: &primary_production
+    <<: *default
+    database: metazine_production
+    username: metazine
+    password: <%= ENV["POSTGRES_PASSWORD"] %>
+  cache:
+    <<: *primary_production
+    database: metazine_production_cache
+    migrations_paths: db/cache_migrate
+  queue:
+    <<: *primary_production
+    database: metazine_production_queue
+    migrations_paths: db/queue_migrate
+  cable:
+    <<: *primary_production
+    database: metazine_production_cable
+    migrations_paths: db/cable_migrate
