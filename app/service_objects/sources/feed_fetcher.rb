@@ -6,9 +6,9 @@ module Sources
     include Concerns::HTTPRequestsHelper
 
     def consume_all
-      Rails.logger.info('Starting feed consumption for all active sources')
+      Rails.logger.info("Starting feed consumption for all active sources")
       Source.active.each { |source| consume(source) }
-      Rails.logger.info('Completed feed consumption for all active sources')
+      Rails.logger.info("Completed feed consumption for all active sources")
     end
 
     def consume(source)
@@ -78,36 +78,36 @@ module Sources
     end
 
     def decode_response(response)
-      return response unless response.headers['Content-Encoding']
+      return response unless response.headers["Content-Encoding"]
 
-      decoded_body = case response.headers['Content-Encoding'].downcase
-                     when 'gzip'
-                       Zlib::GzipReader.new(StringIO.new(response.body)).read
-                     when 'deflate'
-                       Zlib::Inflate.inflate(response.body)
-                     when 'br'
-                       Brotli.inflate(response.body)
-                     when 'zstd'
-                       Zstd.decode(response.body)
-                     when 'compress'
-                       Zlib::Inflate.inflate(response.body)
-                     else
-                       response.body
-                     end
+      decoded_body = case response.headers["Content-Encoding"].downcase
+      when "gzip"
+        Zlib::GzipReader.new(StringIO.new(response.body)).read
+      when "deflate"
+        Zlib::Inflate.inflate(response.body)
+      when "br"
+        Brotli.inflate(response.body)
+      when "zstd"
+        Zstd.decode(response.body)
+      when "compress"
+        Zlib::Inflate.inflate(response.body)
+      else
+        response.body
+      end
 
       # Create a new response object with the decoded body
       env = response.env.dup
       env.response_body = decoded_body
       Faraday::Response.new(env)
-    rescue StandardError => e
+    rescue => e
       Rails.logger.error "Failed to decode response body: #{e.message}"
       response
     end
 
     def feed_not_modified?(response, feed, source)
-      if (response.headers['last-modified'] && response.headers['last-modified'] == source.last_modified) ||
-         (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
-         (feed.last_modified == source.last_modified)
+      if (response.headers["last-modified"] && response.headers["last-modified"] == source.last_modified) ||
+          (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
+          (feed.last_modified == source.last_modified)
         true
       else
         false
@@ -115,7 +115,7 @@ module Sources
     end
 
     def parse_feed(response, source: nil)
-      feed = Feedjira.parse(response.body.force_encoding('utf-8'))
+      feed = Feedjira.parse(response.body.force_encoding("utf-8"))
 
       if feed.nil?
         handle_fetch_error(source, :feed_not_available)
@@ -151,8 +151,8 @@ module Sources
 
     def update_source_metadata(source, feed, response)
       source.assign_attributes(
-        last_modified: response.headers['last-modified'] || feed.last_modified,
-        etag: response.headers['etag'],
+        last_modified: response.headers["last-modified"] || feed.last_modified,
+        etag: response.headers["etag"],
         last_built: feed.respond_to?(:last_built) ? feed.last_built : nil,
         last_error_status: nil
       )

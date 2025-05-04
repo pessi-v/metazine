@@ -1,16 +1,13 @@
 class ActivityPub::ActorActivityHandler
   def self.handle_create_activity(activity_hash_or_id)
-    Rails.logger.info "ActivityPub::ActorActivityHandler handle_create_activity: #{activity_hash_or_id}"
     handle_activity(activity_hash_or_id, "Create")
   end
 
   def self.handle_update_activity(activity_hash_or_id)
-    Rails.logger.info "ActivityPub::ActorActivityHandler handle_update_activity: #{activity_hash_or_id}"
     handle_activity(activity_hash_or_id, "Update")
   end
 
   def self.handle_activity(activity_hash_or_id, action)
-    Rails.logger.info "ActivityPub::ActorActivityHandler handle_activity: #{activity_hash_or_id}, #{action}"
     activity = Fediverse::Request.dereference(activity_hash_or_id)
 
     # Get object attributes and update object
@@ -30,7 +27,6 @@ class ActivityPub::ActorActivityHandler
   end
 
   def self.get_actor(activity)
-    Rails.logger.info "ActivityPub::ActorActivityHandler get_actor: #{activity}"
     Federails::Actor.find_or_create_by_federation_url(
       activity["actor"].is_a?(Hash) ?
         activity.dig("actor", "id") :
@@ -41,7 +37,6 @@ class ActivityPub::ActorActivityHandler
   # This is copied from Fediverse::Webfinger - that needs refactoring so we can use it directly
 
   def self.actor_object_attributes(activity)
-    Rails.logger.info "ActivityPub::ActorActivityHandler actor_object_attributes: #{activity}"
     object = Fediverse::Request.dereference(activity["object"])
 
     # We only want to process actors
@@ -64,7 +59,6 @@ class ActivityPub::ActorActivityHandler
   end
 
   def self.server_and_port(string)
-    Rails.logger.info "ActivityPub::ActorActivityHandler server_and_port: #{string}"
     uri = URI.parse string
     if uri.port && [80, 443].exclude?(uri.port)
       "#{uri.host}:#{uri.port}"

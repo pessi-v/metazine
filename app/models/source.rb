@@ -6,7 +6,7 @@ class Source < ApplicationRecord
   validates :name, exclusion:
     {
       in: %(search source sources articles article user users list fetch_feeds fetch_feed reader .well-known editor following followers),
-      message: '%<value>s is a reserved keyword'
+      message: "%<value>s is a reserved keyword"
     }
 
   scope :active, -> { where(active: true) }
@@ -35,7 +35,7 @@ class Source < ApplicationRecord
     ogp&.image
     ogp&.description
   rescue OGP::MalformedSourceError
-    Rails.logger.debug 'source url does not have ogp metadata'
+    Rails.logger.info "source url does not have ogp metadata"
     nil
   end
 

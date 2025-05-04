@@ -12,14 +12,12 @@ class InstanceActor < ApplicationRecord
   after_followed :accept_follow
 
   def accept_follow(follow)
-    Rails.logger.info "InstanceActor#accept_follow"
     return unless federails_actor.local?
     follow.accept!
   end
 
   after_follow_accepted :follow_accepted
   def follow_accepted(follow)
-    Rails.logger.info "InstanceActor#follow_accepted"
   end
 
   def to_activitypub_object

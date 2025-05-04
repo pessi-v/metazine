@@ -84,7 +84,6 @@ gem 'cld'
 gem 'pg_search'
 
 # ActivityPub
-# gem "federails", path: "/Users/pes/code/federails"
 gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
 
 gem 'dockerfile-rails', '>= 1.6', group: :development

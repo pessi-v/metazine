@@ -139,7 +139,7 @@ module Articles
 
         return response if response.status == 200
       rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
-        Rails.logger.warn("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
+        Rails.logger.info("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
       end
 
       # Fallback to a simpler request if the first attempt fails

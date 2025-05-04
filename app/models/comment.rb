@@ -18,13 +18,11 @@ class Comment < ApplicationRecord
   on_federails_delete_requested -> { delete }
 
   def to_activitypub_object
-    Rails.logger.info "Comment#to_activitypub_object"
     Federails::DataTransformer::Note.to_federation self,
       content: content
   end
 
   def self.handle_federated_object?(hash)
-    Rails.logger.info "Comment::handle_federated_object?"
     # Only reply notes should be saved as Comment
     # Question, what other types of notes are there?
     hash["inReplyTo"].present?
@@ -32,9 +30,6 @@ class Comment < ApplicationRecord
 
   # Create a comment from an incoming ActivityPub object
   def self.from_activitypub_object(hash)
-    Rails.logger.info "Comment::from_activitypub_object"
-    Rails.logger.info "Comment::from_activitypub_object: hash: #{hash}"
-
     # example_hash = {
     #   "id" => "https://remote.social/users/bob/statuses/114411967872142984",
     #   "type" => "Note",
@@ -73,7 +68,6 @@ class Comment < ApplicationRecord
       )
 
     parent = Federails::Utils::Object.find_or_create! hash["inReplyTo"]
-    Rails.logger.info "Comment::from_activitypub_object: parent: #{parent.inspect}"
     attrs[:parent_type] = parent.class.name
     attrs[:parent_id] = parent.id
 
