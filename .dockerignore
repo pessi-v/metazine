@@ -38,3 +38,11 @@
 
 /.private.pem
 /.public.pem
+
+/*/.DS_Store
+/*/*/.DS_Store
+/.DS_Store
+/app.json
+/.github
+.tool-versions
+flip.sh
