@@ -49,7 +49,14 @@ gem 'tzinfo-data', platforms: %i[windows jruby]
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', require: false
 
-gem 'slim-rails' # Slim HTML templating engine
+# Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
+gem "kamal", require: false
+
+# Add HTTP asset caching/compression and X-Sendfile acceleration to Puma [https://github.com/basecamp/thruster/]
+gem "thruster", require: false
+
+# Slim HTML templating engine
+gem 'slim-rails'
 
 # Simple, but flexible HTTP client library, with support for multiple backends.
 gem 'faraday', '~> 2.0'
@@ -99,7 +106,7 @@ gem 'zstd-ruby' # decode compressed http responses
 gem 'dhash-vips'
 
 # Fast transformer inference for Ruby 
-gem "informers"
+# gem "informers"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
