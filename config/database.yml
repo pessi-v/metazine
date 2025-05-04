@@ -83,6 +83,8 @@ production:
     database: metazine_production
     username: metazine
     password: <%= ENV["POSTGRES_PASSWORD"] %>
+    host: <%= ENV["DB_HOST"] %>
+    port: <%= ENV["DB_PORT"] %>
   cache:
     <<: *primary_production
     database: metazine_production_cache
