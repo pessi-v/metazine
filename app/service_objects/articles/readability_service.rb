@@ -192,6 +192,21 @@ module Articles
     # end
     #
     def parse_with_mozilla_readability
+      work_dir = "/rails/tmp"
+      FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
+      begin
+        FileUtils.chmod(0o777, work_dir)
+      rescue
+        nil
+      end
+
+      # Debugging
+      Rails.logger.debug "User: #{Process.uid}, Group: #{Process.gid}"
+      Rails.logger.debug "Work dir exists: #{File.exist?(work_dir)}"
+      Rails.logger.debug "Work dir writable: #{File.writable?(work_dir)}"
+      Rails.logger.debug "Current dir: #{Dir.pwd}"
+      Rails.logger.debug "Current dir writable: #{File.writable?(Dir.pwd)}"
+
       runner = NodeRunner.new(
         <<~JAVASCRIPT
           const { Readability } = require('@mozilla/readability');

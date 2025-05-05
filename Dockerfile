@@ -77,10 +77,18 @@ RUN groupadd --system --gid 1000 rails && \
 useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
 
 # Create necessary directories and set proper permissions
+# RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
+#     chmod 777 /tmp && \
+#     chmod 777 /rails/tmp && \
+#     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
+
+# Create necessary directories and set proper permissions
 RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
-    chmod 777 /tmp && \
-    chmod 777 /rails/tmp && \
+    chmod 1777 /rails/tmp && \
     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
+
+# Set sticky bit on tmp to prevent user conflicts
+RUN chmod +t /rails/tmp
 
 USER 1000:1000
 
