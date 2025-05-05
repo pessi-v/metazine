@@ -83,6 +83,14 @@ useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
 #     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
 
 # Create necessary directories and set proper permissions
+# RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
+#     chmod 1777 /rails/tmp && \
+#     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
+
+# # Set sticky bit on tmp to prevent user conflicts
+# RUN chmod +t /rails/tmp
+
+# Create necessary directories and set proper permissions
 RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
     chmod 1777 /rails/tmp && \
     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
