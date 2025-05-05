@@ -1,17 +1,17 @@
-# module NodeRunnerPatch
-#   def create_tempfile(basename)
-#     # Force use of Rails tmp directory
-#     work_dir = Rails.root.join("tmp", "node_runner_temp")
-#     FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
+module NodeRunnerPatch
+  def create_tempfile(basename)
+    # Always use /rails/tmp for temporary files
+    work_dir = "/rails/tmp"
+    FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
 
-#     filename = File.join(work_dir, "#{basename[0]}_#{SecureRandom.hex(8)}.#{basename[1]}")
-#     File.open(filename, File::WRONLY | File::CREAT | File::EXCL, 0o644)
-#   end
+    # Generate a unique filename
+    prefix = Array(basename).first || "node_runner"
+    suffix = Array(basename).last || "js"
+    filename = File.join(work_dir, "#{prefix}_#{Process.pid}_#{SecureRandom.hex(8)}.#{suffix}")
 
-#   def write_to_tempfile(contents)
-#     tmpfile = create_tempfile(["node_runner", "js"])
-#     tmpfile.write(contents)
-#     tmpfile.close
-#     tmpfile
-#   end
-# end
+    # Create the file with proper permissions
+    File.open(filename, File::WRONLY | File::CREAT | File::EXCL, 0o644)
+  end
+end
+
+NodeRunner.prepend(NodeRunnerPatch)
