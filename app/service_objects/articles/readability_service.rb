@@ -100,7 +100,7 @@ module Articles
     # end
     #
     def parse_with_mozilla_readability
-      temp_dir = Rails.root.join("tmp")
+      temp_dir = Rails.root.join("tmp", "readability")
       FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
       begin
         FileUtils.chmod(0o777, temp_dir)
