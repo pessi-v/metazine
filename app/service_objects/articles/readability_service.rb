@@ -35,27 +35,29 @@ module Articles
     private
 
     # this returns a hash
-    # def parse_with_mozilla_readability
-    #   temp_dir = Rails.root.join("tmp")
-    #   FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+    def parse_with_mozilla_readability
+      # temp_dir = Rails.root.join("tmp")
+      # FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
 
-    #   runner = NodeRunner.new(
-    #     <<~JAVASCRIPT
-    #       const { Readability } = require('@mozilla/readability');
-    #       const jsdom = require("jsdom");
-    #       const { JSDOM } = jsdom;#{"        "}
-    #       const parse = (document) => {
-    #         const dom = new JSDOM(document);
-    #         return new Readability(dom.window.document).parse()
-    #       }
-    #     JAVASCRIPT
-    #   )
+      runner = NodeRunner.new(
+        <<~JAVASCRIPT
+          const { Readability } = require('@mozilla/readability');
+          const jsdom = require("jsdom");
+          const { JSDOM } = jsdom;#{"        "}
+          const parse = (document) => {
+            const dom = new JSDOM(document);
+            return new Readability(dom.window.document).parse()
+          }
+        JAVASCRIPT
+      )
 
-    #   # Set the temporary directory for this process
-    #   Dir.mktmpdir(nil, temp_dir) do |tmpdir|
-    #     runner.parse(@html_content)
-    #   end
-    # end
+      runner.parse(@html_content)
+
+      # Set the temporary directory for this process
+      # Dir.mktmpdir(nil, temp_dir) do |tmpdir|
+      #   runner.parse(@html_content)
+      # end
+    end
     #
     # def parse_with_mozilla_readability
     #   temp_dir = Rails.root.join("tmp", "readability")
@@ -191,36 +193,36 @@ module Articles
     #   end
     # end
     #
-    def parse_with_mozilla_readability
-      work_dir = "/rails/tmp"
-      FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
-      begin
-        FileUtils.chmod(0o777, work_dir)
-      rescue
-        nil
-      end
+    # def parse_with_mozilla_readability
+    #   work_dir = "/rails/tmp"
+    #   FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
+    #   begin
+    #     FileUtils.chmod(0o777, work_dir)
+    #   rescue
+    #     nil
+    #   end
 
-      # Debugging
-      Rails.logger.info "User: #{Process.uid}, Group: #{Process.gid}"
-      Rails.logger.info "Work dir exists: #{File.exist?(work_dir)}"
-      Rails.logger.info "Work dir writable: #{File.writable?(work_dir)}"
-      Rails.logger.info "Current dir: #{Dir.pwd}"
-      Rails.logger.info "Current dir writable: #{File.writable?(Dir.pwd)}"
+    #   # Debugging
+    #   Rails.logger.info "User: #{Process.uid}, Group: #{Process.gid}"
+    #   Rails.logger.info "Work dir exists: #{File.exist?(work_dir)}"
+    #   Rails.logger.info "Work dir writable: #{File.writable?(work_dir)}"
+    #   Rails.logger.info "Current dir: #{Dir.pwd}"
+    #   Rails.logger.info "Current dir writable: #{File.writable?(Dir.pwd)}"
 
-      runner = NodeRunner.new(
-        <<~JAVASCRIPT
-          const { Readability } = require('@mozilla/readability');
-          const jsdom = require("jsdom");
-          const { JSDOM } = jsdom;
-          const parse = (document) => {
-            const dom = new JSDOM(document);
-            return new Readability(dom.window.document).parse()
-          }
-        JAVASCRIPT
-      )
+    #   runner = NodeRunner.new(
+    #     <<~JAVASCRIPT
+    #       const { Readability } = require('@mozilla/readability');
+    #       const jsdom = require("jsdom");
+    #       const { JSDOM } = jsdom;
+    #       const parse = (document) => {
+    #         const dom = new JSDOM(document);
+    #         return new Readability(dom.window.document).parse()
+    #       }
+    #     JAVASCRIPT
+    #   )
 
-      runner.parse(@html_content)
-    end
+    #   runner.parse(@html_content)
+    # end
   end
 end
 
