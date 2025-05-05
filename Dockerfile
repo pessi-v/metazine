@@ -69,7 +69,8 @@ RUN groupadd --system --gid 1000 rails && \
 useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
 chown -R rails:rails db log storage tmp
 
-RUN chmod +t /tmp
+RUN chmod 777 /tmp
+RUN mkdir -p /rails/tmp && chmod 777 /rails/tmp
 
 USER 1000:1000
 
