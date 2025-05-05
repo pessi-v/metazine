@@ -99,48 +99,96 @@ module Articles
     #   ENV["TEMP"] = nil
     # end
     #
+    # def parse_with_mozilla_readability
+    #   temp_dir = Rails.root.join("tmp", "readability")
+    #   FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+    #   begin
+    #     FileUtils.chmod(0o777, temp_dir)
+    #   rescue
+    #     nil
+    #   end
+
+    #   # Pass a custom executor to NodeRunner with a different temp directory approach
+    #   custom_executor = NodeRunner::Executor.new
+
+    #   # Override the create_tempfile behavior
+    #   class << custom_executor
+    #     attr_accessor :temp_dir
+
+    #     # Override the tmpfile creation to use our temp directory
+    #     def create_tempfile(basename)
+    #       tmpfile = nil
+    #       File.open(File.join(temp_dir, "node_runner_#{SecureRandom.hex(8)}.js"), File::WRONLY | File::CREAT | File::EXCL) do |file|
+    #         tmpfile = file
+    #       end
+    #       tmpfile
+    #     end
+    #   end
+
+    #   custom_executor.temp_dir = temp_dir
+
+    #   js_string = <<~JAVASCRIPT
+    #     const { Readability } = require("@mozilla/readability");
+    #     const jsdom = require("jsdom");
+    #     const { JSDOM } = jsdom;#{"        "}
+    #     const parse = (document) => {
+    #       const dom = new JSDOM(document);
+    #       return new Readability(dom.window.document).parse()
+    #     }
+    #   JAVASCRIPT
+
+    #   runner = NodeRunner.new(js_string,
+    #     executor: custom_executor)
+
+    #   runner.parse(@html_content)
+    # end
+    #
     def parse_with_mozilla_readability
-      temp_dir = Rails.root.join("tmp", "readability")
-      FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+      # Create a unique temp directory within Rails tmp
+      temp_dir = Rails.root.join("tmp", "readability", SecureRandom.hex(8))
+      FileUtils.mkdir_p(temp_dir)
       begin
         FileUtils.chmod(0o777, temp_dir)
       rescue
         nil
       end
 
-      # Pass a custom executor to NodeRunner with a different temp directory approach
-      custom_executor = NodeRunner::Executor.new
+      # Explicitly set environment variables for this process
+      original_tmpdir = ENV["TMPDIR"]
+      ENV["TMPDIR"] = temp_dir.to_s
+      ENV["TMP"] = temp_dir.to_s
+      ENV["TEMP"] = temp_dir.to_s
 
-      # Override the create_tempfile behavior
-      class << custom_executor
-        attr_accessor :temp_dir
+      begin
+        runner = NodeRunner.new(
+          <<~JAVASCRIPT
+            const { Readability } = require('@mozilla/readability');
+            const jsdom = require("jsdom");
+            const { JSDOM } = jsdom;
+            const parse = (document) => {
+              const dom = new JSDOM(document);
+              return new Readability(dom.window.document).parse()
+            }
+          JAVASCRIPT
+        )
 
-        # Override the tmpfile creation to use our temp directory
-        def create_tempfile(basename)
-          tmpfile = nil
-          File.open(File.join(temp_dir, "node_runner_#{SecureRandom.hex(8)}.js"), File::WRONLY | File::CREAT | File::EXCL) do |file|
-            tmpfile = file
-          end
-          tmpfile
+        # Don't use Dir.mktmpdir, just run directly
+        result = runner.parse(@html_content)
+
+        # Clean up
+        begin
+          FileUtils.rm_rf(temp_dir)
+        rescue
+          nil
         end
+
+        result
+      ensure
+        # Restore original environment variables
+        ENV["TMPDIR"] = original_tmpdir
+        ENV["TMP"] = nil
+        ENV["TEMP"] = nil
       end
-
-      custom_executor.temp_dir = temp_dir
-
-      js_string = <<~JAVASCRIPT
-        const { Readability } = require("@mozilla/readability");
-        const jsdom = require("jsdom");
-        const { JSDOM } = jsdom;#{"        "}
-        const parse = (document) => {
-          const dom = new JSDOM(document);
-          return new Readability(dom.window.document).parse()
-        }
-      JAVASCRIPT
-
-      runner = NodeRunner.new(js_string,
-        executor: custom_executor)
-
-      runner.parse(@html_content)
     end
   end
 end
