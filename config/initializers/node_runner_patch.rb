@@ -1,17 +1,17 @@
-module NodeRunnerPatch
-  def create_tempfile(basename)
-    # Always use /rails/tmp for temporary files
+class NodeRunner
+  def write_to_tempfile(contents)
+    # Use a simple approach: create a file directly
     work_dir = "/rails/tmp"
-    FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
+    filename = File.join(work_dir, "node_runner_#{Process.pid}_#{SecureRandom.hex(8)}.js")
 
-    # Generate a unique filename
-    prefix = Array(basename).first || "node_runner"
-    suffix = Array(basename).last || "js"
-    filename = File.join(work_dir, "#{prefix}_#{Process.pid}_#{SecureRandom.hex(8)}.#{suffix}")
+    File.write(filename, contents)
 
-    # Create the file with proper permissions
-    File.open(filename, File::WRONLY | File::CREAT | File::EXCL, 0o644)
+    # Return a file-like object that Duck-types as needed
+    file = File.open(filename, "r")
+    def file.path
+      @path
+    end
+    file.instance_variable_set(:@path, filename)
+    file
   end
 end
-
-NodeRunner.prepend(NodeRunnerPatch)
