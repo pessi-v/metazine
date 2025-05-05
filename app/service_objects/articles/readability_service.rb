@@ -35,9 +35,44 @@ module Articles
     private
 
     # this returns a hash
+    # def parse_with_mozilla_readability
+    #   temp_dir = Rails.root.join("tmp")
+    #   FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+
+    #   runner = NodeRunner.new(
+    #     <<~JAVASCRIPT
+    #       const { Readability } = require('@mozilla/readability');
+    #       const jsdom = require("jsdom");
+    #       const { JSDOM } = jsdom;#{"        "}
+    #       const parse = (document) => {
+    #         const dom = new JSDOM(document);
+    #         return new Readability(dom.window.document).parse()
+    #       }
+    #     JAVASCRIPT
+    #   )
+
+    #   # Set the temporary directory for this process
+    #   Dir.mktmpdir(nil, temp_dir) do |tmpdir|
+    #     runner.parse(@html_content)
+    #   end
+    # end
+    #
     def parse_with_mozilla_readability
-      temp_dir = Rails.root.join("tmp")
+      temp_dir = Rails.root.join("tmp", "readability")
       FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+
+      # Ensure the directory has proper permissions
+      begin
+        FileUtils.chmod(0o777, temp_dir)
+      rescue
+        nil
+      end
+
+      # Set environment variables before creating NodeRunner
+      original_tmpdir = ENV["TMPDIR"]
+      ENV["TMPDIR"] = temp_dir.to_s
+      ENV["TMP"] = temp_dir.to_s
+      ENV["TEMP"] = temp_dir.to_s
 
       runner = NodeRunner.new(
         <<~JAVASCRIPT
@@ -51,10 +86,17 @@ module Articles
         JAVASCRIPT
       )
 
-      # Set the temporary directory for this process
-      Dir.mktmpdir(nil, temp_dir) do |tmpdir|
-        runner.parse(@html_content)
+      Dir.mktmpdir("readability_", temp_dir) do |tmpdir|
+        # Also set the specific tmpdir for this block
+        Dir.chdir(tmpdir) do
+          runner.parse(@html_content)
+        end
       end
+    ensure
+      # Restore original environment variables
+      ENV["TMPDIR"] = original_tmpdir
+      ENV["TMP"] = nil
+      ENV["TEMP"] = nil
     end
   end
 end
