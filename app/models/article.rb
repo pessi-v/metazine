@@ -24,7 +24,7 @@ class Article < ApplicationRecord
   validates :description, presence: true, allow_blank: false
 
   pg_search_scope :search_by_title_source_and_readability_output,
-    against: %i[title source_name readability_output],
+    against: %i[title source_name readability_output_jsonb],
     using: {tsearch: {prefix: true}}, # tsearch = full text search
     ignoring: :accents
 

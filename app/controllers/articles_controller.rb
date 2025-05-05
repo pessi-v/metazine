@@ -3,12 +3,12 @@
 class ArticlesController < ApplicationController
   def frontpage
     # for some reason pagy doesn't like .order
-    @pagy, @articles = pagy(latest_articles.select(Article.column_names - ["readability_output"]), limit: 15)
+    @pagy, @articles = pagy(latest_articles, limit: 15)
   end
 
   def search
     @pagy, @articles = pagy(Article.search_by_title_source_and_readability_output(params[:query])
-      .select(Article.column_names - ["readability_output"])
+      .select(Article.column_names - ["readability_output_jsonb"])
       .reorder("published_at DESC"), limit: 14) # for some reason pagy doesn't like .order
 
     @search_term = params[:query]
@@ -17,7 +17,7 @@ class ArticlesController < ApplicationController
 
   def articles_by_source
     @pagy, @articles = pagy(Article.where(source_name: params[:source_name])
-      .select(Article.column_names - ["readability_output"])
+      .select(Article.column_names - ["readability_output_jsonb"])
       .reorder("published_at DESC"), limit: 14) # for some reason pagy doesn't like .order
     @source_name = params[:source_name]
     render :list
@@ -32,9 +32,9 @@ class ArticlesController < ApplicationController
     @article = Article.find(params[:id])
 
     readability_output = @article.readability_output_jsonb
-    if readability_output == "{}"
-      readability_output = eval @article.readability_output
-    end
+    # if readability_output == "{}"
+    #   readability_output = eval @article.readability_output
+    # end
 
     @title = @article.title
     @content = readability_output["content"].gsub('class="page"', "")
@@ -88,7 +88,7 @@ class ArticlesController < ApplicationController
     # @pagy, @articles = pagy(Article.order(published_at: :desc)
     #   .select(Article.column_names - ['readability_output']), limit: 14)
     Article
-      .select(Article.column_names - ["readability_output"])
+      .select(Article.column_names - ["readability_output_jsonb"])
       .reorder("published_at DESC") # for some reason pagy doesn't like .order
   end
 
