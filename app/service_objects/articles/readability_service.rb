@@ -143,52 +143,68 @@ module Articles
     #   runner.parse(@html_content)
     # end
     #
+    # def parse_with_mozilla_readability
+    #   # Create a unique temp directory within Rails tmp
+    #   temp_dir = Rails.root.join("tmp", "readability", SecureRandom.hex(8))
+    #   FileUtils.mkdir_p(temp_dir)
+    #   begin
+    #     FileUtils.chmod(0o777, temp_dir)
+    #   rescue
+    #     nil
+    #   end
+
+    #   # Explicitly set environment variables for this process
+    #   original_tmpdir = ENV["TMPDIR"]
+    #   ENV["TMPDIR"] = temp_dir.to_s
+    #   ENV["TMP"] = temp_dir.to_s
+    #   ENV["TEMP"] = temp_dir.to_s
+
+    #   begin
+    #     runner = NodeRunner.new(
+    #       <<~JAVASCRIPT
+    #         const { Readability } = require('@mozilla/readability');
+    #         const jsdom = require("jsdom");
+    #         const { JSDOM } = jsdom;
+    #         const parse = (document) => {
+    #           const dom = new JSDOM(document);
+    #           return new Readability(dom.window.document).parse()
+    #         }
+    #       JAVASCRIPT
+    #     )
+
+    #     # Don't use Dir.mktmpdir, just run directly
+    #     result = runner.parse(@html_content)
+
+    #     # Clean up
+    #     begin
+    #       FileUtils.rm_rf(temp_dir)
+    #     rescue
+    #       nil
+    #     end
+
+    #     result
+    #   ensure
+    #     # Restore original environment variables
+    #     ENV["TMPDIR"] = original_tmpdir
+    #     ENV["TMP"] = nil
+    #     ENV["TEMP"] = nil
+    #   end
+    # end
+    #
     def parse_with_mozilla_readability
-      # Create a unique temp directory within Rails tmp
-      temp_dir = Rails.root.join("tmp", "readability", SecureRandom.hex(8))
-      FileUtils.mkdir_p(temp_dir)
-      begin
-        FileUtils.chmod(0o777, temp_dir)
-      rescue
-        nil
-      end
+      runner = NodeRunner.new(
+        <<~JAVASCRIPT
+          const { Readability } = require('@mozilla/readability');
+          const jsdom = require("jsdom");
+          const { JSDOM } = jsdom;
+          const parse = (document) => {
+            const dom = new JSDOM(document);
+            return new Readability(dom.window.document).parse()
+          }
+        JAVASCRIPT
+      )
 
-      # Explicitly set environment variables for this process
-      original_tmpdir = ENV["TMPDIR"]
-      ENV["TMPDIR"] = temp_dir.to_s
-      ENV["TMP"] = temp_dir.to_s
-      ENV["TEMP"] = temp_dir.to_s
-
-      begin
-        runner = NodeRunner.new(
-          <<~JAVASCRIPT
-            const { Readability } = require('@mozilla/readability');
-            const jsdom = require("jsdom");
-            const { JSDOM } = jsdom;
-            const parse = (document) => {
-              const dom = new JSDOM(document);
-              return new Readability(dom.window.document).parse()
-            }
-          JAVASCRIPT
-        )
-
-        # Don't use Dir.mktmpdir, just run directly
-        result = runner.parse(@html_content)
-
-        # Clean up
-        begin
-          FileUtils.rm_rf(temp_dir)
-        rescue
-          nil
-        end
-
-        result
-      ensure
-        # Restore original environment variables
-        ENV["TMPDIR"] = original_tmpdir
-        ENV["TMP"] = nil
-        ENV["TEMP"] = nil
-      end
+      runner.parse(@html_content)
     end
   end
 end
