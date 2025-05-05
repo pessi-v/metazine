@@ -36,6 +36,9 @@ module Articles
 
     # this returns a hash
     def parse_with_mozilla_readability
+      temp_dir = Rails.root.join("tmp")
+      FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+
       runner = NodeRunner.new(
         <<~JAVASCRIPT
           const { Readability } = require('@mozilla/readability');
@@ -48,7 +51,10 @@ module Articles
         JAVASCRIPT
       )
 
-      runner.parse(@html_content)
+      # Set the temporary directory for this process
+      Dir.mktmpdir(nil, temp_dir) do |tmpdir|
+        runner.parse(@html_content)
+      end
     end
   end
 end

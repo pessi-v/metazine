@@ -58,7 +58,6 @@ module Articles
         published_at: determine_published_at,
         image_url: find_image_url,
         paywalled: paywalled?,
-        readability_output: readability_output,
         readability_output_jsonb: readability_output,
         # tags: readability_output["tags"],
         federails_actor: @instance_actor

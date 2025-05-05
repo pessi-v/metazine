@@ -5,9 +5,9 @@ module Articles
   # or content other than full articles.
   class ApprovalHelper
     FORBIDDEN_STRINGS = [
-      'Of the principles and themes outlined in this issue, Tribune readers will easily discern.'\
-      ' ‘Gastropolitics’ discusses how food matters to socialist politics. Food institutions historic,'\
-      ' existing or imagined, are discussed, as well as the transformative urges behind their establishment.'
+      "Of the principles and themes outlined in this issue, Tribune readers will easily discern." \
+      " \u2018Gastropolitics\u2019 discusses how food matters to socialist politics. Food institutions historic," \
+      " existing or imagined, are discussed, as well as the transformative urges behind their establishment."
 
     ].freeze
 
@@ -16,11 +16,11 @@ module Articles
     end
 
     def approve?
-      html_string = @article.readability_output
+      html_string = @article.readability_output_jsonb["content"]
 
       # filters some cases where no article is shown without Javascript or cookies,
       # and some cases of actually Video/Podcast content
-      if (@article.readability_output_jsonb['length'] && @article.readability_output_jsonb['length'] < 1900) || html_string.nil? || html_string.length < 1900
+      if @article.readability_output_jsonb["length"] && @article.readability_output_jsonb["length"] < 1900
         return false
       elsif FORBIDDEN_STRINGS.any? { |string| html_string.include?(string) }
         return false

@@ -79,7 +79,7 @@ gem 'addressable'
 
 gem 'nokogiri'
 
-# Run backend JS code with Node
+# Run backend JS code
 gem 'node-runner', '~> 1.2'
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
