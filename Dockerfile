@@ -63,6 +63,7 @@ COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
 RUN chmod +x bin/docker-entrypoint bin/thrust
+RUN chmod 777 /tmp
 
 # Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
