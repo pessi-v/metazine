@@ -64,39 +64,16 @@ COPY --from=build /rails /rails
 
 RUN chmod +x bin/docker-entrypoint bin/thrust
 
-# # Run and own only the runtime files as a non-root user for security
-# RUN groupadd --system --gid 1000 rails && \
-# useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-# chown -R rails:rails db log storage tmp
-
-# RUN chmod 777 /tmp
-# RUN mkdir -p /rails/tmp && chmod 777 /rails/tmp
-
-# Create user and group
+# Run and own only the runtime files as a non-root user for security
 RUN groupadd --system --gid 1000 rails && \
-useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash
-
-# Create necessary directories and set proper permissions
-# RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
-#     chmod 777 /tmp && \
-#     chmod 777 /rails/tmp && \
-#     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
-
-# Create necessary directories and set proper permissions
-# RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
-#     chmod 1777 /rails/tmp && \
-#     chown -R rails:rails /rails  # Change ownership of the entire /rails directory
-
-# # Set sticky bit on tmp to prevent user conflicts
-# RUN chmod +t /rails/tmp
-
-# Create necessary directories and set proper permissions
-RUN mkdir -p /rails/tmp /rails/log /rails/storage && \
-    chmod 1777 /rails/tmp && \
-    chown -R rails:rails /rails  # Change ownership of the entire /rails directory
+useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
+chown -R rails:rails db log storage tmp
 
 # Set sticky bit on tmp to prevent user conflicts
 RUN chmod +t /rails/tmp
+
+# Set sticky bit on tmp to prevent user conflicts
+RUN chmod +t /tmp
 
 USER 1000:1000
 
