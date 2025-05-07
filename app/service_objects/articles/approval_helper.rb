@@ -16,6 +16,7 @@ module Articles
     end
 
     def approve?
+      return false if @article.readability_output_jsonb.blank?
       html_string = @article.readability_output_jsonb["content"]
       return false if html_string.blank?
 
