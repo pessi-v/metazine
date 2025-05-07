@@ -29,9 +29,21 @@ ENV RAILS_ENV="production" \
 FROM base AS build
 
 # Install packages needed to build gems
+# RUN apt-get update -qq && \
+#     apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config libpq-dev nodejs npm && \
+#     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+    
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config libpq-dev nodejs npm && \
+    apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config libpq-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+    
+# Update to Node.js 22 (if using a Debian/Ubuntu-based image)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get install -y nodejs
+
+# If needed, you can also update npm
+RUN npm install -g npm@10.8.2
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
