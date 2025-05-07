@@ -36,8 +36,10 @@ module Articles
 
     # this returns a hash
     def parse_with_mozilla_readability
-      # temp_dir = Rails.root.join("tmp")
-      # FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
+      # Log the environment
+      Rails.logger.info "Current user: #{`whoami`.strip}"
+      Rails.logger.info "Temp directory permissions: #{`ls -la /tmp`.strip}"
+      Rails.logger.info "Process ID: #{Process.pid}"
 
       runner = NodeRunner.new(
         <<~JAVASCRIPT
@@ -52,177 +54,11 @@ module Articles
       )
 
       runner.parse(@html_content)
-
-      # Set the temporary directory for this process
-      # Dir.mktmpdir(nil, temp_dir) do |tmpdir|
-      #   runner.parse(@html_content)
-      # end
+    rescue => e
+      Rails.logger.error "Error in parse_with_mozilla_readability: #{e.class} - #{e.message}"
+      Rails.logger.error "Backtrace: #{e.backtrace.join("\n")}"
+      raise
     end
-    #
-    # def parse_with_mozilla_readability
-    #   temp_dir = Rails.root.join("tmp", "readability")
-    #   FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
-
-    #   # Ensure the directory has proper permissions
-    #   begin
-    #     FileUtils.chmod(0o777, temp_dir)
-    #   rescue
-    #     nil
-    #   end
-
-    #   # Set environment variables before creating NodeRunner
-    #   original_tmpdir = ENV["TMPDIR"]
-    #   ENV["TMPDIR"] = temp_dir.to_s
-    #   ENV["TMP"] = temp_dir.to_s
-    #   ENV["TEMP"] = temp_dir.to_s
-
-    #   runner = NodeRunner.new(
-    #     <<~JAVASCRIPT
-    #       const { Readability } = require('@mozilla/readability');
-    #       const jsdom = require("jsdom");
-    #       const { JSDOM } = jsdom;#{"        "}
-    #       const parse = (document) => {
-    #         const dom = new JSDOM(document);
-    #         return new Readability(dom.window.document).parse()
-    #       }
-    #     JAVASCRIPT
-    #   )
-
-    #   Dir.mktmpdir("readability_", temp_dir) do |tmpdir|
-    #     # Also set the specific tmpdir for this block
-    #     Dir.chdir(tmpdir) do
-    #       runner.parse(@html_content)
-    #     end
-    #   end
-    # ensure
-    #   # Restore original environment variables
-    #   ENV["TMPDIR"] = original_tmpdir
-    #   ENV["TMP"] = nil
-    #   ENV["TEMP"] = nil
-    # end
-    #
-    # def parse_with_mozilla_readability
-    #   temp_dir = Rails.root.join("tmp", "readability")
-    #   FileUtils.mkdir_p(temp_dir) unless File.exist?(temp_dir)
-    #   begin
-    #     FileUtils.chmod(0o777, temp_dir)
-    #   rescue
-    #     nil
-    #   end
-
-    #   # Pass a custom executor to NodeRunner with a different temp directory approach
-    #   custom_executor = NodeRunner::Executor.new
-
-    #   # Override the create_tempfile behavior
-    #   class << custom_executor
-    #     attr_accessor :temp_dir
-
-    #     # Override the tmpfile creation to use our temp directory
-    #     def create_tempfile(basename)
-    #       tmpfile = nil
-    #       File.open(File.join(temp_dir, "node_runner_#{SecureRandom.hex(8)}.js"), File::WRONLY | File::CREAT | File::EXCL) do |file|
-    #         tmpfile = file
-    #       end
-    #       tmpfile
-    #     end
-    #   end
-
-    #   custom_executor.temp_dir = temp_dir
-
-    #   js_string = <<~JAVASCRIPT
-    #     const { Readability } = require("@mozilla/readability");
-    #     const jsdom = require("jsdom");
-    #     const { JSDOM } = jsdom;#{"        "}
-    #     const parse = (document) => {
-    #       const dom = new JSDOM(document);
-    #       return new Readability(dom.window.document).parse()
-    #     }
-    #   JAVASCRIPT
-
-    #   runner = NodeRunner.new(js_string,
-    #     executor: custom_executor)
-
-    #   runner.parse(@html_content)
-    # end
-    #
-    # def parse_with_mozilla_readability
-    #   # Create a unique temp directory within Rails tmp
-    #   temp_dir = Rails.root.join("tmp", "readability", SecureRandom.hex(8))
-    #   FileUtils.mkdir_p(temp_dir)
-    #   begin
-    #     FileUtils.chmod(0o777, temp_dir)
-    #   rescue
-    #     nil
-    #   end
-
-    #   # Explicitly set environment variables for this process
-    #   original_tmpdir = ENV["TMPDIR"]
-    #   ENV["TMPDIR"] = temp_dir.to_s
-    #   ENV["TMP"] = temp_dir.to_s
-    #   ENV["TEMP"] = temp_dir.to_s
-
-    #   begin
-    #     runner = NodeRunner.new(
-    #       <<~JAVASCRIPT
-    #         const { Readability } = require('@mozilla/readability');
-    #         const jsdom = require("jsdom");
-    #         const { JSDOM } = jsdom;
-    #         const parse = (document) => {
-    #           const dom = new JSDOM(document);
-    #           return new Readability(dom.window.document).parse()
-    #         }
-    #       JAVASCRIPT
-    #     )
-
-    #     # Don't use Dir.mktmpdir, just run directly
-    #     result = runner.parse(@html_content)
-
-    #     # Clean up
-    #     begin
-    #       FileUtils.rm_rf(temp_dir)
-    #     rescue
-    #       nil
-    #     end
-
-    #     result
-    #   ensure
-    #     # Restore original environment variables
-    #     ENV["TMPDIR"] = original_tmpdir
-    #     ENV["TMP"] = nil
-    #     ENV["TEMP"] = nil
-    #   end
-    # end
-    #
-    # def parse_with_mozilla_readability
-    #   work_dir = "/rails/tmp"
-    #   FileUtils.mkdir_p(work_dir) unless File.exist?(work_dir)
-    #   begin
-    #     FileUtils.chmod(0o777, work_dir)
-    #   rescue
-    #     nil
-    #   end
-
-    #   # Debugging
-    #   Rails.logger.info "User: #{Process.uid}, Group: #{Process.gid}"
-    #   Rails.logger.info "Work dir exists: #{File.exist?(work_dir)}"
-    #   Rails.logger.info "Work dir writable: #{File.writable?(work_dir)}"
-    #   Rails.logger.info "Current dir: #{Dir.pwd}"
-    #   Rails.logger.info "Current dir writable: #{File.writable?(Dir.pwd)}"
-
-    #   runner = NodeRunner.new(
-    #     <<~JAVASCRIPT
-    #       const { Readability } = require('@mozilla/readability');
-    #       const jsdom = require("jsdom");
-    #       const { JSDOM } = jsdom;
-    #       const parse = (document) => {
-    #         const dom = new JSDOM(document);
-    #         return new Readability(dom.window.document).parse()
-    #       }
-    #     JAVASCRIPT
-    #   )
-
-    #   runner.parse(@html_content)
-    # end
   end
 end
 
