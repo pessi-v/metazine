@@ -1,6 +1,6 @@
 class CollapseMigrations < ActiveRecord::Migration[8.0]
   def change
-    These are extensions that must be enabled in order to support this database
+    # These are extensions that must be enabled in order to support this database
     enable_extension "pg_catalog.plpgsql"
     enable_extension "unaccent"
 
