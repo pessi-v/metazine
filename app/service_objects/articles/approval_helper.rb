@@ -17,6 +17,7 @@ module Articles
 
     def approve?
       html_string = @article.readability_output_jsonb["content"]
+      return false if html_string.blank?
 
       # filters some cases where no article is shown without Javascript or cookies,
       # and some cases of actually Video/Podcast content
