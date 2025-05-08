@@ -9,6 +9,10 @@ module Articles
       @source = source
       @entry = entry
       @original_page = fetch_original_page
+      unless @original_page
+        Rails.logger.info "Access blocked by Cloudflare security check when accessing #{@entry.url}"
+        return
+      end
       @description = description
       @clean_title = clean_title
     end
@@ -136,13 +140,27 @@ module Articles
           req.headers["Sec-Fetch-User"] = "?1"
         end
 
+        if CloudflareDetector.is_cloudflare_challenge?(response)
+          # Handle the challenge case
+          Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+          return false
+        end
+
         return response if response.status == 200
       rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
         Rails.logger.info("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
       end
 
       # Fallback to a simpler request if the first attempt fails
-      Faraday.get(@entry.url)
+      response = Faraday.get(@entry.url)
+
+      if CloudflareDetector.is_cloudflare_challenge?(response)
+        # Handle the challenge case
+        Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+        return {error: "Access blocked by Cloudflare security check", success: false}
+      end
+
+      response
     end
 
     def fetch_og_data

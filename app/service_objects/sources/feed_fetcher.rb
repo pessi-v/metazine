@@ -15,6 +15,8 @@ module Sources
       Rails.logger.info("Processing feed for source: #{source.name}")
 
       response = make_request(source: source)
+      # binding.break
+
       if response.status == 500
         handle_fetch_error(source, :internal_server_error)
         return
@@ -106,7 +108,7 @@ module Sources
 
     def feed_not_modified?(response, feed, source)
       if (response.headers["last-modified"] && response.headers["last-modified"] == source.last_modified) ||
-          (feed.respond_to?(:last_built) && feed.last_built == source.last_built) ||
+          (feed.respond_to?(:last_built) && feed.last_built.present? && feed.last_built == source.last_built) ||
           (feed.last_modified == source.last_modified)
         true
       else

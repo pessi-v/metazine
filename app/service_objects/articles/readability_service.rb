@@ -8,7 +8,6 @@ module Articles
 
     def parse
       readability_output = parse_with_mozilla_readability
-
       return if readability_output.nil?
 
       readability_output.delete("textContent")
