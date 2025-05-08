@@ -47,6 +47,18 @@ class ArticlesController < ApplicationController
     end
   end
 
+  def testing
+    runner = NodeRunner.new(
+      <<~JAVASCRIPT
+        const hello = (response) => {
+          return `Hello? ${response}`
+        }
+      JAVASCRIPT
+    )
+
+    Rails.logger.info runner.hello("BOB")
+  end
+
   private
 
   def add_image_attributes(html_string)
