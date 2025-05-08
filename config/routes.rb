@@ -24,5 +24,5 @@ Rails.application.routes.draw do
   # some Sources contain a period or some other special character in the name
   get ":source_name", to: "articles#articles_by_source",
     constraints: {source_name: %r{[^/]+}}, as: :articles_by_source
-  get "testing", to: "articles#testing", as: :testing
+  get "articles/testing", to: "articles#testing", as: :testing
 end
