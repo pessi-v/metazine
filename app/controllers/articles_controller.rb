@@ -2,16 +2,14 @@
 
 class ArticlesController < ApplicationController
   def frontpage
-    # @articles = latest_articles.limit(14)
-
     # for some reason pagy doesn't like .order
-    @pagy, @articles = pagy(latest_articles.select(Article.column_names - ['readability_output']), limit: 15)
+    @pagy, @articles = pagy(latest_articles, limit: 15)
   end
 
   def search
     @pagy, @articles = pagy(Article.search_by_title_source_and_readability_output(params[:query])
-      .select(Article.column_names - ['readability_output'])
-      .reorder('published_at DESC'), limit: 14) # for some reason pagy doesn't like .order
+      .select(Article.column_names - ["readability_output_jsonb"])
+      .reorder("published_at DESC"), limit: 14) # for some reason pagy doesn't like .order
 
     @search_term = params[:query]
     render :list
@@ -19,8 +17,8 @@ class ArticlesController < ApplicationController
 
   def articles_by_source
     @pagy, @articles = pagy(Article.where(source_name: params[:source_name])
-      .select(Article.column_names - ['readability_output'])
-      .reorder('published_at DESC'), limit: 14) # for some reason pagy doesn't like .order
+      .select(Article.column_names - ["readability_output_jsonb"])
+      .reorder("published_at DESC"), limit: 14) # for some reason pagy doesn't like .order
     @source_name = params[:source_name]
     render :list
   end
@@ -33,28 +31,40 @@ class ArticlesController < ApplicationController
   def reader
     @article = Article.find(params[:id])
 
-    set_article_readability_output(@article) unless @article.readability_output
-
     readability_output = @article.readability_output_jsonb
-    if readability_output == '{}'
-      readability_output = eval @article.readability_output
-    end
-
+    # if readability_output == "{}"
+    #   readability_output = eval @article.readability_output
+    # end
 
     @title = @article.title
-    @content = readability_output['content'].gsub('class="page"', '')
+    @content = readability_output["content"].gsub('class="page"', "")
     @content = add_image_attributes(@content)
-
-    # @content = readability_output['textContent']
     @text_to_speech_content = prepare_readability_output_for_tts(readability_output)
-
-    # headers['Cross-Origin-Opener-Policy'] = 'same-origin'
-    # headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
 
     respond_to do |format|
       format.html
       format.json { render json: @article }
     end
+  end
+
+  def testing
+    Rails.logger.info "Current user: #{`whoami`.strip}"
+    Rails.logger.info "Temp directory permissions: #{`ls -la /tmp`.strip}"
+    Rails.logger.info "Process ID: #{Process.pid}"
+
+    runner = NodeRunner.new(
+      <<~JAVASCRIPT
+        const hello = (response) => {
+          return `Hello? ${response}`
+        }
+      JAVASCRIPT
+    )
+
+    Rails.logger.info runner.hello("BOB")
+
+    Rails.logger.info "Current user: #{`whoami`.strip}"
+    Rails.logger.info "Temp directory permissions: #{`ls -la /tmp`.strip}"
+    Rails.logger.info "Process ID: #{Process.pid}"
   end
 
   private
@@ -64,14 +74,14 @@ class ArticlesController < ApplicationController
     doc = Nokogiri::HTML(html_string)
 
     # Find all img tags
-    doc.css('img').each do |img|
+    doc.css("img").each do |img|
       # Add class attribute
-      existing_classes = img['class']&.split(' ') || []
-      new_classes = existing_classes + ['custom-prop-image']
-      img['class'] = new_classes.uniq.join(' ')
+      existing_classes = img["class"]&.split(" ") || []
+      new_classes = existing_classes + ["custom-prop-image"]
+      img["class"] = new_classes.uniq.join(" ")
 
       # Add data controller attribute
-      img['data-controller'] = 'reader-image'
+      img["data-controller"] = "reader-image"
     end
 
     # Return the modified HTML as a string
@@ -98,15 +108,8 @@ class ArticlesController < ApplicationController
     # @pagy, @articles = pagy(Article.order(published_at: :desc)
     #   .select(Article.column_names - ['readability_output']), limit: 14)
     Article
-      .select(Article.column_names - ['readability_output'])
-      .reorder('published_at DESC') # for some reason pagy doesn't like .order
-  end
-
-  # TODO: remove after a few days (1.2.25)
-  def set_article_readability_output(article)
-    response = Faraday.get(article.url)
-    article.readability_output = Articles::ReadabilityService.new(response.body).parse
-    article.save
+      .select(Article.column_names - ["readability_output_jsonb"])
+      .reorder("published_at DESC") # for some reason pagy doesn't like .order
   end
 
   # Only allow a list of trusted parameters through.
@@ -139,31 +142,31 @@ class ArticlesController < ApplicationController
     #
     # TODO: when this is well refined, make a new attribute where this text is stored
 
-    content = readability_output['content']
+    content = readability_output["content"]
     blocks = []
 
     # Remove tooltip spans and sup tags before processing other content
     content = content
-              .gsub(%r{<span[^>]*role="tooltip"[^>]*>.*?</span>}m, '')
+      .gsub(%r{<span[^>]*role="tooltip"[^>]*>.*?</span>}m, "")
     # .gsub(/<sup>(?:(?!<\/sup>).)*?<a[^>]*>(?:(?!<\/sup>).)*?<\/a>(?:(?!<\/sup>).)*?<\/sup>/m, '')  # TODO: this doesn't seem to work (the intent was to remove superscipts)
 
     def process_string(item)
       item
-        .gsub(%r{</?[^>]*>}, '') # Remove leftover tags (including <em>)
-        .delete('~') # Remove tildes
-        .gsub(/\\[a-z]/, '')               # Remove escaped characters
-        .gsub(/&[a-z]+;/, ' ')             # Replace HTML entities with space
-        .gsub(/\\u[0-9a-fA-F]{4}/, ' ')    # Replace hex codes with space
+        .gsub(%r{</?[^>]*>}, "") # Remove leftover tags (including <em>)
+        .delete("~") # Remove tildes
+        .gsub(/\\[a-z]/, "")               # Remove escaped characters
+        .gsub(/&[a-z]+;/, " ")             # Replace HTML entities with space
+        .gsub(/\\u[0-9a-fA-F]{4}/, " ")    # Replace hex codes with space
         .gsub(/\((.*?)\)/) { |_match| ", #{::Regexp.last_match(1)}, " } # Add commas around parenthetical content
         .gsub(/“(.*?)”/) { |_match| ", quote, #{::Regexp.last_match(1)}, end quote, " }  # Make quotations explicitly readable
         .gsub(/"(.*?)"/) { |_match| ", quote, #{::Regexp.last_match(1)}, end quote, " }  # Make quotations explicitly readable
         .strip
-        .gsub(/(?<![.!?])$/, '.')
+        .gsub(/(?<![.!?])$/, ".")
     end
 
     # Process the content in order of appearance
     content.scan(%r{<(?:p|h\d+|ul|ol)>(.*?)</(?:p|h\d+|ul|ol)>}m).flatten.each do |block|
-      if block.include?('<li>')
+      if block.include?("<li>")
         if block.match?(/<ol/)
           # Process ordered list items with their index
           index = 1
@@ -177,13 +180,13 @@ class ArticlesController < ApplicationController
         else
           # Handle unordered lists
           # TODO: Some Content has a <ul> tag for each <li> element (!)
-          blocks << 'Summary:'
+          blocks << "Summary:"
 
           block.scan(%r{<li>(.*?)</li>}m).flatten.each do |item|
             blocks << process_string(item)
           end
 
-          blocks << 'End of summary.'
+          blocks << "End of summary."
         end
       else
         # Process regular paragraphs and headers

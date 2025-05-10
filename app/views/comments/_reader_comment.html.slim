@@ -1,0 +1,9 @@
+.flex-column style="padding-left: #{depth * 20}px;"
+  .comment-author
+    = link_to comment.federated_url do
+      = comment.federails_actor.name
+  .comment
+    == comment.content
+  .comment-replies
+    - comment.comments.each do |child_comment|
+      = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: depth + 1 }

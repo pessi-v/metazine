@@ -2,12 +2,17 @@
 
 module Articles
   class CreateService
-    require 'faraday/gzip'
+    require "faraday/gzip"
 
     def initialize(source, entry)
+      @instance_actor = Federails::Actor.where(entity_type: "InstanceActor").first
       @source = source
       @entry = entry
       @original_page = fetch_original_page
+      unless @original_page
+        Rails.logger.info "Access blocked by Cloudflare security check when accessing #{@entry.url}"
+        return
+      end
       @description = description
       @clean_title = clean_title
     end
@@ -20,7 +25,6 @@ module Articles
 
       # clean up duplicate image, in case headline image is also in the text body
       article = ImageHelper.compare_and_update_article_images(article)
-      
 
       article.save
     end
@@ -28,22 +32,25 @@ module Articles
     private
 
     def article_exists?
-      Article.where('articles.title = ? OR articles.url = ?', @clean_title, @entry.url).exists?
+      Article.where("articles.title = ? OR articles.url = ?", @clean_title, @entry.url).exists?
     end
 
     def english?
       text = @description.presence || @clean_title
-      CLD.detect_language(text)[:code] == 'en'
+      CLD.detect_language(text)[:code] == "en"
     end
 
     def allowed_media_type?
-      return false if @entry.categories.include?('Video') && !@source.allow_video
-      return false if @entry.categories.intersect?(%w[Podcast Audio]) && !@source.allow_audio
+      audio_categories = %w[Podcast Audio]
+      return false if @entry.categories.include?("Video") && !@source.allow_video
+      return false if (@entry.categories & audio_categories).any? && !@source.allow_audio
 
       true
     end
 
     def article_attributes
+      readability_output = article_readability_output(@original_page.body)
+      # TODO: remove this once we have a way to handle the tags
       {
         title: @clean_title,
         description: @description,
@@ -55,8 +62,9 @@ module Articles
         published_at: determine_published_at,
         image_url: find_image_url,
         paywalled: paywalled?,
-        readability_output: article_readability_output(@original_page.body),
-        readability_output_jsonb: article_readability_output(@original_page.body)
+        readability_output_jsonb: readability_output,
+        # tags: readability_output["tags"],
+        federails_actor: @instance_actor
       }
     end
 
@@ -99,7 +107,7 @@ module Articles
       return Time.current if @entry.published.blank?
 
       timestamp = Time.zone.parse(@entry.published.to_s)
-      timestamp > Time.current ? Time.current : timestamp
+      (timestamp > Time.current) ? Time.current : timestamp
     end
 
     def find_image_url
@@ -119,32 +127,48 @@ module Articles
 
         response = connection.get(@entry.url) do |req|
           # Mimic a modern browser
-          req.headers['User-Agent'] =
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-          req.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
-          req.headers['Accept-Language'] = 'en-US,en;q=0.5'
-          req.headers['Accept-Encoding'] = 'gzip, deflate, br'
-          req.headers['Connection'] = 'keep-alive'
-          req.headers['Upgrade-Insecure-Requests'] = '1'
-          req.headers['Sec-Fetch-Dest'] = 'document'
-          req.headers['Sec-Fetch-Mode'] = 'navigate'
-          req.headers['Sec-Fetch-Site'] = 'none'
-          req.headers['Sec-Fetch-User'] = '?1'
+          req.headers["User-Agent"] =
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+          req.headers["Accept"] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+          req.headers["Accept-Language"] = "en-US,en;q=0.5"
+          req.headers["Accept-Encoding"] = "gzip, deflate, br"
+          req.headers["Connection"] = "keep-alive"
+          req.headers["Upgrade-Insecure-Requests"] = "1"
+          req.headers["Sec-Fetch-Dest"] = "document"
+          req.headers["Sec-Fetch-Mode"] = "navigate"
+          req.headers["Sec-Fetch-Site"] = "none"
+          req.headers["Sec-Fetch-User"] = "?1"
+        end
+
+        if CloudflareDetector.is_cloudflare_challenge?(response)
+          # Handle the challenge case
+          Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+          return false
         end
 
         return response if response.status == 200
       rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
-        Rails.logger.warn("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
+        Rails.logger.info("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
       end
 
       # Fallback to a simpler request if the first attempt fails
-      Faraday.get(@entry.url)
+      response = Faraday.get(@entry.url)
+
+      if CloudflareDetector.is_cloudflare_challenge?(response)
+        # Handle the challenge case
+        Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+        return {error: "Access blocked by Cloudflare security check", success: false}
+      end
+
+      response
     end
 
     def fetch_og_data
       return nil if @original_page.body.empty?
 
       @fetch_og_data ||= OGP::OpenGraph.new(@original_page.body, required_attributes: [])
+    rescue OGP::MalformedSourceError
+      # TODO
     end
 
     def paywalled?
@@ -153,15 +177,15 @@ module Articles
       doc = Nokogiri::HTML(response_body)
 
       # Check for the presence of paywall form div
-      return true if doc.css('#paywall-form').any?
+      return true if doc.css("#paywall-form").any?
 
       # Check for paywall message text
-      paywall_message = doc.css('.po-ln__message')
-      return true if paywall_message.text.include?('available to subscribers only')
+      paywall_message = doc.css(".po-ln__message")
+      return true if paywall_message.text.include?("available to subscribers only")
 
       # Check if intro section ends with ellipsis [...] which indicates truncated content
-      intro_section = doc.css('.po-cn__intro').text
-      return true if intro_section&.strip&.end_with?('[…]')
+      intro_section = doc.css(".po-cn__intro").text
+      return true if intro_section&.strip&.end_with?("[\u2026]")
 
       false
     end
@@ -169,7 +193,7 @@ module Articles
     def article_readability_output(html)
       readability_output = ReadabilityService.new(html).parse
 
-      if @source&.url&.match?('https://chuangcn.org')
+      if @source&.url&.match?("https://chuangcn.org")
         readability_output = ChuangHelper.new(readability_output).remove_chinese_section
       end
 

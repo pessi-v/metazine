@@ -8,39 +8,13 @@ Features:
 - Newspaper-like presentation of articles
 - Search across all articles
 - In-app reader view for articles using the @mozilla/readability JS library
+- In-browser text-to-speech service for articles
+- Federation with AcivityPub
 
 Planned:
 
-- ActivityPub integration
-- Comments
 - Article translations
 
 ## Demo App
 
-[Can be found here](https://newfutu.re/)
-
-## Installation
-
-### On Fly.io
-
-Dockerfile should have the required changes for deployment to Fly.io.
-
-### Locally
-
-Make sure you have installed ruby, the 'rails' gem, nodejs and npm.
-
-`git clone https://github.com/pessi-v/metazine.git
-bundle
-rails db:migrate
-npm install jsdom
-npm install @mozilla/readability`
-
-run the app:
-`bin/dev`
-
-### env variables
-
-You should define the following variables (in .env, for example):
-
-`INSTANCE_NAME = <your instance name here>
-APP_SHORT_DESCRIPTION = <whatever you want to say>`
+[Can be found here](https://mzine.top/)

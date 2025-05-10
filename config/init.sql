@@ -1,1 +1,0 @@
-CREATE DATABASE metazine_production;

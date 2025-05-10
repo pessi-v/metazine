@@ -1,4 +1,3 @@
-// import * as tts from "/assets/@mintplex-labs--piper-tts-web-99597191.js";
 import * as tts from RAILS_ASSET_URL("./@mintplex-labs--piper-tts-web.js")
 
 let session = null;
