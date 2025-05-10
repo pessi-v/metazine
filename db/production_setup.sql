@@ -1,0 +1,4 @@
+CREATE DATABASE metazine_production;
+CREATE DATABASE metazine_production_cache;
+CREATE DATABASE metazine_production_queue;
+CREATE DATABASE metazine_production_cable;
