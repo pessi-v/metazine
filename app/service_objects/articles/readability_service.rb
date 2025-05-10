@@ -35,11 +35,6 @@ module Articles
 
     # this returns a hash
     def parse_with_mozilla_readability
-      # Log the environment
-      Rails.logger.info "Current user: #{`whoami`.strip}"
-      Rails.logger.info "Temp directory permissions: #{`ls -la /tmp`.strip}"
-      Rails.logger.info "Process ID: #{Process.pid}"
-
       runner = NodeRunner.new(
         <<~JAVASCRIPT
           const { Readability } = require('@mozilla/readability');

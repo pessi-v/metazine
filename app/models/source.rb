@@ -30,6 +30,7 @@ class Source < ApplicationRecord
   def add_description_and_image
     uri = URI(url)
     response = Faraday.get(uri.origin)
+    return if response.body.blank?
     ogp = OGP::OpenGraph.new(response.body, required_attributes: [])
 
     ogp&.image
