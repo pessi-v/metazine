@@ -16,6 +16,31 @@ module Sources
       @feed_fetcher.consume_all
     end
 
+    test "consume_all continues processing sources even when one fails" do
+      # Create three mock sources
+      source1 = sources(:one)
+      source2 = sources(:two)
+      source3 = sources(:three)
+
+      # Set up Source.active to return our three sources
+      Source.expects(:active).returns([source1, source2, source3])
+
+      # The first source will process normally
+      @feed_fetcher.expects(:consume).with(source1).once
+
+      # The second source will raise an exception
+      @feed_fetcher.expects(:consume).with(source2).raises(StandardError.new("Test error"))
+
+      # The third source should still be processed despite the failure of the second
+      @feed_fetcher.expects(:consume).with(source3).once
+
+      # We expect a log message for the error
+      Rails.logger.expects(:error).with(regexp_matches(/Error processing source/))
+
+      # Call the method - it should handle the error from source2 and continue
+      @feed_fetcher.consume_all
+    end
+
     # Test for successful feed consumption (not modified - 304)
     test "consume handles 304 not modified status" do
       response = mock

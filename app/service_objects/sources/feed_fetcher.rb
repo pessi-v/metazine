@@ -7,7 +7,13 @@ module Sources
 
     def consume_all
       Rails.logger.info("Starting feed consumption for all active sources")
-      Source.active.each { |source| consume(source) }
+      Source.active.each do |source|
+        consume(source)
+      rescue => e
+        Rails.logger.error("Error processing source #{source.name}: #{e.message}")
+        # Optionally record the error in the source
+        source.update(last_error_status: "processing_error: #{e.message}") if source.respond_to?(:update)
+      end
       Rails.logger.info("Completed feed consumption for all active sources")
     end
 
