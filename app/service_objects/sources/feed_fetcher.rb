@@ -139,6 +139,10 @@ module Sources
       process_entries(feed.entries, source)
       update_source_metadata(source, feed, response)
       true
+    rescue => e
+      Rails.logger.error("Failed to process feed for source #{source.name}: #{e.message}")
+      handle_fetch_error(source, :process_feed_error, e)
+      false
     end
 
     def process_entries(entries, source)
@@ -149,6 +153,8 @@ module Sources
         Rails.logger.info "Skipping duplicate article: #{entry.url}"
         next
       end
+
+      true
     end
 
     def update_source_metadata(source, feed, response)

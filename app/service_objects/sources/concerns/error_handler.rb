@@ -12,7 +12,8 @@ module Sources
           redirect_limit_reached: "Redirect limit reached",
           xml_parse_error: "XML parsing error: response body is probably not a feed",
           internal_server_error: "Internal server error (HTTP error 500)",
-          not_found: "Not found (404)"
+          not_found: "Not found (404)",
+          process_feed_error: "Error processing feed"
         }
 
         Rails.logger.info("#{error_messages[error_type]} for source: #{source&.name} (#{source&.url})")
