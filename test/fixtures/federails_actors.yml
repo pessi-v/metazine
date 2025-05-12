@@ -1,0 +1,6 @@
+instance_actor:
+  entity_type: "InstanceActor"
+  entity_id: <%= ActiveRecord::FixtureSet.identify(:editor) %>  # References the main instance_actor
+  name: "Test Instance Actor"
+  created_at: <%= Time.current.iso8601 %>
+  updated_at: <%= Time.current.iso8601 %>
