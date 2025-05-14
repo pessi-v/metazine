@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module Articles
   class CreateService
     require "faraday/gzip"
@@ -9,15 +7,13 @@ module Articles
       @source = source
       @entry = entry
       @original_page = fetch_original_page
-      unless @original_page
-        Rails.logger.info "Access blocked by Cloudflare security check when accessing #{@entry.url}"
-        return
-      end
-      @description = description
-      @clean_title = clean_title
+      @description = make_description
+      @clean_title = TextCleaner.clean_title(@entry.title)
     end
 
     def create_article
+      return nil if !@original_page
+
       return if article_exists? || !english? || !allowed_media_type?
 
       article = Article.new(article_attributes)
@@ -27,6 +23,7 @@ module Articles
       article = ImageHelper.compare_and_update_article_images(article)
 
       article.save
+      article
     end
 
     private
@@ -68,39 +65,17 @@ module Articles
       }
     end
 
-    def clean_title
-      TextCleaner.new(@entry.title).clean_title
-    end
-
-    def description
+    def make_description
       # Use OG:Description if present
       og_description = fetch_og_data&.description
-      return @description = TextCleaner.new(og_description).clean if og_description
+      return TextCleaner.clean_description(og_description) if og_description
+
+      entry_summary = @entry.summary.presence
+      return TextCleaner.clean_description(entry_summary) if entry_summary
 
       # Use entry Summary if present, or take a part of main text
-      @description ||= begin
-        text = @entry.summary.presence || @entry.content.presence
-        return nil unless text
-
-        cleaned_text = TextCleaner.new(text).clean
-        truncate_summary(cleaned_text)
-      end
-    end
-
-    def summary
-      @summary ||= begin
-        text = entry.summary.presence || entry.content.presence
-        return nil unless text
-
-        cleaned_text = TextCleaner.new(text).clean
-        truncate_summary(cleaned_text)
-      end
-    end
-
-    def truncate_summary(text, length: 350)
-      return text if text.length <= length
-
-      "#{text[0..length]}…"
+      text = @entry.content.presence
+      text ? TextCleaner.clean_description(text) : nil
     end
 
     def determine_published_at

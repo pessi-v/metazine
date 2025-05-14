@@ -7,7 +7,7 @@ class InstanceActor < ApplicationRecord
   )
 
   # Validate at most one record
-  validate :only_one_instance_actor
+  validate :only_one_instance_actor, on: :create
 
   after_followed :accept_follow
 
@@ -21,6 +21,11 @@ class InstanceActor < ApplicationRecord
   end
 
   def to_activitypub_object
+    scheme = Rails.application.config.force_ssl ? "https" : "http"
+    host = Rails.application.default_url_options[:host]
+    port = Rails.application.default_url_options[:port]
+    site_host = "#{scheme}://#{host}#{port ? ":#{port}" : ""}"
+
     {
       "@context": {
         toot: "http://joinmastodon.org/ns#",
@@ -32,12 +37,12 @@ class InstanceActor < ApplicationRecord
       icon: [
         type: "Image",
         mediaType: "image/jpg",
-        url: ActionController::Base.helpers.asset_url("instance-logo.jpeg")
+        url: "#{site_host}#{ActionController::Base.helpers.asset_path("instance-logo.jpeg")}"
       ],
       Image: [
         type: "Image",
         mediaType: "image/jpg",
-        url: ActionController::Base.helpers.asset_url("waves.jpg")
+        url: "#{site_host}#{ActionController::Base.helpers.asset_path("waves.jpg")}"
       ]
     }
   end
