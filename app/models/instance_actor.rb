@@ -34,16 +34,16 @@ class InstanceActor < ApplicationRecord
           "@type": "@id"
         }
       },
-      icon: [
+      icon: {
         type: "Image",
         mediaType: "image/jpg",
         url: "#{site_host}#{ActionController::Base.helpers.asset_path("instance-logo.jpeg")}"
-      ],
-      Image: [
+      },
+      image: {
         type: "Image",
         mediaType: "image/jpg",
         url: "#{site_host}#{ActionController::Base.helpers.asset_path("waves.jpg")}"
-      ]
+      }
     }
   end
 
