@@ -4,3 +4,4 @@ instance_actor:
   name: "Test Instance Actor"
   created_at: <%= Time.current.iso8601 %>
   updated_at: <%= Time.current.iso8601 %>
+  local: true

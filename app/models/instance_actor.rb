@@ -7,7 +7,7 @@ class InstanceActor < ApplicationRecord
   )
 
   # Validate at most one record
-  validate :only_one_instance_actor
+  validate :only_one_instance_actor, on: :create
 
   after_followed :accept_follow
 
