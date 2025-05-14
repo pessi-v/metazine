@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_14_164154) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_14_170945) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "unaccent"
@@ -80,6 +80,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_14_164154) do
     t.text "private_key"
     t.datetime "tombstoned_at"
     t.string "actor_type"
+    t.json "extensions"
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
