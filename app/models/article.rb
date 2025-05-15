@@ -38,7 +38,7 @@ class Article < ApplicationRecord
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
-      content: reader_url(self) # TODO: we could have a partial for ActivityPub that only includes the ogp content? That way we wouldn't need to render the whole reader page
+      content: "<a href=\"#{reader_url(self)}\">#{reader_url(self)}</a>" # TODO: we could have a partial for ActivityPub that only includes the ogp content? That way we wouldn't need to render the whole reader page
       # content: federated_card_content
     )
   end
