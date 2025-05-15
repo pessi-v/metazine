@@ -47,26 +47,6 @@ class ArticlesController < ApplicationController
     end
   end
 
-  def testing
-    Rails.logger.info "Current user: #{`whoami`.strip}"
-    Rails.logger.info "Temp directory permissions: #{`ls -la /tmp`.strip}"
-    Rails.logger.info "Process ID: #{Process.pid}"
-
-    runner = NodeRunner.new(
-      <<~JAVASCRIPT
-        const hello = (response) => {
-          return `Hello? ${response}`
-        }
-      JAVASCRIPT
-    )
-
-    Rails.logger.info runner.hello("BOB")
-
-    Rails.logger.info "Current user: #{`whoami`.strip}"
-    Rails.logger.info "Temp directory permissions: #{`ls -la /tmp`.strip}"
-    Rails.logger.info "Process ID: #{Process.pid}"
-  end
-
   private
 
   def add_image_attributes(html_string)
