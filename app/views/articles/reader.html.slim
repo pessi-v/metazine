@@ -1,4 +1,4 @@
-- content_for :og_title, "Article: #{@article.title}"
+- content_for :og_title, @article.title
 - content_for :og_description, @article.description
 - content_for :og_image, @article.image_url if @article.image_url
 - content_for :og_type, "article"
