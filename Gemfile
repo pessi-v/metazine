@@ -72,7 +72,7 @@ gem 'node-runner', '~> 1.2'
 # Use .env files
 gem 'dotenv'
 
-gem 'rufus-scheduler'
+# gem 'rufus-scheduler'
 
 # ActivityPub
 gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
@@ -103,6 +103,10 @@ gem 'cld'
 
 # Compare image similarity
 gem 'dhash-vips'
+
+# Database metrics
+gem 'pghero'
+gem "pg_query", ">= 2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

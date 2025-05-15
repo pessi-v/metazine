@@ -282,9 +282,13 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.5.9)
+    pg_query (6.1.0)
+      google-protobuf (>= 3.25.3)
     pg_search (2.3.7)
       activerecord (>= 6.1)
       activesupport (>= 6.1)
+    pghero (3.6.2)
+      activerecord (>= 6.1)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -392,8 +396,6 @@ GEM
       ffi (~> 1.12)
       logger
     ruby2_keywords (0.0.5)
-    rufus-scheduler (3.9.2)
-      fugit (~> 1.1, >= 1.11.1)
     sass-embedded (1.87.0-aarch64-linux-gnu)
       google-protobuf (~> 4.30)
     sass-embedded (1.87.0-aarch64-linux-musl)
@@ -531,13 +533,14 @@ DEPENDENCIES
   ostruct
   pagy (~> 9.1)
   pg (~> 1.1)
+  pg_query (>= 2)
   pg_search
+  pghero
   propshaft
   puma (>= 5.0)
   rails (~> 8.0.2)
   rubocop-rails-omakase
   ruby-readability
-  rufus-scheduler
   slim-rails
   solid_cable
   solid_cache

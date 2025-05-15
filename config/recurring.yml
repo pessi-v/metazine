@@ -8,3 +8,18 @@
 #     command: "SoftDeletedRecord.due.delete_all"
 #     priority: 2
 #     schedule: at 5am every day
+
+production:
+  fetch_feeds:
+    command: "Sources::FeedFetcher.consume_all"
+    schedule: every hour
+  capture_query_stats_for_pghero:
+    command: "PgHero.capture_query_stats"
+    schedule: every 5 minutes
+  capture_space_stats_for_pghero:
+    command: "PgHero.capture_space_stats"
+    schedule: every day at 1am
+development:
+  fetch_feeds:
+    command: "Sources::FeedFetcher.consume_all"
+    schedule: every hour

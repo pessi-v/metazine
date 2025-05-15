@@ -13,6 +13,8 @@ Rails.application.routes.draw do
 
   mount Federails::Engine => "/"
 
+  mount PgHero::Engine, at: "pghero"
+
   get "reader/(:id)", to: "articles#reader", as: :reader
   post "fetch_feeds", to: "sources#fetch_feeds", as: :fetch_feeds
   post "fetch_feed", to: "sources#fetch_feed", as: :fetch_feed
