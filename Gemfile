@@ -24,7 +24,7 @@ gem "dartsass-rails"
 gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -75,7 +75,14 @@ gem 'dotenv'
 # gem 'rufus-scheduler'
 
 # ActivityPub
-gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
+# gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
+gem "federails", path: "../federails"
+
+# Authentication with omniauth
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem 'omniauth-mastodon', git: 'https://github.com/trakt/omniauth-mastodon' # this fork works with omniauth gem version 2
+gem 'mastodon-api', require: 'mastodon', git: 'https://github.com/daverooneyca/mastodon-api' # this fork works with at least ruby 3.3.4
 
  # pagination
 gem 'pagy', '~> 9.1'

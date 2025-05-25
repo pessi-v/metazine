@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_15_121208) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_25_132200) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -106,6 +106,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_15_121208) do
     t.string "name"
   end
 
+  create_table "mastodon_clients", force: :cascade do |t|
+    t.string "domain", null: false
+    t.string "client_id", null: false
+    t.string "client_secret", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "pghero_query_stats", force: :cascade do |t|
     t.text "database"
     t.text "user"
@@ -126,6 +134,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_15_121208) do
     t.index ["database", "captured_at"], name: "index_pghero_space_stats_on_database_and_captured_at"
   end
 
+  create_table "sessions", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "ip_address"
+    t.string "user_agent"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sessions_on_user_id"
+  end
+
   create_table "sources", force: :cascade do |t|
     t.string "name"
     t.string "url"
@@ -144,9 +161,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_15_121208) do
     t.string "last_built"
   end
 
+  create_table "users", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   add_foreign_key "articles", "federails_actors"
   add_foreign_key "comments", "federails_actors"
   add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
+  add_foreign_key "sessions", "users"
 end

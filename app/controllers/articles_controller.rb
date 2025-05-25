@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class ArticlesController < ApplicationController
+  allow_unauthenticated_access
   def frontpage
     # for some reason pagy doesn't like .order
     @pagy, @articles = pagy(latest_articles, limit: 15)

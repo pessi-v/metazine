@@ -45,7 +45,16 @@
   .content
     = @content.html_safe
 
+
   .line
   h2 Discussion
+
+  = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
+    label for="identifier" The name of your Mastodon instance, e.g. masto.social
+    = f.text_field :identifier, required: true, placeholder: "masto.social"
+    = f.submit do
+      = image_tag "mastodon-white.svg"
+      span Mastodon
+
   - @article.comments.each do |comment|
     = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
