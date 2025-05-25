@@ -19,8 +19,6 @@ class SessionsController < ApplicationController
       user = federails_actor.entity
     end
 
-    # binding.break
-
     if user
       start_new_session_for user
       redirect_to frontpage_url
@@ -42,7 +40,7 @@ class SessionsController < ApplicationController
 
   def destroy
     terminate_session
-    redirect_to new_session_path
+    redirect_back(fallback_location: frontpage_path)
   end
 end
 

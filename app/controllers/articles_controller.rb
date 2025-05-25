@@ -2,6 +2,8 @@
 
 class ArticlesController < ApplicationController
   allow_unauthenticated_access
+  before_action :resume_session
+
   def frontpage
     # for some reason pagy doesn't like .order
     @pagy, @articles = pagy(latest_articles, limit: 15)

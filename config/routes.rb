@@ -1,7 +1,8 @@
+# Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 Rails.application.routes.draw do
   resource :session, only: %i[new destroy]
   resources :passwords, param: :token
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  resources :comments, only: %i[create update destroy]
 
   resources :sources
   # resources :articles
