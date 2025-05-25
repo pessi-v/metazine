@@ -21,6 +21,7 @@ module Articles
 
       def clean(text)
         text
+          .dup
           .force_encoding("utf-8")
           .then { |t| strip_formatting(t) }
           .then { |t| remove_special_characters(t) }

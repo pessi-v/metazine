@@ -123,7 +123,7 @@ module Sources
     end
 
     def parse_feed(response, source: nil)
-      feed = Feedjira.parse(response.body.force_encoding("utf-8"))
+      feed = Feedjira.parse(response.body.dup.force_encoding("utf-8"))
 
       if feed.nil?
         handle_fetch_error(source, :feed_not_available)

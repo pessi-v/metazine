@@ -6,9 +6,7 @@ class InstanceActorWebfingerTest < ActionDispatch::IntegrationTest
     InstanceActor.destroy_all
 
     # Create an instance actor for testing
-    @instance_actor = InstanceActor.create(
-      name: "instance"
-    )
+    @instance_actor = InstanceActor.create(name: "instance")
   end
 
   test "there is a Webfinger for the InstanceActor at the expected URL" do
