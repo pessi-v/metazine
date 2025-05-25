@@ -1,7 +1,8 @@
 .flex-column style="padding-left: #{depth * 20}px;"
   .comment-author
-    = link_to comment.federated_url do
-      = comment.federails_actor.name
+    = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
+    / = link_to comment.federated_url do
+    /   = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
   .comment
     == comment.content
   .comment-replies

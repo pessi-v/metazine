@@ -60,6 +60,7 @@
       
     .comment-form
       = form_with url: comments_path, method: :post do |f|
+        = f.hidden_field :article_id, value: @article.id
         = f.text_area :content, placeholder: "Write your comment...", required: true
         = f.submit "Comment"
 
