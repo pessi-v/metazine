@@ -17,8 +17,10 @@ GIT
       omniauth
       omniauth-oauth2
 
-PATH
-  remote: ../federails
+GIT
+  remote: https://gitlab.com/pessi-v/federails
+  revision: bf9cce55142a6b17b400b4b33d1eb22083c9e7fa
+  branch: federails-cursor
   specs:
     federails (0.6.2)
       faraday

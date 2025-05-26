@@ -194,8 +194,13 @@
     }
   }
 
-  .discussion__header {
+  .reader .discussion__header {
     display: flex;
     justify-content: space-between;
   }
+}
+
+.discussion__header {
+  display: flex;
+  justify-content: space-between;
 }

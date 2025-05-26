@@ -75,8 +75,8 @@ gem 'dotenv'
 # gem 'rufus-scheduler'
 
 # ActivityPub
-# gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
-gem "federails", path: "../federails"
+gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
+# gem "federails", path: "../federails"
 
 # Authentication with omniauth
 gem "omniauth"
