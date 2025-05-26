@@ -7,11 +7,17 @@ class SessionsController < ApplicationController
 
   # Only handles Mastodon logins for now
   def create
-    omni_auth_info = request.env["omniauth.auth"]
-    profile_url = omni_auth_info["info"]["urls"]["profile"]
-    # profile_url = omni_auth_info["extra"]["raw_info"]["uri"]
-    federails_actor = Federails::Actor.find_or_create_by_federation_url(profile_url)
-    # binding.break
+    oauth_info = request.env["omniauth.auth"]
+
+    if oauth_info["extra"]["raw_info"]["uri"]
+      federated_url = oauth_info["extra"]["raw_info"]["uri"]
+    else
+      federated_url = "#{oauth_info['info']['urls']['domain']}/#{oauth_info['info']['name']}"
+    end
+
+    login_page = request.env["omniauth.origin"]
+    federails_actor = Federails::Actor.find_or_create_by_federation_url(federated_url)
+
     if !federails_actor.entity && !federails_actor.local?
       user = User.create
       federails_actor.update(entity_id: user.id, entity_type: "User")
@@ -21,8 +27,7 @@ class SessionsController < ApplicationController
 
     if user
       start_new_session_for user
-      redirect_to frontpage_url
-      # redirect_to after_authentication_url
+      redirect_to "#{login_page}#discussion"
     else
       redirect_to new_session_path, alert: "Something went wrong."
     end
