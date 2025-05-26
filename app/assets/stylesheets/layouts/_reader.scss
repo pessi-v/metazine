@@ -193,4 +193,9 @@
       width: 100%;
     }
   }
+
+  .discussion__header {
+    display: flex;
+    justify-content: space-between;
+  }
 }

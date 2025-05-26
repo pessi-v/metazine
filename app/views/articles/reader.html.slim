@@ -47,30 +47,29 @@
 
 
   .line#discussion
-  h2 Discussion
+  .discussion__header
+    h2 Discussion
+    .user-status
+      - if Current.user || Current.session
+        p You're logged in as #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
+        = button_to "Log out", session_path, method: :delete, class: "logout-btn"
+          
+      - else
+        = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
+          label for="identifier" The name of your Mastodon instance, e.g. masto.social
+          = f.text_field :identifier, required: true, placeholder: "masto.social"
+          = f.submit do
+            = image_tag "mastodon-white.svg"
+            span Mastodon
 
   / - binding.break
 
   - if Current.user || Current.session
-    .user-status
-      p You're logged in as #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
-      
-    .user-actions
-      = button_to "Log out", session_path, method: :delete, class: "logout-btn"
-      
     .comment-form
       = form_with url: comments_path, method: :post do |f|
         = f.hidden_field :article_id, value: @article.id
         = f.text_area :content, placeholder: "Write your comment...", required: true
         = f.submit "Comment"
-
-  - else
-    = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
-      label for="identifier" The name of your Mastodon instance, e.g. masto.social
-      = f.text_field :identifier, required: true, placeholder: "masto.social"
-      = f.submit do
-        = image_tag "mastodon-white.svg"
-        span Mastodon
 
   / = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
   /   label for="identifier" The name of your Mastodon instance, e.g. masto.social

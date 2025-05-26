@@ -9,6 +9,7 @@ class SessionsController < ApplicationController
   def create
     oauth_info = request.env["omniauth.auth"]
 
+    # The oauth_info is a bit different between instances
     if oauth_info["extra"]["raw_info"]["uri"]
       federated_url = oauth_info["extra"]["raw_info"]["uri"]
     else
