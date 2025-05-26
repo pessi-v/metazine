@@ -12,7 +12,7 @@ class SessionsController < ApplicationController
     if oauth_info["extra"]["raw_info"]["uri"]
       federated_url = oauth_info["extra"]["raw_info"]["uri"]
     else
-      federated_url = "#{oauth_info['info']['urls']['domain']}/#{oauth_info['info']['name']}"
+      federated_url = "#{oauth_info['info']['urls']['domain']}/users/#{oauth_info['info']['name']}"
     end
 
     login_page = request.env["omniauth.origin"]
