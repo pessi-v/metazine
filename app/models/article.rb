@@ -34,11 +34,15 @@ class Article < ApplicationRecord
 
   on_federails_delete_requested -> { Rails.logger.info "someone tried to Delete an Article via AP: #{self}" }
 
+  def federated_url
+    reader_url(self)
+  end
+
   def to_activitypub_object
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
-      content: "<a href=\"#{reader_url(self)}\">#{reader_url(self)}</a>"
+      content: "<a href=\"#{reader_url(self)}\">Read on #{ENV["APP_NAME"]}</a>"
     )
   end
 
