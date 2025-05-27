@@ -15,13 +15,12 @@
 css:
   .reply-toggle summary {
     cursor: pointer;
-    color: #007bff;
     list-style: none;
     padding: 5px 0;
   }
 
   .reply-toggle summary:hover {
-    color: #0056b3;
+    color: var(--color-three);
   }
 
   .reply-toggle summary::-webkit-details-marker {
@@ -32,23 +31,25 @@ css:
     content: " (Close)";
   }
 
-.flex-column style="padding-left: #{depth * 20}px;"
-  .comment-author
-    = link_to comment.federails_actor.federated_url do
-      = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
-    = "on #{comment.created_at.strftime("%d.%m.%Y")}"
+/ .flex-column style="padding-left: #{depth * 20}px;"
+.flex-column style="padding-left: 20px;"
   .comment
-    == comment.content
-  
-  details.reply-toggle
-    summary Reply
-    .reply-form style="margin-top: 10px;"
-      = form_with url: comments_path, method: :post do |f|
-        = f.hidden_field :article_id, value: @article.id
-        = f.hidden_field :parent_type, value: "Comment"
-        = f.hidden_field :parent_id, value: comment.id
-        = f.text_area :content, placeholder: "Write your reply...", required: true, rows: 3
-        = f.submit "Reply", class: "btn btn-sm btn-primary"
+    .comment-author
+      = link_to comment.federails_actor.federated_url do
+        = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
+      = "on #{comment.created_at.strftime("%d.%m.%Y")}"
+    .comment-content
+      == comment.content
+    
+    details.reply-toggle
+      summary Reply
+      .reply-form style="margin-top: 10px;"
+        = form_with url: comments_path, method: :post do |f|
+          = f.hidden_field :article_id, value: @article.id
+          = f.hidden_field :parent_type, value: "Comment"
+          = f.hidden_field :parent_id, value: comment.id
+          = f.text_area :content, placeholder: "Write your reply...", required: true, rows: 3
+          = f.submit "Reply", class: "btn btn-sm btn-primary"
 
   .comment-replies
     - comment.comments.each do |child_comment|

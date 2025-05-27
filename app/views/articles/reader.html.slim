@@ -1,28 +1,3 @@
-css: 
-  input[type="submit"] {
-    background-color: none;
-    color: var(--color-text-header);
-    border: var(--border);
-    padding: 10px 20px;
-    border-radius: 1px;
-  }
-
-  input[type="text"] {
-    background-color: none;
-    font-family: var(--font-family-headlines);
-    font-size: var(--font-size-s);
-    font-weight: bold;
-    color: var(--color-text-header);
-    / border: var(--border);
-    border-bottom: var(--border);
-    border-top: 0;
-    border-left: 0;
-    border-right: 0;
-    border-radius: 1px;
-    padding: 10px 20px;
-    border-radius: 1px;
-  }
-
 - content_for :og_title, @article.title
 - content_for :og_description, @article.description
 - content_for :og_image, @article.image_url if @article.image_url
@@ -76,13 +51,13 @@ css:
     h2 Discussion
     .user-status
       - if Current.user || Current.session
-        h3 Logged in as #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
+        h3 #{"Logged in as".upcase} #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
         = button_to "Log out", session_path, method: :delete, class: "logout-btn"
           
       - else
         = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
           = f.submit "Login with"
-          = f.text_field :identifier, required: true, placeholder: "YOUR MASTODON HOST", oninvalid: "this.setCustomValidity('e.g. masto.social')", oninput: "setCustomValidity('')"
+          = f.text_field :identifier, required: true, placeholder: "A MASTODON HOST", oninvalid: "this.setCustomValidity('e.g. masto.social')", oninput: "setCustomValidity('')"
 
       / - else
       /   = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
