@@ -42,7 +42,7 @@ class Article < ApplicationRecord
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
-      content: "<a href=\"#{reader_url(self)}\">Read on #{ENV["APP_NAME"]}</a>"
+      content: "<a href=\"#{reader_url(self)}\">Read on #{ENV["INSTANCE_NAME"]}</a>"
     )
   end
 
