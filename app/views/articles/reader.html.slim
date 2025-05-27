@@ -1,3 +1,28 @@
+css: 
+  input[type="submit"] {
+    background-color: none;
+    color: var(--color-text-header);
+    border: var(--border);
+    padding: 10px 20px;
+    border-radius: 1px;
+  }
+
+  input[type="text"] {
+    background-color: none;
+    font-family: var(--font-family-headlines);
+    font-size: var(--font-size-s);
+    font-weight: bold;
+    color: var(--color-text-header);
+    / border: var(--border);
+    border-bottom: var(--border);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 1px;
+    padding: 10px 20px;
+    border-radius: 1px;
+  }
+
 - content_for :og_title, @article.title
 - content_for :og_description, @article.description
 - content_for :og_image, @article.image_url if @article.image_url
@@ -51,23 +76,27 @@
     h2 Discussion
     .user-status
       - if Current.user || Current.session
-        p You're logged in as #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
+        h3 Logged in as #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
         = button_to "Log out", session_path, method: :delete, class: "logout-btn"
           
       - else
         = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
-          label for="identifier" The name of your Mastodon instance, e.g. masto.social
-          = f.text_field :identifier, required: true, placeholder: "masto.social"
-          = f.submit do
-            = image_tag "mastodon-white.svg"
-            span Mastodon
+          = f.submit "Login with"
+          = f.text_field :identifier, required: true, placeholder: "YOUR MASTODON HOST", oninvalid: "this.setCustomValidity('e.g. masto.social')", oninput: "setCustomValidity('')"
+
+      / - else
+      /   = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
+      /     / label for="identifier" Your Mastodon account
+      /     = f.submit "Login with"
+      /     = f.text_field :identifier, required: true, placeholder: "Your Mastodon host"
 
   / - binding.break
 
   - if Current.user || Current.session
     .comment-form
       = form_with url: comments_path, method: :post do |f|
-        = f.hidden_field :article_id, value: @article.id
+        = f.hidden_field :parent_type, value: "Article"
+        = f.hidden_field :parent_id, value: @article.id
         = f.text_area :content, placeholder: "Write your comment...", required: true
         = f.submit "Comment"
 
