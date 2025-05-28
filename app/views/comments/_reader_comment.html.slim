@@ -1,61 +1,62 @@
-/ .flex-column style="padding-left: #{depth * 20}px;"
-/   .comment-author
-/     = link_to comment.federails_actor.federated_url do
-/       = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
-/     = "on #{comment.created_at.strftime("%d.%m.%Y")}"
-/     /   = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
-/   .comment
-/     == comment.content
-/   .comment-replies
-/     - comment.comments.each do |child_comment|
-/       = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: depth + 1 }
+  css:
+    .reply-toggle summary {
+      font-family: var(--font-family-headlines);
+      font-weight: bold;
+      color: var(--color-text-header);
+      font-size: var(--font-size-s);
+      text-transform: uppercase;
+      cursor: pointer;
+      list-style: none;
+      padding: 5px 0;
+    }
 
+    .reply-toggle summary:hover {
+      color: var(--color-three);
+    }
 
+    .reply-toggle summary::-webkit-details-marker {
+      display: none;
+    }
 
-css:
-  .reply-toggle summary {
-    font-family: var(--font-family-headlines);
-    font-weight: bold;
-    color: var(--color-text-header);
-    font-size: var(--font-size-s);
-    text-transform: uppercase;
-    cursor: pointer;
-    list-style: none;
-    padding: 5px 0;
-  }
+    .reply-toggle[open] summary::after {
+      content: " (Close)";
+    }
 
-  .reply-toggle summary:hover {
-    color: var(--color-three);
-  }
+    .comment-delete {
+      font-size: var(--font-size-s);
+      font-weight: bold;
+      color: var(--color-text-header);
+      text-transform: uppercase;
+      cursor: pointer;
+    }
 
-  .reply-toggle summary::-webkit-details-marker {
-    display: none;
-  }
+    .comment-delete:hover {
+      color: var(--color-three) !important;
+    }
 
-  .reply-toggle[open] summary::after {
-    content: " (Close)";
-  }
+  .flex-column style="padding-left: calc(#{depth == 0 ? 0 : 1} * var(--space-m));"
+    .comment
+      .comment-author
+        = link_to comment.federails_actor.federated_url do
+          = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
+        = "on #{comment.created_at.strftime("%d.%m.%y")}"
+      .comment-content
+        == comment.content
+      
+      .comment-actions
+        - if Current.user.federails_actor.id == comment.federails_actor.id
+          / = link_to "Delete", comment_path(params: {id: comment.id, article_id: @article.id}), class: "comment-delete", data: { turbo_method: :delete, confirm: "Are you sure you want to delete this comment?", remote: true }
+          = link_to "Delete", comment_path(id: comment.id, article_id: @article.id), class: "comment-delete", data: { turbo_method: :delete, confirm: "Are you sure you want to delete this comment?", remote: true }
+        details.reply-toggle
+          summary Reply
+          .reply-form style="margin-top: 10px;"
+            = form_with url: comments_path, method: :post do |f|
+              = f.hidden_field :article_id, value: @article.id
+              = f.hidden_field :parent_type, value: "Comment"
+              = f.hidden_field :parent_id, value: comment.id
+              = f.text_area :content, placeholder: "Write your reply...", required: true, rows: 3
+              = f.submit "Reply", class: "btn btn-sm btn-primary"
 
-/ .flex-column style="padding-left: #{depth * 20}px;"
-.flex-column
-  .comment
-    .comment-author
-      = link_to comment.federails_actor.federated_url do
-        = "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
-      = "on #{comment.created_at.strftime("%d.%m.%Y")}"
-    .comment-content
-      == comment.content
-    
-    details.reply-toggle
-      summary Reply
-      .reply-form style="margin-top: 10px;"
-        = form_with url: comments_path, method: :post do |f|
-          = f.hidden_field :article_id, value: @article.id
-          = f.hidden_field :parent_type, value: "Comment"
-          = f.hidden_field :parent_id, value: comment.id
-          = f.text_area :content, placeholder: "Write your reply...", required: true, rows: 3
-          = f.submit "Reply", class: "btn btn-sm btn-primary"
-
-  .comment-replies
-    - comment.comments.each do |child_comment|
-      = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: depth + 1 }
+    .comment-replies
+      - comment.comments.each do |child_comment|
+        = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: depth + 1 }

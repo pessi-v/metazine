@@ -17,5 +17,21 @@ class CommentsController < ApplicationController
   end
 
   def destroy
+    # binding.break
+    @comment = Comment.find(params[:id])
+    @article = Article.find(params[:article_id])
+
+    if @comment.semi_delete!
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: root_path, notice: "Comment deleted successfully.") }
+        format.json { render json: {status: "deleted", message: "Comment deleted successfully."} }
+        format.turbo_stream { render turbo_stream: turbo_stream.replace(@comment, partial: "comments/reader_comment", locals: {comment: @comment, depth: 0}) }
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_back(fallback_location: root_path, alert: "Failed to delete comment.") }
+        format.json { render json: {error: "Failed to delete comment."}, status: :unprocessable_entity }
+      end
+    end
   end
 end

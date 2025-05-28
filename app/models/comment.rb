@@ -14,8 +14,21 @@ class Comment < ApplicationRecord
   validates :parent_type, :parent_id, presence: true, allow_blank: false
 
   scope :top_level_comments, -> { where parent_id: nil }
+  scope :active, -> { where(deleted_at: nil) }
+  scope :deleted, -> { where.not(deleted_at: nil) }
 
   on_federails_delete_requested -> { delete }
+
+  def semi_delete!
+    update!(
+      deleted_at: Time.current,
+      content: "deleted message" # Clear the content but keep the record
+    )
+  end
+
+  def deleted?
+    deleted_at.present?
+  end
 
   def to_activitypub_object
     Federails::DataTransformer::Note.to_federation self,
@@ -30,35 +43,6 @@ class Comment < ApplicationRecord
 
   # Create a comment from an incoming ActivityPub object
   def self.from_activitypub_object(hash)
-    # example_hash = {
-    #   "id" => "https://remote.social/users/bob/statuses/114411967872142984",
-    #   "type" => "Note",
-    #   "inReplyTo" => "https://metazine.com/federation/published/articles/4567",
-    #   "published" => "2025-04-27T21:08:03Z",
-    #   "url" => "https://remote.social/@bob/114411967872142984",
-    #   "attributedTo" => "https://remote.social/users/bob",
-    #   "to" => "as:Public",
-    #   "cc" => "https://remote.social/users/bob/followers",
-    #   "sensitive" => false,
-    #   "atomUri" => "https://remote.social/users/bob/statuses/114411967872142984",
-    #   "inReplyToAtomUri" => "https://metazine.com/federation/published/articles/4567",
-    #   "conversation" => "tag:remote.social,2025-04-27:objectId=117405214:objectType=Conversation",
-    #   "content" => "<p>HELLO WORLD</p>",
-    #   "contentMap" => {"de" => "<p>HELLO WORLD</p>"},
-    #   "attachment" => [],
-    #   "tag" => [],
-    #   "replies" =>
-    #     {"id" => "https://remote.social/users/bob/statuses/114411967872142984/replies",
-    #       "type" => "Collection",
-    #       "first" =>
-    #         {"type" => "CollectionPage",
-    #           "next" => "https://remote.social/users/bob/statuses/114411967872142984/replies?only_other_accounts=true&page=true",
-    #           "partOf" => "https://remote.social/users/bob/statuses/114411967872142984/replies",
-    #           "items" => []
-    #         }
-    #     }
-    #   }
-
     raise "No parent defined in object" if hash["inReplyTo"].blank?
 
     attrs = Federails::Utils::Object.timestamp_attributes(hash)
@@ -76,5 +60,9 @@ class Comment < ApplicationRecord
 
   def federate?
     true
+  end
+
+  def soft_delete
+    # update(deleted_at: Time.current)
   end
 end
