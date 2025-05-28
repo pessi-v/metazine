@@ -2,6 +2,7 @@
 - content_for :og_description, @article.description
 - content_for :og_image, @article.image_url if @article.image_url
 - content_for :og_type, "article"
+- content_for :site_name, @article.source_name
 
 .instance-title
   = link_to('/') do

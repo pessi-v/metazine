@@ -14,6 +14,11 @@
 
 css:
   .reply-toggle summary {
+    font-family: var(--font-family-headlines);
+    font-weight: bold;
+    color: var(--color-text-header);
+    font-size: var(--font-size-s);
+    text-transform: uppercase;
     cursor: pointer;
     list-style: none;
     padding: 5px 0;
@@ -32,7 +37,7 @@ css:
   }
 
 / .flex-column style="padding-left: #{depth * 20}px;"
-.flex-column style="padding-left: 20px;"
+.flex-column
   .comment
     .comment-author
       = link_to comment.federails_actor.federated_url do
