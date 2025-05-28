@@ -37,9 +37,12 @@
   .flex-column style="padding-left: calc(#{depth == 0 ? 0 : 1} * var(--space-m));"
     .comment
       .comment-author
-        = link_to comment.federails_actor.federated_url do
-          = comment.federails_actor.id == Current.user.federails_actor.id ? "you" : "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
-        = "on #{comment.created_at.strftime("%d.%m.%y")}"
+        - if comment.deleted?
+          = "someone on #{comment.created_at.strftime("%d.%m.%y")}"
+        - else
+          = link_to comment.federails_actor.federated_url do
+            = comment.federails_actor.id == Current.user.federails_actor.id ? "you" : "#{comment.federails_actor.username}@#{comment.federails_actor.server}"
+          = "on #{comment.created_at.strftime("%d.%m.%y")}"
       .comment-content
         == comment.content
       
