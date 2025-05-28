@@ -4,7 +4,9 @@ class Comment < ApplicationRecord
   acts_as_federails_data(
     handles: "Note",
     actor_entity_method: :federails_actor,
-    should_federate_method: :federate?
+    should_federate_method: :federate?,
+    soft_deleted_method: :deleted?,
+    soft_delete_date_method: :deleted_at
   )
 
   belongs_to :parent, polymorphic: true
