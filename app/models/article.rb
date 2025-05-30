@@ -48,7 +48,8 @@ class Article < ApplicationRecord
     Rails.logger.info "Article.handle_federated_object?"
     Rails.logger.info "Hash: #{hash}"
     # Replies are handled by Comment
-    hash["inReplyTo"].blank?
+    # hash["inReplyTo"].blank?
+    false
   end
 
   # Creates or updates entity based on the ActivityPub activity

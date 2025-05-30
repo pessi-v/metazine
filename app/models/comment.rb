@@ -9,6 +9,8 @@ class Comment < ApplicationRecord
     soft_delete_date_method: :deleted_at
   )
 
+  before_save :report_validity
+
   belongs_to :parent, polymorphic: true
   belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
   has_many :comments, dependent: :destroy, as: :parent
@@ -21,6 +23,12 @@ class Comment < ApplicationRecord
   scope :deleted, -> { where.not(deleted_at: nil) }
 
   on_federails_delete_requested -> { delete }
+
+  def report_validity
+    Rails.logger.info "Comment.report_validity"
+    Rails.logger.info "Comment: #{self}"
+    Rails.logger.info "errors: #{errors.full_messages}" if !valid?
+  end
 
   def semi_delete!
     update!(
