@@ -35,7 +35,6 @@ export default class extends Controller {
     this.handlingPrediction = false;
 
     this.worker = new Worker(
-      // new URL("/assets/piper_worker-edd4a480.js", import.meta.url),
       new URL(RAILS_ASSET_URL("../piper_worker.js"), import.meta.url),
       { type: "module" }
     );
@@ -205,8 +204,8 @@ export default class extends Controller {
     button.textContent = this.isPlayingValue
       ? "Pause ⏸"
       : this.isPausedValue
-      ? "Play ⏵"
-      : "Listen";
+        ? "Play ⏵"
+        : "Listen";
   }
 
   // Not really necessary in our case - disconnect() is used for the Stimulus controller in some cases (content update, modal close etc.)

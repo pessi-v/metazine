@@ -10,6 +10,7 @@ class Comment < ApplicationRecord
   )
 
   belongs_to :parent, polymorphic: true
+  belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
   has_many :comments, dependent: :destroy, as: :parent
 
   validates :content, presence: true, allow_blank: false

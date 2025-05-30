@@ -3,7 +3,6 @@
 class Article < ApplicationRecord
   include PgSearch::Model
   include Federails::DataEntity
-
   include ActionView::Helpers::TagHelper
   include ActionView::Context
   include Rails.application.routes.url_helpers
@@ -16,7 +15,6 @@ class Article < ApplicationRecord
 
   belongs_to :source, counter_cache: true
   belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
-
   has_many :comments, dependent: :destroy, as: :parent
 
   validates :title, :source_name, presence: true
