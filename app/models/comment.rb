@@ -39,6 +39,8 @@ class Comment < ApplicationRecord
   end
 
   def self.handle_federated_object?(hash)
+    Rails.logger.info "Comment.handle_federated_object?"
+    Rails.logger.info "Hash: #{hash}"
     # Only reply notes should be saved as Comment
     # Question, what other types of notes are there?
     hash["inReplyTo"].present?

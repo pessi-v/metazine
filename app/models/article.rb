@@ -45,6 +45,8 @@ class Article < ApplicationRecord
   end
 
   def self.handle_federated_object?(hash)
+    Rails.logger.info "Article.handle_federated_object?"
+    Rails.logger.info "Hash: #{hash}"
     # Replies are handled by Comment
     hash["inReplyTo"].blank?
   end
