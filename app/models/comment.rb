@@ -12,7 +12,7 @@ class Comment < ApplicationRecord
   before_save :report_validity
 
   belongs_to :parent, polymorphic: true
-  # belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
+  belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
   has_many :comments, dependent: :destroy, as: :parent
 
   validates :content, presence: true, allow_blank: false
