@@ -16,6 +16,10 @@ class SourcesController < ApplicationController
   end
 
   def sources_admin
+    # @article_counts_by_day = Article.where("published_at >= ?", 7.days.ago)
+    #                                 .group("DATE(published_at)")
+    #                                 .count
+
     @sources = Source.all.order(articles_count: :desc)
     @article_counts_by_day = [
       Article.today.count,
