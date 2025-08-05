@@ -1,0 +1,16 @@
+.comment-author {
+  display: flex;
+  width: auto;
+  gap: var(--space-xxs);
+  font-family: var(--font-family-headlines);
+  font-weight: bold;
+  font-size: var(--font-size-s);
+  color: var(--color-text-header);
+}
+
+.comment {
+  border-left: var(--border);
+  padding-left: var(--space-xxs);
+  border-radius: 1px;
+  margin-bottom: var(--space-xs);
+}

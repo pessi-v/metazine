@@ -15,6 +15,10 @@ class Source < ApplicationRecord
   before_create :add_description_and_image
   after_update :update_articles_source_name, if: :saved_change_to_name?
 
+  def self.consume_all_feeds
+    Sources::FeedFetcher.new.consume_all
+  end
+
   def consume_feed
     Sources::FeedFetcher.new.consume(self)
   end

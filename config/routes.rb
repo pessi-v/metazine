@@ -1,5 +1,8 @@
+# Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  resource :session, only: %i[new destroy]
+  resources :passwords, param: :token
+  resources :comments, only: %i[create update destroy]
 
   resources :sources
   # resources :articles
@@ -25,4 +28,7 @@ Rails.application.routes.draw do
   get ":source_name", to: "articles#articles_by_source",
     constraints: {source_name: %r{[^/]+}}, as: :articles_by_source
   get "articles/testing", to: "articles#testing", as: :testing
+
+  get "auth/:provider/callback", to: "sessions#create"
+  get "auth/failure", to: "sessions#failure"
 end

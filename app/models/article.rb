@@ -3,7 +3,6 @@
 class Article < ApplicationRecord
   include PgSearch::Model
   include Federails::DataEntity
-
   include ActionView::Helpers::TagHelper
   include ActionView::Context
   include Rails.application.routes.url_helpers
@@ -16,7 +15,6 @@ class Article < ApplicationRecord
 
   belongs_to :source, counter_cache: true
   belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
-
   has_many :comments, dependent: :destroy, as: :parent
 
   validates :title, :source_name, presence: true
@@ -34,17 +32,24 @@ class Article < ApplicationRecord
 
   on_federails_delete_requested -> { Rails.logger.info "someone tried to Delete an Article via AP: #{self}" }
 
+  def federated_url
+    reader_url(self)
+  end
+
   def to_activitypub_object
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
-      content: "<a href=\"#{reader_url(self)}\">#{reader_url(self)}</a>"
+      content: "<a href=\"#{reader_url(self)}\">Read on #{ENV["INSTANCE_NAME"]}</a>"
     )
   end
 
   def self.handle_federated_object?(hash)
+    Rails.logger.info "Article.handle_federated_object?"
+    Rails.logger.info "Hash: #{hash}"
     # Replies are handled by Comment
-    hash["inReplyTo"].blank?
+    # hash["inReplyTo"].blank?
+    false
   end
 
   # Creates or updates entity based on the ActivityPub activity

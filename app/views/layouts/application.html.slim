@@ -14,7 +14,7 @@ html
     meta property="og:image" content="#{yield(:og_image).presence || asset_url('instance-logo.jpeg')}"
     meta property="og:url" content="#{request.original_url}"
     meta property="og:type" content="#{yield(:og_type).presence || 'website'}"
-    meta property="og:site_name" content="#{ENV['INSTANCE_NAME']}"
+    meta property="og:site_name" content="#{yield(:site_name).presence || ENV['INSTANCE_NAME']}"
 
     = yield :head
 

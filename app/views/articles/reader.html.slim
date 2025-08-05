@@ -2,6 +2,7 @@
 - content_for :og_description, @article.description
 - content_for :og_image, @article.image_url if @article.image_url
 - content_for :og_type, "article"
+- content_for :site_name, @article.source_name
 
 .instance-title
   = link_to('/') do
@@ -45,7 +46,42 @@
   .content
     = @content.html_safe
 
-  .line
-  h2 Discussion
+
+  .line#discussion
+  .discussion__header
+    h2 Discussion
+    .user-status
+      - if Current.user || Current.session
+        h3 #{"Logged in as".upcase} #{Current.user.federails_actor.username}@#{Current.user.federails_actor.server}
+        = button_to "Log out", session_path, method: :delete, class: "logout-btn"
+          
+      - else
+        = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
+          = f.submit "Login with"
+          = f.text_field :identifier, required: true, placeholder: "A MASTODON HOST", oninvalid: "this.setCustomValidity('e.g. masto.social')", oninput: "setCustomValidity('')"
+
+      / - else
+      /   = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
+      /     / label for="identifier" Your Mastodon account
+      /     = f.submit "Login with"
+      /     = f.text_field :identifier, required: true, placeholder: "Your Mastodon host"
+
+  / - binding.break
+
+  - if Current.user || Current.session
+    .comment-form
+      = form_with url: comments_path, method: :post do |f|
+        = f.hidden_field :parent_type, value: "Article"
+        = f.hidden_field :parent_id, value: @article.id
+        = f.text_area :content, placeholder: "Write your comment...", required: true
+        = f.submit "Comment"
+
+  / = form_with url: "/auth/mastodon", method: :post, data: {turbo: false} do |f|
+  /   label for="identifier" The name of your Mastodon instance, e.g. masto.social
+  /   = f.text_field :identifier, required: true, placeholder: "masto.social"
+  /   = f.submit do
+  /     = image_tag "mastodon-white.svg"
+  /     span Mastodon
+
   - @article.comments.each do |comment|
     = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
