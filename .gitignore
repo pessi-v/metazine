@@ -50,3 +50,4 @@ node_modules
 .ruby-lsp
 Dockerfile_original
 Dockerfile_*
+megalinter-reports/

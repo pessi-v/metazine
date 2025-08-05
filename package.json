@@ -1,10 +1,15 @@
 {
-  "engines": {
-    "node": ">=22.2.0",
-    "npm": ">=10.8.2"
+  "name": "puppeteer-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "@mozilla/readability": "^0.6.0",
-    "jsdom": "^24.1.0"
+    "puppeteer": "^19.0.0"
   }
 }

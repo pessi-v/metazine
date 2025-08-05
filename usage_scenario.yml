@@ -1,0 +1,51 @@
+name: Metazine Green Metrics Measurement
+author: Green Metrics Tool User
+description: Energy measurement of the Metazine web application
+
+ignore-unsupported-compose: true
+
+networks:
+  metazine-network:
+
+services:
+  db:
+    image: postgres:16
+    container_name: metazine-db
+    env_file:
+      - .env
+    networks:
+      - metazine-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.gmt
+    container_name: metazine-web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - RAILS_MAX_THREADS=5
+    networks:
+      - metazine-network
+
+  puppeteer:
+    build:
+      context: .
+      dockerfile: Dockerfile.puppeteer
+    container_name: metazine-puppeteer
+    depends_on:
+      - web
+    networks:
+      - metazine-network
+
+flow:
+  - name: "Visit homepage"
+    container: puppeteer
+    commands:
+      - type: console
+        command: "node index.js"

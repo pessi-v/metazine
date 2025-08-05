@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.gmt
+    image: metazine-gmt
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - RAILS_MAX_THREADS=5
+
+  db:
+    image: postgres:16
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  puppeteer:
+    build:
+      context: .
+      dockerfile: Dockerfile.puppeteer
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
