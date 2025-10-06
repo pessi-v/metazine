@@ -7,6 +7,9 @@
 
 # For a containerized dev environment, see Dev Containers: https://guides.rubyonrails.org/getting_started_with_devcontainer.html
 
+# Node.js stage - we'll copy node and npm from here
+FROM node:22-slim AS node
+
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
 ARG RUBY_VERSION=3.4.3
 FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
@@ -14,7 +17,13 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 # Rails app lives here
 WORKDIR /rails
 
-# Install base packages (including Node.js for node-runner)
+# Copy Node.js from the node stage
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm && \
+    ln -s /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# Install base packages
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y curl libjemalloc2 libvips postgresql-client && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
@@ -32,13 +41,6 @@ FROM base AS build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential git libyaml-dev pkg-config zlib1g-dev libpq-dev && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
-    
-# Update to Node.js 22 (if using a Debian/Ubuntu-based image)
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs
-
-# If needed, you can also update npm
-RUN npm install -g npm@10.8.2
 
 # Install application gems
 COPY Gemfile Gemfile.lock ./
@@ -62,12 +64,6 @@ RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 # Final stage for app image
 FROM base
-
-# Install Node.js in the final stage too (needed for node-runner)
-RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs && \
-    npm install -g npm@10.8.2 && \
-    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy built artifacts: gems, application
 COPY --from=build /rails/vendor/bundle /rails/vendor/bundle
