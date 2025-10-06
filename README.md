@@ -17,4 +17,4 @@ Planned:
 
 ## Demo App
 
-[Can be found here](https://mzine.top/)
+[Can be found here](https://metazine.pessi.info/)
