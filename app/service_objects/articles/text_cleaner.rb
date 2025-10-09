@@ -1,6 +1,8 @@
 module Articles
   module TextCleaner
     class << self
+      include ActionView::Helpers::SanitizeHelper
+
       def clean_title(title)
         cleaned_title_text = clean(title)
         title = clean_parentheses(cleaned_title_text)
@@ -43,7 +45,7 @@ module Articles
 
       def strip_formatting(text)
         text = ApplicationController.helpers.strip_links(text)
-        text = text.sanitize
+        text = ApplicationController.helpers.sanitize(text)
         text = ApplicationController.helpers.strip_tags(text)
         CGI.unescapeHTML(text)
       end

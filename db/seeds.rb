@@ -9,3 +9,5 @@
 #   end
 
 InstanceActor.create(name: "Editor")
+
+Source.create(name: "Le Monde Diplomatique", url: "https://mondediplo.com/backend")
