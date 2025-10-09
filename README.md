@@ -9,7 +9,7 @@ Features already in:
 - Search across all articles
 - In-app reader view for articles using the @mozilla/readability JS library
 - In-browser text-to-speech service for articles
-- Federation with AcivityPub
+- Login with ActivityPub to post comments to articles
 
 Features I'll add when I have time:
 
