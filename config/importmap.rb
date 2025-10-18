@@ -10,3 +10,6 @@ pin "onnxruntime-web" # @1.18.0
 pin "piper"
 pin "piper_worker"
 pin "@mintplex-labs--piper-tts-web"
+pin "kokoro"
+pin "kokoro_worker"
+pin "detect_web_gpu"

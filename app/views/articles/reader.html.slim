@@ -27,18 +27,24 @@
       p.source
         = @article.published_at.strftime('%A %-d.%-m.%Y')
     / .flex-row.justify-end.align-center.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
-    .tts_button data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
-      / button data-action="click->piper#predict"
-        'Read article out loud
-      button.predict_button data-piper-target="predictButton" data-action="click->piper#predict"
-        'Listen
-      select.tts_voices data-piper-target="voiceSelect" style="display:none;"
-      / p Stored Voices
-      ul data-piper-target="storedList" style="display:none;"
-      / button data-action="click->piper#flush" data-piper-target="flushButton"
-      /   'Flush storage
+    div data-controller="tts-selector"
+      .tts_button data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium" data-tts-selector-target="piper"
+        / button data-action="click->piper#predict"
+          'Read article out loud
+        button.predict_button data-piper-target="predictButton" data-action="click->piper#predict"
+          'Listen
+        select.tts_voices data-piper-target="voiceSelect" style="display:none;"
+        / p Stored Voices
+        ul data-piper-target="storedList" style="display:none;"
+        / button data-action="click->piper#flush" data-piper-target="flushButton"
+        /   'Flush storage
 
-      
+      .tts_button data-controller="kokoro" data-kokoro-text-value=@text_to_speech_content data-kokoro-selected-voice-value="af_sky" data-tts-selector-target="kokoro"
+        button.predict_button data-kokoro-target="predictButton" data-action="click->kokoro#predict"
+          'Listen
+        select.tts_voices data-kokoro-target="voiceSelect" data-action="change->kokoro#voiceChanged" style="display:none;"
+
+
 
 
   .line
