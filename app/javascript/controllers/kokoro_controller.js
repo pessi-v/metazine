@@ -26,6 +26,8 @@ export default class extends Controller {
     this.batchedText = null; // Will store batched text segments
     this.detectedDevice = null;
     this.detectedDtype = null;
+    this.isGenerating = false; // Track if currently generating to prevent duplicates
+    this.playbackActive = false; // Track if playback session is active
 
     // Detect WebGPU availability
     await this.detectDevice();
@@ -118,10 +120,19 @@ export default class extends Controller {
           break;
 
         case "generating":
-          this.updateStatus("Generating speech...");
+          this.updateStatus(`Generating speech... (${event.data.text ? event.data.text.substring(0, 50) + '...' : ''})`);
+          break;
+
+        case "audio_chunk":
+          this.handleAudioChunk(event.data.audio, event.data.chunkIndex);
+          break;
+
+        case "generation_complete":
+          this.handleGenerationComplete(event.data.text, event.data.totalChunks);
           break;
 
         case "result":
+          // Legacy support for non-streaming
           this.handleAudioSegment(event.data.audio);
           break;
 
@@ -169,7 +180,41 @@ export default class extends Controller {
     this.worker.postMessage({ type: "list_voices" });
   }
 
+  handleAudioChunk(audioBlob, chunkIndex) {
+    console.log(`Received audio chunk ${chunkIndex}, queue size: ${this.audioQueue.length}, playbackActive: ${this.playbackActive}`);
+
+    // Queue the audio chunk
+    this.audioQueue.push(audioBlob);
+
+    // Start playing if we haven't started the playback session yet
+    if (
+      this.audioQueue.length >= 1 &&
+      !this.playbackActive &&
+      !this.isPausedValue
+    ) {
+      console.log('Starting playback session');
+      this.playbackActive = true;
+      this.playNextSegment();
+    }
+  }
+
+  handleGenerationComplete(text, totalChunks) {
+    this.isGenerating = false; // Mark generation as complete
+    console.log(`Generation complete: ${totalChunks} chunks for segment ${this.currentTextIndex + 1}/${this.batchedText.length}`);
+    this.updateStatus(`Generated ${totalChunks} audio chunks (segment ${this.currentTextIndex + 1}/${this.batchedText.length})`);
+
+    // Request next segment if there's more batched text
+    if (this.currentTextIndex < this.batchedText.length - 1) {
+      this.currentTextIndex++;
+      console.log(`Requesting next segment: ${this.currentTextIndex + 1}/${this.batchedText.length}`);
+      this.requestNextSegment();
+    } else {
+      console.log('All segments generated');
+    }
+  }
+
   handleAudioSegment(audioBlob) {
+    // Legacy support for non-streaming generation
     this.audioQueue.push(audioBlob);
 
     // Start playing if we have at least 1 segment and haven't started playing yet
@@ -199,9 +244,19 @@ export default class extends Controller {
       return;
     }
 
+    // Prevent duplicate generation requests
+    if (this.isGenerating) {
+      console.log('Already generating, skipping duplicate request');
+      return;
+    }
+
+    this.isGenerating = true;
+    const textToGenerate = this.batchedText[this.currentTextIndex];
+    console.log(`Requesting generation for segment ${this.currentTextIndex + 1}: "${textToGenerate.substring(0, 50)}..."`);
+
     this.worker.postMessage({
       type: "generate",
-      text: this.batchedText[this.currentTextIndex],
+      text: textToGenerate,
       voice: this.selectedVoiceValue,
     });
   }
@@ -221,16 +276,19 @@ export default class extends Controller {
 
   playNextSegment() {
     if (this.audioQueue.length === 0 || this.isPausedValue) {
+      // If queue is empty and we're not paused, end the playback session
+      if (this.audioQueue.length === 0 && !this.isPausedValue) {
+        this.playbackActive = false;
+        console.log('Playback session ended (queue empty)');
+      }
       return;
     }
 
-    const audioBlob = this.audioQueue[0];
+    const audioBlob = this.audioQueue.shift(); // Remove from queue immediately
     this.currentAudio = new Audio();
     this.currentAudio.src = URL.createObjectURL(audioBlob);
 
     this.currentAudio.onended = () => {
-      // Remove the played segment
-      this.audioQueue.shift();
       URL.revokeObjectURL(this.currentAudio.src);
       this.currentAudio = null;
 
@@ -241,14 +299,20 @@ export default class extends Controller {
             this.playNextSegment();
           }
         }, 500);
-      } else if (
-        this.audioQueue.length === 0 &&
-        this.currentTextIndex >= this.batchedText.length - 1
-      ) {
-        // All done
-        this.isPlayingValue = false;
-        this.updateStatus("Playback completed");
-        this.updateButtonText();
+      } else if (this.audioQueue.length === 0) {
+        // Queue is empty
+        if (this.currentTextIndex >= this.batchedText.length - 1 && !this.isGenerating) {
+          // All done - no more segments to generate
+          this.isPlayingValue = false;
+          this.playbackActive = false;
+          this.updateStatus("Playback completed");
+          this.updateButtonText();
+          console.log('Playback session completed');
+        } else {
+          // More segments coming, but queue is empty - pause the session so new chunks can restart it
+          this.playbackActive = false;
+          console.log('Playback session paused - waiting for next segment chunks');
+        }
       }
     };
 
@@ -273,8 +337,10 @@ export default class extends Controller {
         this.currentAudio.pause();
       }
       this.isPlayingValue = false;
+      this.playbackActive = false; // Pause the session
       this.updateStatus("Paused");
       this.updateButtonText();
+      console.log('Playback paused');
       return;
     }
 
@@ -284,11 +350,14 @@ export default class extends Controller {
       if (this.currentAudio) {
         this.currentAudio.play();
         this.updateStatus("Resumed playback");
+        this.playbackActive = true;
       } else if (this.audioQueue.length > 0) {
+        this.playbackActive = true;
         this.playNextSegment();
       }
       this.isPlayingValue = true;
       this.updateButtonText();
+      console.log('Playback resumed');
       return;
     }
 
@@ -296,10 +365,13 @@ export default class extends Controller {
     this.isPausedValue = false;
     this.currentTextIndex = 0;
     this.audioQueue = [];
+    this.isGenerating = false; // Reset generation flag
+    this.playbackActive = false; // Reset playback flag
 
     // Batch the text segments
     this.batchedText = this.batchTextSegments();
 
+    console.log(`Starting generation: ${this.batchedText.length} batches of ~${this.batchSizeValue} sentences`);
     this.updateStatus(
       `Starting generation... (${this.batchedText.length} batches of ~${this.batchSizeValue} sentences)`
     );

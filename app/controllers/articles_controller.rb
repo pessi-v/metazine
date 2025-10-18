@@ -137,11 +137,11 @@ class ArticlesController < ApplicationController
         .gsub(/\\[a-z]/, "")               # Remove escaped characters
         .gsub(/&[a-z]+;/, " ")             # Replace HTML entities with space
         .gsub(/\\u[0-9a-fA-F]{4}/, " ")    # Replace hex codes with space
-        .gsub(/\b([A-Z]{2,})(s?)\b/) do    # Add spaces between letters in acronyms (e.g., USA -> U S A, ICBMs -> I C B M's)
+        .gsub(/\b([A-Z]{2,})(s?)\b/) do    # Add spaces between letters in acronyms (e.g., USA -> U S A, ICBMs -> I C B Ms)
           acronym = ::Regexp.last_match(1)
           plural = ::Regexp.last_match(2)
           result = acronym.chars.join(" ")
-          result += "'#{plural}" unless plural.empty?
+          result += "#{plural}" unless plural.empty?
           result
         end
         .gsub(/\((.*?)\)/) { |_match| ", #{::Regexp.last_match(1)}, " } # Add commas around parenthetical content

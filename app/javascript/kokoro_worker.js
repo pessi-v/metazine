@@ -1,4 +1,5 @@
 let KokoroTTS = null;
+let TextSplitterStream = null;
 let ttsInstance = null;
 let isInitialized = false;
 
@@ -7,6 +8,7 @@ let isInitialized = false;
   try {
     const module = await import(RAILS_ASSET_URL("./kokoro.js"));
     KokoroTTS = module.KokoroTTS;
+    TextSplitterStream = module.TextSplitterStream;
     self.postMessage({ type: "module_loaded" });
   } catch (error) {
     self.postMessage({
@@ -103,6 +105,14 @@ async function generateSpeech(config) {
       return;
     }
 
+    if (!TextSplitterStream) {
+      self.postMessage({
+        type: "error",
+        message: "TextSplitterStream not loaded.",
+      });
+      return;
+    }
+
     const text = config.text || "";
     const voice = config.voice || "af_sky";
 
@@ -114,19 +124,55 @@ async function generateSpeech(config) {
       return;
     }
 
-    self.postMessage({ type: "generating" });
+    self.postMessage({ type: "generating", text: text });
 
-    // Generate the audio
-    const audio = await ttsInstance.generate(text, { voice });
+    // Set up the streaming pipeline
+    const splitter = new TextSplitterStream();
+    const stream = ttsInstance.stream(splitter, { voice });
 
-    // Convert to WAV blob
-    const wavBlob = await audio.toBlob();
+    // Process the stream and send audio chunks as they're generated
+    let chunkIndex = 0;
+    const streamProcessor = (async () => {
+      try {
+        for await (const { text: chunkText, phonemes, audio } of stream) {
+          // Convert to WAV blob
+          const wavBlob = await audio.toBlob();
 
-    self.postMessage({
-      type: "result",
-      audio: wavBlob,
-      text: text,
-    });
+          self.postMessage({
+            type: "audio_chunk",
+            audio: wavBlob,
+            chunkIndex: chunkIndex++,
+            chunkText: chunkText,
+          });
+        }
+
+        // Signal that streaming is complete for this text
+        self.postMessage({
+          type: "generation_complete",
+          text: text,
+          totalChunks: chunkIndex,
+        });
+      } catch (error) {
+        self.postMessage({
+          type: "error",
+          message: `Stream processing failed: ${error.message}`,
+          stack: error.stack,
+        });
+      }
+    })();
+
+    // Push text to the splitter word by word to enable streaming
+    const tokens = text.match(/\s*\S+/g) || [text];
+    for (const token of tokens) {
+      splitter.push(token);
+      await new Promise((resolve) => setTimeout(resolve, 1)); // Small delay to allow streaming
+    }
+
+    // Close the splitter to signal no more text
+    splitter.close();
+
+    // Wait for stream processing to complete
+    await streamProcessor;
   } catch (error) {
     self.postMessage({
       type: "error",
