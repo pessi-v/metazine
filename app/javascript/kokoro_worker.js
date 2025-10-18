@@ -114,7 +114,7 @@ async function generateSpeech(config) {
     }
 
     const text = config.text || "";
-    const voice = config.voice || "af_sky";
+    const voice = config.voice || "af_aoede";
 
     if (!text) {
       self.postMessage({
@@ -195,12 +195,34 @@ async function listVoices() {
     // list_voices() returns undefined, voices are shown in console.table
     // For now, just send back a hardcoded list of known voices
     const voices = [
-      "af_heart", "af_alloy", "af_aoede", "af_bella", "af_jessica",
-      "af_kore", "af_nicole", "af_nova", "af_river", "af_sarah",
-      "af_sky", "am_adam", "am_echo", "am_eric", "am_fenrir",
-      "am_liam", "am_michael", "am_onyx", "am_puck", "am_santa",
-      "bf_emma", "bf_isabella", "bm_george", "bm_lewis",
-      "bf_alice", "bf_lily", "bm_daniel", "bm_fable"
+      "af_heart",
+      "af_alloy",
+      "af_aoede",
+      "af_bella",
+      "af_jessica",
+      "af_kore",
+      "af_nicole",
+      "af_nova",
+      "af_river",
+      "af_sarah",
+      "af_sky",
+      "am_adam",
+      "am_echo",
+      "am_eric",
+      "am_fenrir",
+      "am_liam",
+      "am_michael",
+      "am_onyx",
+      "am_puck",
+      "am_santa",
+      "bf_emma",
+      "bf_isabella",
+      "bm_george",
+      "bm_lewis",
+      "bf_alice",
+      "bf_lily",
+      "bm_daniel",
+      "bm_fable",
     ];
 
     self.postMessage({
