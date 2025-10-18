@@ -68,12 +68,12 @@ export default class extends Controller {
       // For WebGPU, fp32 is recommended
       this.detectedDtype =
         this.dtypeValue !== "auto" ? this.dtypeValue : "fp32";
-      console.log("WebGPU detected, using fp32");
+      // console.log("WebGPU detected, using fp32");
     } else {
       this.detectedDevice = "wasm";
       // For WASM, q8 is more efficient
       this.detectedDtype = this.dtypeValue !== "auto" ? this.dtypeValue : "q8";
-      console.log("WebGPU not available, falling back to WASM with q8");
+      // console.log("WebGPU not available, falling back to WASM with q8");
     }
   }
 
@@ -120,7 +120,9 @@ export default class extends Controller {
           break;
 
         case "generating":
-          this.updateStatus(`Generating speech... (${event.data.text ? event.data.text.substring(0, 50) + '...' : ''})`);
+          this.updateStatus(
+            `Generating speech... (${event.data.text ? event.data.text.substring(0, 50) + "..." : ""})`
+          );
           break;
 
         case "audio_chunk":
@@ -128,7 +130,10 @@ export default class extends Controller {
           break;
 
         case "generation_complete":
-          this.handleGenerationComplete(event.data.text, event.data.totalChunks);
+          this.handleGenerationComplete(
+            event.data.text,
+            event.data.totalChunks
+          );
           break;
 
         case "result":
@@ -181,7 +186,7 @@ export default class extends Controller {
   }
 
   handleAudioChunk(audioBlob, chunkIndex) {
-    console.log(`Received audio chunk ${chunkIndex}, queue size: ${this.audioQueue.length}, playbackActive: ${this.playbackActive}`);
+    // console.log(`Received audio chunk ${chunkIndex}, queue size: ${this.audioQueue.length}, playbackActive: ${this.playbackActive}`);
 
     // Queue the audio chunk
     this.audioQueue.push(audioBlob);
@@ -192,7 +197,7 @@ export default class extends Controller {
       !this.playbackActive &&
       !this.isPausedValue
     ) {
-      console.log('Starting playback session');
+      // console.log('Starting playback session');
       this.playbackActive = true;
       this.playNextSegment();
     }
@@ -200,16 +205,18 @@ export default class extends Controller {
 
   handleGenerationComplete(text, totalChunks) {
     this.isGenerating = false; // Mark generation as complete
-    console.log(`Generation complete: ${totalChunks} chunks for segment ${this.currentTextIndex + 1}/${this.batchedText.length}`);
-    this.updateStatus(`Generated ${totalChunks} audio chunks (segment ${this.currentTextIndex + 1}/${this.batchedText.length})`);
+    // console.log(`Generation complete: ${totalChunks} chunks for segment ${this.currentTextIndex + 1}/${this.batchedText.length}`);
+    this.updateStatus(
+      `Generated ${totalChunks} audio chunks (segment ${this.currentTextIndex + 1}/${this.batchedText.length})`
+    );
 
     // Request next segment if there's more batched text
     if (this.currentTextIndex < this.batchedText.length - 1) {
       this.currentTextIndex++;
-      console.log(`Requesting next segment: ${this.currentTextIndex + 1}/${this.batchedText.length}`);
+      // console.log(`Requesting next segment: ${this.currentTextIndex + 1}/${this.batchedText.length}`);
       this.requestNextSegment();
     } else {
-      console.log('All segments generated');
+      // console.log('All segments generated');
     }
   }
 
@@ -246,13 +253,13 @@ export default class extends Controller {
 
     // Prevent duplicate generation requests
     if (this.isGenerating) {
-      console.log('Already generating, skipping duplicate request');
+      // console.log('Already generating, skipping duplicate request');
       return;
     }
 
     this.isGenerating = true;
     const textToGenerate = this.batchedText[this.currentTextIndex];
-    console.log(`Requesting generation for segment ${this.currentTextIndex + 1}: "${textToGenerate.substring(0, 50)}..."`);
+    // console.log(`Requesting generation for segment ${this.currentTextIndex + 1}: "${textToGenerate.substring(0, 50)}..."`);
 
     this.worker.postMessage({
       type: "generate",
@@ -279,7 +286,7 @@ export default class extends Controller {
       // If queue is empty and we're not paused, end the playback session
       if (this.audioQueue.length === 0 && !this.isPausedValue) {
         this.playbackActive = false;
-        console.log('Playback session ended (queue empty)');
+        // console.log('Playback session ended (queue empty)');
       }
       return;
     }
@@ -301,17 +308,20 @@ export default class extends Controller {
         }, 500);
       } else if (this.audioQueue.length === 0) {
         // Queue is empty
-        if (this.currentTextIndex >= this.batchedText.length - 1 && !this.isGenerating) {
+        if (
+          this.currentTextIndex >= this.batchedText.length - 1 &&
+          !this.isGenerating
+        ) {
           // All done - no more segments to generate
           this.isPlayingValue = false;
           this.playbackActive = false;
           this.updateStatus("Playback completed");
           this.updateButtonText();
-          console.log('Playback session completed');
+          // console.log('Playback session completed');
         } else {
           // More segments coming, but queue is empty - pause the session so new chunks can restart it
           this.playbackActive = false;
-          console.log('Playback session paused - waiting for next segment chunks');
+          // console.log('Playback session paused - waiting for next segment chunks');
         }
       }
     };
@@ -340,7 +350,7 @@ export default class extends Controller {
       this.playbackActive = false; // Pause the session
       this.updateStatus("Paused");
       this.updateButtonText();
-      console.log('Playback paused');
+      console.log("Playback paused");
       return;
     }
 
@@ -357,7 +367,7 @@ export default class extends Controller {
       }
       this.isPlayingValue = true;
       this.updateButtonText();
-      console.log('Playback resumed');
+      console.log("Playback resumed");
       return;
     }
 
@@ -371,7 +381,7 @@ export default class extends Controller {
     // Batch the text segments
     this.batchedText = this.batchTextSegments();
 
-    console.log(`Starting generation: ${this.batchedText.length} batches of ~${this.batchSizeValue} sentences`);
+    // console.log(`Starting generation: ${this.batchedText.length} batches of ~${this.batchSizeValue} sentences`);
     this.updateStatus(
       `Starting generation... (${this.batchedText.length} batches of ~${this.batchSizeValue} sentences)`
     );
