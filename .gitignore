@@ -40,8 +40,8 @@
 
 /config/credentials/production.key
 
-.kamal/secrets
-/config/deploy.yml
+.kamal/secrets*
+/config/deploy*
 /config/deploy_original.yml
 .DS_Store
 node_modules
