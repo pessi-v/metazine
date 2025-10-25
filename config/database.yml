@@ -187,12 +187,7 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: <%= ENV["POSTGRES_DB"] %>
-    username: <%= ENV["POSTGRES_USER"] %>
-    password: <%= ENV["POSTGRES_PASSWORD"] %>
-    host: <%= ENV["DB_HOST"] %>
-    # Optional fallback to DATABASE_URL if available
-    url: <%= ENV["DATABASE_URL"] if ENV["DATABASE_URL"].present? %>
+    url: <%= ENV["DATABASE_URL"] %>
   cache:
     <<: *primary_production
     database: metazine_production_cache
