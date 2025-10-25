@@ -11,5 +11,7 @@
 InstanceActor.create(name: "Editor")
 
 Source.create(name: "Le Monde Diplomatique", url: "https://mondediplo.com/backend")
+Source.create(name: "The Ecologist", url: "https://theecologist.org/whats_new/feed")
+Source.create(name: "Grist", url: "https://grist.org/feed")
 
 Source.consume_all
