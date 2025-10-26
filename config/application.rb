@@ -46,5 +46,14 @@ module Metazine
 
     # Application configuration
     config.app_name = ENV.fetch("APP_NAME", "Metazine")
+
+    # Configure middleware to handle Cloudflare Tunnel proxied requests
+    config.middleware.use ActionDispatch::RemoteIp, true, [
+      "127.0.0.1",      # localhost
+      "::1",            # localhost IPv6
+      "172.16.0.0/12",  # Private network (Docker, Cloudflare Tunnel)
+      "10.0.0.0/8",     # Private network
+      "192.168.0.0/16"  # Private network
+    ]
   end
 end

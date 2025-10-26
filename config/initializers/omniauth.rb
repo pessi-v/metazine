@@ -39,6 +39,17 @@ end
 OmniAuth.config.allowed_request_methods = [:post, :get]
 OmniAuth.config.silence_get_warning = true
 
+# For Cloudflare Tunnel compatibility: store state in cookie to survive redirects
+OmniAuth.config.request_validation_phase = proc { |env|
+  # Store state in a more persistent way for Cloudflare Tunnel
+  request = Rack::Request.new(env)
+  if request.params['state']
+    # During callback, retrieve state from cookie
+    stored_state = request.cookies['omniauth.state']
+    env['rack.session']['omniauth.state'] = stored_state if stored_state
+  end
+}
+
 # Log all OmniAuth failures
 OmniAuth.config.on_failure = proc { |env|
   puts "\n=== OmniAuth Failure Detected ==="
@@ -50,5 +61,5 @@ OmniAuth.config.on_failure = proc { |env|
   puts "=== End OmniAuth Failure ==="
 
   # Call the default failure handler
-  OmniAuth::FailureEndpoint.new(env).call(env)
+  OmniAuth::FailureEndpoint.new(env).call
 }
