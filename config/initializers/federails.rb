@@ -18,6 +18,15 @@ Federails.configure do |conf|
 end
 
 Rails.application.config.after_initialize do
+  # Register handlers for Create and Update activities
   Fediverse::Inbox.register_handler("Create", "*", ActivityPub::ActorActivityHandler, :handle_create_activity)
   Fediverse::Inbox.register_handler("Update", "*", ActivityPub::ActorActivityHandler, :handle_update_activity)
+
+  # Follow activities are handled by federails built-in handlers
+  # They should already be registered automatically when federails loads
+
+  # Debug: Log registered handlers to verify Follow is registered
+  Rails.logger.info "=== Federails handlers check ==="
+  Rails.logger.info "Follow handlers: #{Fediverse::Inbox.class_variable_get(:@@handlers)['Follow'].inspect}"
+  Rails.logger.info "All handlers: #{Fediverse::Inbox.class_variable_get(:@@handlers).keys.inspect}"
 end
