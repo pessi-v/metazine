@@ -36,6 +36,7 @@ class SessionsController < ApplicationController
     end
 
     @user = User.from_omniauth(auth)
+    Rails.logger.info "=== User from omniauth: #{@user.inspect}, persisted: #{@user.persisted?}"
 
     if @user.persisted?
       # Create a new session record
@@ -43,6 +44,7 @@ class SessionsController < ApplicationController
         ip_address: request.remote_ip,
         user_agent: request.user_agent
       )
+      Rails.logger.info "=== Session created: ID=#{@session.id}, user_id=#{@session.user_id}, persisted=#{@session.persisted?}"
 
       # Store session ID in signed cookie (more reliable than session hash for OAuth)
       cookies.signed.permanent[:session_id] = {
@@ -51,6 +53,7 @@ class SessionsController < ApplicationController
         same_site: :lax,
         secure: Rails.env.production?
       }
+      Rails.logger.info "=== Set signed cookie session_id=#{@session.id}"
 
       # Also store in session hash as backup
       session[:session_id] = @session.id
@@ -61,6 +64,7 @@ class SessionsController < ApplicationController
       puts "Redirecting to: #{return_to}"
       redirect_to return_to, notice: "Successfully logged in as #{@user.full_username}!"
     else
+      Rails.logger.error "=== User NOT persisted! Errors: #{@user.errors.full_messages}"
       redirect_back fallback_location: frontpage_path, alert: "Failed to create user account."
     end
   end

@@ -20,7 +20,10 @@ class ApplicationController < ActionController::Base
 
     # Try signed cookie first (more reliable for OAuth), then fall back to session hash
     session_id = cookies.signed[:session_id] || session[:session_id]
+    Rails.logger.info "=== current_session lookup: session_id=#{session_id.inspect}"
     @current_session = Session.find_by(id: session_id) if session_id
+    Rails.logger.info "=== current_session result: #{@current_session.inspect}"
+    @current_session
   end
 
   # Returns true if the user is logged in
