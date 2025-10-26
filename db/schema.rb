@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_25_164838) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_25_233239) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -45,9 +45,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_164838) do
     t.string "federated_url"
     t.bigint "federails_actor_id"
     t.datetime "deleted_at"
+    t.bigint "user_id"
     t.index ["deleted_at"], name: "index_comments_on_deleted_at"
     t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
     t.index ["parent_type", "parent_id"], name: "index_poly_comments_on_parent"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "federails_activities", force: :cascade do |t|
@@ -166,10 +168,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_164838) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "provider"
+    t.string "uid"
+    t.string "username"
+    t.string "display_name"
+    t.string "avatar_url"
+    t.string "access_token"
+    t.string "domain"
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["username"], name: "index_users_on_username"
   end
 
   add_foreign_key "articles", "federails_actors"
   add_foreign_key "comments", "federails_actors"
+  add_foreign_key "comments", "users"
   add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
   add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"

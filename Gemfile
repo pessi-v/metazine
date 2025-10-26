@@ -75,7 +75,8 @@ gem 'dotenv'
 # gem 'rufus-scheduler'
 
 # ActivityPub
-gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
+# gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
+gem 'federails', git: 'https://gitlab.com/experimentslabs/federails/'
 
  # pagination
 gem 'pagy', '~> 9.1'
@@ -107,6 +108,12 @@ gem 'dhash-vips'
 # Database metrics
 gem 'pghero'
 gem "pg_query", ">= 2"
+
+# Authentication with omniauth
+gem "omniauth"
+gem "omniauth-rails_csrf_protection"
+gem 'omniauth-mastodon', git: 'https://github.com/trakt/omniauth-mastodon' # this fork works with omniauth gem version 2
+gem 'mastodon-api', require: 'mastodon', git: 'https://github.com/daverooneyca/mastodon-api' # this fork works with at least ruby 3.3.4
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
