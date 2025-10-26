@@ -2,16 +2,15 @@
 
 class SourcesController < ApplicationController
   before_action :set_source, only: %i[show edit update destroy]
-  http_basic_authenticate_with name: 'admin', password: 'metazine', only: %i[new edit create destroy update]
+  http_basic_authenticate_with name: "admin", password: "metazine", only: %i[new edit create destroy update]
 
   # GET /sources or /sources.json
   def index
     @sources = Source.active.order(:name).select(:id, :name, :url, :articles_count)
     # Group sources by first letter and sort alphabetically
     @sources_in_array = @sources.group_by { |source| source.name[0].upcase }
-                                .sort_by { |letter, _| letter }
-                                .map { |letter, sources| [letter, sources] }
-    # binding.break
+      .sort_by { |letter, _| letter }
+      .map { |letter, sources| [letter, sources] }
   end
 
   def sources_admin
@@ -29,7 +28,8 @@ class SourcesController < ApplicationController
   end
 
   # GET /sources/1 or /sources/1.json
-  def show; end
+  def show
+  end
 
   # GET /sources/new
   def new
@@ -37,7 +37,8 @@ class SourcesController < ApplicationController
   end
 
   # GET /sources/1/edit
-  def edit; end
+  def edit
+  end
 
   def fetch_feeds
     # TODO: make this action only available to admin
@@ -57,7 +58,7 @@ class SourcesController < ApplicationController
 
     respond_to do |format|
       if @source.save
-        format.html { redirect_to source_url(@source), notice: 'Source was successfully created.' }
+        format.html { redirect_to source_url(@source), notice: "Source was successfully created." }
         format.json { render :show, status: :created, location: @source }
         format.turbo_stream
       else
@@ -71,7 +72,7 @@ class SourcesController < ApplicationController
   def update
     respond_to do |format|
       if @source.update(source_params)
-        format.html { redirect_to source_url(@source), notice: 'Source was successfully updated.' }
+        format.html { redirect_to source_url(@source), notice: "Source was successfully updated." }
         format.json { render :show, status: :ok, location: @source }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -85,7 +86,7 @@ class SourcesController < ApplicationController
     @source.destroy!
 
     respond_to do |format|
-      format.html { redirect_to sources_url, notice: 'Source was successfully destroyed.' }
+      format.html { redirect_to sources_url, notice: "Source was successfully destroyed." }
       format.json { head :no_content }
       format.turbo_stream
     end
@@ -101,6 +102,6 @@ class SourcesController < ApplicationController
   # Only allow a list of trusted parameters through.
   def source_params
     params.require(:source).permit(:name, :url, :last_modified, :etag, :active, :show_images, :allow_video,
-                                   :allow_audio, :last_error_status)
+      :allow_audio, :last_error_status)
   end
 end

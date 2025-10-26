@@ -1,7 +1,7 @@
 .article_small_image_headline_summary_preview
   - if article.image_url
     = link_to(article.url, class: 'image') do
-      img.image src=article.image_url
+      img.image src=article.image_url referrerpolicy="no-referrer"
   - else
     .image
   .headline_source_summary_and_preview

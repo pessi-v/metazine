@@ -12,7 +12,7 @@
 
 .reader
   - if @article.image_url && !@content.match?(@article.image_url)
-    = image_tag(@article.image_url, class: 'header-image custom-prop-image', data: { controller: "reader-image" })
+    = image_tag(@article.image_url, class: 'header-image custom-prop-image', referrerpolicy: 'no-referrer', data: { controller: "reader-image" })
 
   .article_headline
     = link_to(@article.url) do

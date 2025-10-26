@@ -1,5 +1,5 @@
 .article_image_headline_summary
-  img.image src=article.image_url
+  img.image src=article.image_url referrerpolicy="no-referrer"
   = render 'article_headline', article: article
   p.summary
     = article.description || article.summary
