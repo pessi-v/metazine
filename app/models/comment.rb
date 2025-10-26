@@ -15,17 +15,52 @@ class Comment < ApplicationRecord
   validates :parent_type, :parent_id, presence: true, allow_blank: false
   validates :federails_actor, presence: true
 
+  # Prevent editing deleted comments
+  validate :cannot_edit_deleted_comment, on: :update
+
+  def cannot_edit_deleted_comment
+    if deleted_at_was.present? && !deleted_at_changed?
+      errors.add(:base, "Cannot edit a deleted comment")
+    end
+  end
+
   scope :top_level_comments, -> { where parent_id: nil }
   scope :local_comments, -> { where.not(user_id: nil) }
   scope :federated_comments, -> { where(user_id: nil) }
   scope :active, -> { where(deleted_at: nil) }
   scope :deleted, -> { where.not(deleted_at: nil) }
 
-  on_federails_delete_requested -> { delete }
+  # When receiving a Delete activity from the fediverse, soft delete the comment
+  on_federails_delete_requested -> { update_columns(deleted_at: Time.current, content: "[deleted]", user_id: nil) }
+
+  # Override destroy to soft delete instead of hard delete
+  # This allows federails to send the Delete activity before we soft delete
+  before_destroy :soft_delete_instead_of_destroy
+
+  def soft_delete_instead_of_destroy
+    # Only soft delete if not already deleted
+    unless deleted?
+      update_columns(
+        deleted_at: Time.current,
+        content: "[deleted]",
+        user_id: nil
+      )
+    end
+    # Return false to halt the destroy chain and prevent actual deletion
+    throw(:abort)
+  end
 
   def to_activitypub_object
+    # Get the parent's federated URL for inReplyTo field
+    parent_url = if parent.is_a?(Article)
+      parent.federated_url
+    elsif parent.is_a?(Comment)
+      parent.federated_url
+    end
+
     Federails::DataTransformer::Note.to_federation self,
-      content: content
+      content: content,
+      inReplyTo: parent_url
   end
 
   def self.handle_federated_object?(hash)
@@ -112,7 +147,9 @@ class Comment < ApplicationRecord
     end
   end
 
-  # Soft delete the comment
+  # Soft delete the comment (kept for backwards compatibility)
+  # NOTE: For federation to work properly, use .destroy instead
+  # which triggers the before_destroy callback
   def soft_delete!
     update_columns(
       deleted_at: Time.current,

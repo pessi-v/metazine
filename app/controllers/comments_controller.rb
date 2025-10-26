@@ -32,7 +32,9 @@ class CommentsController < ApplicationController
   # DELETE /comments/:id
   def destroy
     if @comment.user == current_user
-      @comment.soft_delete!
+      # Call destroy which will trigger soft delete via before_destroy callback
+      # This allows federails to send the Delete activity
+      @comment.destroy
       redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully."
     else
       redirect_back fallback_location: frontpage_path, alert: "You can only delete your own comments."
