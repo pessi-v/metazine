@@ -1,0 +1,14 @@
+.comment-form
+  h3 Add a comment
+
+  = form_with(model: comment, url: article_comments_path(parent), method: :post, class: "new-comment-form") do |f|
+    .form-group
+      = f.label :content, "Your comment:", class: "form-label"
+      = f.text_area :content,
+        rows: 4,
+        class: "form-textarea",
+        placeholder: "Share your thoughts...",
+        required: true
+
+    .form-actions
+      = f.submit "Post Comment", class: "btn-primary"

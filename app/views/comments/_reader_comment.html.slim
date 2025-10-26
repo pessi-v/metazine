@@ -1,9 +1,21 @@
-.flex-column style="padding-left: #{depth * 20}px;"
-  .comment-author
-    = link_to comment.federated_url do
-      = comment.federails_actor.name
-  .comment
+.flex-column.comment-item style="padding-left: #{depth * 20}px;"
+  .comment-header
+    .comment-author
+      - if comment.federated_url
+        = link_to comment.federated_url, target: "_blank", rel: "noopener" do
+          strong = comment.author_name
+          span.username = " (#{comment.author_username})"
+      - else
+        strong = comment.author_name
+        span.username = " (#{comment.author_username})"
+
+    - if logged_in? && comment.user == current_user
+      .comment-actions
+        = button_to "Delete", comment_path(comment), method: :delete, class: "btn-delete-comment", data: { confirm: "Are you sure you want to delete this comment?" }
+
+  .comment-content
     == comment.content
+
   .comment-replies
     - comment.comments.each do |child_comment|
       = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: depth + 1 }

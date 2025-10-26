@@ -8,12 +8,16 @@ class Comment < ApplicationRecord
   )
 
   belongs_to :parent, polymorphic: true
+  belongs_to :user, optional: true
   has_many :comments, dependent: :destroy, as: :parent
 
   validates :content, presence: true, allow_blank: false
   validates :parent_type, :parent_id, presence: true, allow_blank: false
+  validates :federails_actor, presence: true
 
   scope :top_level_comments, -> { where parent_id: nil }
+  scope :local_comments, -> { where.not(user_id: nil) }
+  scope :federated_comments, -> { where(user_id: nil) }
 
   on_federails_delete_requested -> { delete }
 
@@ -76,5 +80,33 @@ class Comment < ApplicationRecord
 
   def federate?
     true
+  end
+
+  # Returns true if this is a local comment (created by a logged-in user)
+  def local?
+    user.present?
+  end
+
+  # Returns true if this is a federated comment (from ActivityPub)
+  def federated?
+    !local?
+  end
+
+  # Get the display name for the comment author
+  def author_name
+    if local?
+      user.name
+    else
+      federails_actor&.name || "Anonymous"
+    end
+  end
+
+  # Get the username for the comment author
+  def author_username
+    if local?
+      user.full_username
+    else
+      federails_actor&.username || "unknown"
+    end
   end
 end

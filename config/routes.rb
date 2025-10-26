@@ -2,7 +2,12 @@ Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   resources :sources
-  # resources :articles
+
+  # Comments routes
+  resources :articles, only: [] do
+    resources :comments, only: [:create]
+  end
+  resources :comments, only: [:destroy]
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -10,6 +15,13 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   root "articles#frontpage", as: :frontpage
+
+  # Authentication routes
+  post "login/mastodon", to: "sessions#mastodon", as: :login_mastodon
+  get "auth/mastodon/callback", to: "sessions#create"
+  post "auth/mastodon/callback", to: "sessions#create"
+  get "auth/failure", to: "sessions#failure"
+  delete "logout", to: "sessions#destroy", as: :logout
 
   mount Federails::Engine => "/"
 

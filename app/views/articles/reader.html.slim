@@ -1,57 +1,77 @@
-- content_for :og_title, @article.title
-- content_for :og_description, @article.description
-- content_for :og_image, @article.image_url if @article.image_url
-- content_for :og_type, "article"
+- cache @article do
+  - content_for :og_title, @article.title
+  - content_for :og_description, @article.description
+  - content_for :og_image, @article.image_url if @article.image_url
+  - content_for :og_type, "article"
 
-.instance-title
-  = link_to('/') do
-    h4.desktop
-      = ENV['INSTANCE_NAME'].upcase.gsub(' ', '<br>').html_safe
-    h4.mobile
-      = ENV['INSTANCE_NAME'].upcase
+  .instance-title
+    = link_to('/') do
+      h4.desktop
+        = ENV['INSTANCE_NAME'].upcase.gsub(' ', '<br>').html_safe
+      h4.mobile
+        = ENV['INSTANCE_NAME'].upcase
 
-.reader
+  .reader
 
-  - if @article.image_url && !@content.match?(@article.image_url)
-    = image_tag(@article.image_url, class: 'header-image custom-prop-image', data: { controller: "reader-image" })
+    - if @article.image_url && !@content.match?(@article.image_url)
+      = image_tag(@article.image_url, class: 'header-image custom-prop-image', data: { controller: "reader-image" })
 
-  .article_headline
-    = link_to(@article.url) do
-      h2.headline
-        = @article.title
-  .flex-row.justify-space-between
-    .source_and_reader_link
-      = link_to(articles_by_source_path(@article.source_name)) do
+    .article_headline
+      = link_to(@article.url) do
+        h2.headline
+          = @article.title
+    .flex-row.justify-space-between
+      .source_and_reader_link
+        = link_to(articles_by_source_path(@article.source_name)) do
+          p.source
+            = @article.source_name
         p.source
-          = @article.source_name
-      p.source
-        = @article.published_at.strftime('%A %-d.%-m.%Y')
-    / .flex-row.justify-end.align-center.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
-    div data-controller="tts-selector"
-      .tts_button data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium" data-tts-selector-target="piper"
-        / button data-action="click->piper#predict"
-          'Read article out loud
-        button.predict_button data-piper-target="predictButton" data-action="click->piper#predict"
-          'Listen
-        select.tts_voices data-piper-target="voiceSelect" style="display:none;"
-        / p Stored Voices
-        ul data-piper-target="storedList" style="display:none;"
-        / button data-action="click->piper#flush" data-piper-target="flushButton"
-        /   'Flush storage
+          = @article.published_at.strftime('%A %-d.%-m.%Y')
+      / .flex-row.justify-end.align-center.gap-s data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium"
+      div data-controller="tts-selector"
+        .tts_button data-controller="piper" data-piper-text-value=@text_to_speech_content data-piper-voice-id-value="en_US-hfc_female-medium" data-tts-selector-target="piper"
+          / button data-action="click->piper#predict"
+            'Read article out loud
+          button.predict_button data-piper-target="predictButton" data-action="click->piper#predict"
+            'Listen
+          select.tts_voices data-piper-target="voiceSelect" style="display:none;"
+          / p Stored Voices
+          ul data-piper-target="storedList" style="display:none;"
+          / button data-action="click->piper#flush" data-piper-target="flushButton"
+          /   'Flush storage
 
-      .tts_button data-controller="kokoro" data-kokoro-text-value=@text_to_speech_content data-kokoro-selected-voice-value="af_sky" data-tts-selector-target="kokoro"
-        button.predict_button data-kokoro-target="predictButton" data-action="click->kokoro#predict"
-          'Listen
-        select.tts_voices data-kokoro-target="voiceSelect" data-action="change->kokoro#voiceChanged" style="display:none;"
+        .tts_button data-controller="kokoro" data-kokoro-text-value=@text_to_speech_content data-kokoro-selected-voice-value="af_sky" data-tts-selector-target="kokoro"
+          button.predict_button data-kokoro-target="predictButton" data-action="click->kokoro#predict"
+            'Listen
+          select.tts_voices data-kokoro-target="voiceSelect" data-action="change->kokoro#voiceChanged" style="display:none;"
 
 
 
 
-  .line
-  .content
-    = @content.html_safe
+    .line
+    .content
+      = @content.html_safe
 
-  .line
-  h2 Discussion
-  - @article.comments.each do |comment|
-    = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
+    .line
+    h2 Discussion
+
+    .discussion-section
+      - if logged_in?
+        .user-info
+          p
+            | Logged in as
+            strong<> = current_user.full_username
+            = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
+
+        = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
+      - else
+        = render partial: 'sessions/login_form'
+
+      .line
+
+      .comments-list
+        - if @article.comments.any?
+          - @article.comments.where(parent_type: 'Article').each do |comment|
+            = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
+        - else
+          p.no-comments No comments yet. Be the first to comment!

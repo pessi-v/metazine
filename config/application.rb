@@ -43,5 +43,8 @@ module Metazine
       g.test_framework :minitest
       g.fixture_replacement :minitest
     end
+
+    # Application configuration
+    config.app_name = ENV.fetch("APP_NAME", "Metazine")
   end
 end

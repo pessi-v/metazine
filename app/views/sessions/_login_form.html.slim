@@ -1,0 +1,19 @@
+.login-prompt
+  h3 Login to participate in the discussion
+
+  = form_with url: "/auth/mastodon", method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
+    = f.hidden_field :origin, value: request.original_url
+    .form-group
+      = f.label :identifier, "Your Mastodon instance:", class: "form-label"
+      .form-input-group
+        = f.text_field :identifier,
+          placeholder: "mastodon.social",
+          class: "form-input",
+          required: true,
+          autocomplete: "off"
+        = f.submit "Login", class: "btn-login"
+    .form-help
+      | Example: mastodon.social, fosstodon.org
+      br
+      | Don't have an account?
+      = link_to "Join Mastodon", "https://joinmastodon.org/servers", target: "_blank", rel: "noopener"
