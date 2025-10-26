@@ -11,18 +11,16 @@ class ApplicationController < ActionController::Base
   def current_user
     return @current_user if defined?(@current_user)
 
-    @current_user = if session[:user_id]
-      User.find_by(id: session[:user_id])
-    end
+    @current_user = current_session&.user
   end
 
   # Returns the current session
   def current_session
     return @current_session if defined?(@current_session)
 
-    @current_session = if session[:session_id]
-      Session.find_by(id: session[:session_id])
-    end
+    # Try signed cookie first (more reliable for OAuth), then fall back to session hash
+    session_id = cookies.signed[:session_id] || session[:session_id]
+    @current_session = Session.find_by(id: session_id) if session_id
   end
 
   # Returns true if the user is logged in

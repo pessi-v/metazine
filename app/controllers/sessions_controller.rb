@@ -44,7 +44,15 @@ class SessionsController < ApplicationController
         user_agent: request.user_agent
       )
 
-      # Store session ID in cookie
+      # Store session ID in signed cookie (more reliable than session hash for OAuth)
+      cookies.signed.permanent[:session_id] = {
+        value: @session.id,
+        httponly: true,
+        same_site: :lax,
+        secure: Rails.env.production?
+      }
+
+      # Also store in session hash as backup
       session[:session_id] = @session.id
       session[:user_id] = @user.id
 
@@ -63,7 +71,9 @@ class SessionsController < ApplicationController
       current_session.destroy
     end
 
+    # Clear both session hash and signed cookie
     reset_session
+    cookies.delete(:session_id)
     redirect_back fallback_location: frontpage_path, notice: "Logged out successfully."
   end
 
