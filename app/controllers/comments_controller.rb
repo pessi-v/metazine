@@ -1,7 +1,7 @@
 class CommentsController < ApplicationController
   before_action :require_login
   before_action :set_parent, only: [:create]
-  before_action :set_comment, only: [:destroy]
+  before_action :set_comment, only: [:update, :destroy]
 
   # POST /articles/:article_id/comments
   def create
@@ -16,10 +16,23 @@ class CommentsController < ApplicationController
     end
   end
 
+  # PATCH /comments/:id
+  def update
+    if @comment.user == current_user
+      if @comment.update(comment_params)
+        redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
+      else
+        redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
+      end
+    else
+      redirect_back fallback_location: frontpage_path, alert: "You can only edit your own comments."
+    end
+  end
+
   # DELETE /comments/:id
   def destroy
     if @comment.user == current_user
-      @comment.destroy
+      @comment.soft_delete!
       redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully."
     else
       redirect_back fallback_location: frontpage_path, alert: "You can only delete your own comments."

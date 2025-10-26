@@ -18,6 +18,8 @@ class Comment < ApplicationRecord
   scope :top_level_comments, -> { where parent_id: nil }
   scope :local_comments, -> { where.not(user_id: nil) }
   scope :federated_comments, -> { where(user_id: nil) }
+  scope :active, -> { where(deleted_at: nil) }
+  scope :deleted, -> { where.not(deleted_at: nil) }
 
   on_federails_delete_requested -> { delete }
 
@@ -108,5 +110,19 @@ class Comment < ApplicationRecord
     else
       federails_actor&.username || "unknown"
     end
+  end
+
+  # Soft delete the comment
+  def soft_delete!
+    update_columns(
+      deleted_at: Time.current,
+      content: "[deleted]",
+      user_id: nil
+    )
+  end
+
+  # Check if comment is deleted
+  def deleted?
+    deleted_at.present?
   end
 end
