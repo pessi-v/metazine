@@ -32,8 +32,8 @@ class Comment < ApplicationRecord
   end
 
   scope :top_level_comments, -> { where parent_id: nil }
-  scope :local_comments, -> { where.not(user_id: nil) }
-  scope :federated_comments, -> { where(user_id: nil) }
+  scope :local_comments, -> { where(federated_url: nil) }
+  scope :federated_comments, -> { where.not(federated_url: nil) }
   scope :active, -> { where(deleted_at: nil) }
   scope :deleted, -> { where.not(deleted_at: nil) }
 
@@ -126,14 +126,14 @@ class Comment < ApplicationRecord
     true
   end
 
-  # Returns true if this is a local comment (created by a logged-in user)
+  # Returns true if this is a local comment (created via newfutu.re, not via ActivityPub)
   def local?
-    user.present?
+    federated_url.blank?
   end
 
   # Returns true if this is a federated comment (from ActivityPub)
   def federated?
-    !local?
+    federated_url.present?
   end
 
   # Get the display name for the comment author
