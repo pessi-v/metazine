@@ -1,3 +1,5 @@
+require 'federails/data_transformer/note'
+
 class Comment < ApplicationRecord
   include Federails::DataEntity
 
@@ -60,7 +62,7 @@ class Comment < ApplicationRecord
 
     Federails::DataTransformer::Note.to_federation self,
       content: content,
-      inReplyTo: parent_url
+      custom: { 'inReplyTo' => parent_url }
   end
 
   def self.handle_federated_object?(hash)

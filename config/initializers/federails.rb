@@ -18,6 +18,10 @@ Federails.configure do |conf|
 end
 
 Rails.application.config.after_initialize do
+  # Ensure actor models are loaded so they register with federails
+  User
+  InstanceActor
+
   # Register handlers for Create and Update activities
   Fediverse::Inbox.register_handler("Create", "*", ActivityPub::ActorActivityHandler, :handle_create_activity)
   Fediverse::Inbox.register_handler("Update", "*", ActivityPub::ActorActivityHandler, :handle_update_activity)

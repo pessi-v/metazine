@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'federails/data_transformer/note'
+
 class Article < ApplicationRecord
   include PgSearch::Model
   include Federails::DataEntity
