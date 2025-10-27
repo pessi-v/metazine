@@ -13,7 +13,9 @@ class Article < ApplicationRecord
   acts_as_federails_data(
     handles: "Note",
     with: :handle_incoming_fediverse_data,
-    actor_entity_method: :federails_actor
+    actor_entity_method: :federails_actor,
+    route_path_segment: :articles,
+    url_param: :id
   )
 
   belongs_to :source, counter_cache: true

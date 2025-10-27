@@ -6,7 +6,9 @@ class Comment < ApplicationRecord
   acts_as_federails_data(
     handles: "Note",
     actor_entity_method: :federails_actor,
-    should_federate_method: :federate?
+    should_federate_method: :federate?,
+    route_path_segment: :comments,
+    url_param: :id
   )
 
   belongs_to :parent, polymorphic: true
