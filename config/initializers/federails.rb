@@ -22,15 +22,22 @@ Rails.application.config.after_initialize do
   User
   InstanceActor
 
-  # Register handlers for Create and Update activities
-  Fediverse::Inbox.register_handler("Create", "*", ActivityPub::ActorActivityHandler, :handle_create_activity)
-  Fediverse::Inbox.register_handler("Update", "*", ActivityPub::ActorActivityHandler, :handle_update_activity)
+  # Register handlers for Create and Update activities with Note objects (comments/replies)
+  Fediverse::Inbox.register_handler("Create", "Note", ActivityPub::NoteActivityHandler, :handle_create_note)
+  Fediverse::Inbox.register_handler("Update", "Note", ActivityPub::NoteActivityHandler, :handle_update_note)
+
+  # Register handlers for Create and Update activities with Actor objects (Person, Application, etc.)
+  Fediverse::Inbox.register_handler("Create", "Person", ActivityPub::ActorActivityHandler, :handle_create_activity)
+  Fediverse::Inbox.register_handler("Update", "Person", ActivityPub::ActorActivityHandler, :handle_update_activity)
+  Fediverse::Inbox.register_handler("Create", "Application", ActivityPub::ActorActivityHandler, :handle_create_activity)
+  Fediverse::Inbox.register_handler("Update", "Application", ActivityPub::ActorActivityHandler, :handle_update_activity)
 
   # Follow activities are handled by federails built-in handlers
   # They should already be registered automatically when federails loads
 
-  # Debug: Log registered handlers to verify Follow is registered
+  # Debug: Log registered handlers to verify all handlers are registered
   Rails.logger.info "=== Federails handlers check ==="
   Rails.logger.info "Follow handlers: #{Fediverse::Inbox.class_variable_get(:@@handlers)['Follow'].inspect}"
+  Rails.logger.info "Create handlers: #{Fediverse::Inbox.class_variable_get(:@@handlers)['Create'].inspect}"
   Rails.logger.info "All handlers: #{Fediverse::Inbox.class_variable_get(:@@handlers).keys.inspect}"
 end
