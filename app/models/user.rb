@@ -22,6 +22,38 @@ class User < ApplicationRecord
       user.access_token = auth.credentials.token
       user.domain = extract_domain(auth)
       user.save!
+
+      # Link to existing federated actor if one exists
+      user.link_to_federated_actor!
+    end
+  end
+
+  # Links this user to an existing federated actor if they're the same person
+  # This allows users who commented via ActivityPub to claim ownership when they log in
+  def link_to_federated_actor!
+    return unless domain.present? && username.present?
+
+    # Construct the expected ActivityPub actor URL
+    # Format: https://domain/users/username (standard Mastodon format)
+    expected_actor_url = "https://#{domain}/users/#{username}"
+
+    # Find an existing remote actor with this federated_url
+    remote_actor = Federails::Actor.find_by(
+      federated_url: expected_actor_url,
+      local: [false, nil],
+      entity_id: nil
+    )
+
+    if remote_actor
+      Rails.logger.info "Linking User##{id} to remote Federails::Actor##{remote_actor.id}"
+
+      # Associate any comments from this remote actor with the user
+      Comment.where(federails_actor: remote_actor, user_id: nil).update_all(user_id: id)
+
+      # Update the actor to point to this user entity
+      remote_actor.update!(entity_id: id, entity_type: 'User')
+
+      Rails.logger.info "  Claimed #{Comment.where(user_id: id, federails_actor: remote_actor).count} comments"
     end
   end
 

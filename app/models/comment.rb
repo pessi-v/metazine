@@ -19,6 +19,9 @@ class Comment < ApplicationRecord
   validates :parent_type, :parent_id, presence: true, allow_blank: false
   validates :federails_actor, presence: true
 
+  # After creating a federated comment, try to link it to an existing user
+  after_create :link_to_user_if_exists
+
   # Prevent editing deleted comments
   validate :cannot_edit_deleted_comment, on: :update
 
@@ -165,5 +168,33 @@ class Comment < ApplicationRecord
   # Check if comment is deleted
   def deleted?
     deleted_at.present?
+  end
+
+  # Check if a given user owns this comment (either local or federated)
+  def owned_by?(user)
+    return false unless user
+
+    # Direct ownership via user_id
+    return true if user_id == user.id
+
+    # Federated ownership: same federails_actor
+    return true if federails_actor && user.federails_actor &&
+                   federails_actor.id == user.federails_actor.id
+
+    false
+  end
+
+  private
+
+  # Links this comment to a user if the federails_actor is associated with a user
+  def link_to_user_if_exists
+    return if user_id.present? # Already linked
+    return unless federails_actor
+
+    # Check if this actor is associated with a logged-in user
+    if federails_actor.entity_type == 'User' && federails_actor.entity_id
+      update_column(:user_id, federails_actor.entity_id)
+      Rails.logger.info "Linked Comment##{id} to User##{federails_actor.entity_id}"
+    end
   end
 end
