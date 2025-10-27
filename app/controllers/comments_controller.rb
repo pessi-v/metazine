@@ -18,7 +18,7 @@ class CommentsController < ApplicationController
 
   # PATCH /comments/:id
   def update
-    if @comment.user == current_user
+    if @comment.owned_by?(current_user)
       if @comment.update(comment_params)
         redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
       else
@@ -31,7 +31,7 @@ class CommentsController < ApplicationController
 
   # DELETE /comments/:id
   def destroy
-    if @comment.user == current_user
+    if @comment.owned_by?(current_user)
       # Call destroy which will trigger soft delete via before_destroy callback
       # This allows federails to send the Delete activity
       @comment.destroy
