@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_25_233239) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_28_135325) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -102,6 +102,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_25_233239) do
     t.index ["actor_id", "target_actor_id"], name: "index_federails_followings_on_actor_id_and_target_actor_id", unique: true
     t.index ["target_actor_id"], name: "index_federails_followings_on_target_actor_id"
     t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
+  end
+
+  create_table "federails_hosts", force: :cascade do |t|
+    t.string "domain", null: false
+    t.string "nodeinfo_url"
+    t.string "software_name"
+    t.string "software_version"
+    t.jsonb "protocols", default: []
+    t.jsonb "services", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["domain"], name: "index_federails_hosts_on_domain", unique: true
   end
 
   create_table "instance_actors", force: :cascade do |t|
