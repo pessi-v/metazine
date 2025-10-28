@@ -64,9 +64,10 @@ class User < ApplicationRecord
     Rails.logger.info "    server: #{remote_actor.server}"
     Rails.logger.info "    local: #{remote_actor.local}"
 
-    # If actor is already linked to this user, we're done
+    # If actor is already linked to this user, update attributes and we're done
     if remote_actor.entity_id == id && remote_actor.entity_type == 'User'
-      Rails.logger.info "  Already linked!"
+      Rails.logger.info "  Already linked! Updating actor attributes..."
+      update_actor_attributes(remote_actor)
       return
     end
 
@@ -76,13 +77,29 @@ class User < ApplicationRecord
       return
     end
 
-    # Link the actor to this user
+    # Link the actor to this user and update attributes
     remote_actor.update!(entity_id: id, entity_type: 'User', local: false)
+    update_actor_attributes(remote_actor)
 
     # Claim any comments from this actor
     claimed_count = Comment.where(federails_actor: remote_actor, user_id: nil).update_all(user_id: id)
 
     Rails.logger.info "  Successfully linked! Claimed #{claimed_count} comments"
+  end
+
+  # Update actor attributes from user data
+  def update_actor_attributes(actor)
+    updates = {}
+    updates[:name] = display_name if display_name.present? && actor.name != display_name
+    updates[:username] = username if username.present? && actor.username != username
+    updates[:avatar_url] = avatar_url if avatar_url.present? && actor.avatar_url != avatar_url
+
+    if updates.any?
+      actor.update!(updates)
+      Rails.logger.info "    Updated actor attributes: #{updates.keys.join(', ')}"
+    else
+      Rails.logger.info "    No actor attribute updates needed"
+    end
   end
 
   def name
@@ -97,6 +114,17 @@ class User < ApplicationRecord
 
   def self.extract_domain(auth)
     # For Mastodon, the domain is in the auth hash
-    auth.info.urls&.dig("Profile")&.match(/https?:\/\/([^\/]+)/)&.[](1) || auth.extra&.raw_info&.instance
+    # Try multiple sources in order of preference:
+    # 1. info.urls.domain (direct domain field)
+    # 2. info.urls["profile"] (lowercase key)
+    # 3. extra.raw_info.url (user's profile URL)
+    # 4. extra.raw_info.instance (instance domain)
+    domain = auth.info.urls&.domain&.match(/https?:\/\/([^\/]+)/)&.[](1) ||
+             auth.info.urls&.[]("profile")&.match(/https?:\/\/([^\/]+)/)&.[](1) ||
+             auth.extra&.raw_info&.url&.match(/https?:\/\/([^\/]+)/)&.[](1) ||
+             auth.extra&.raw_info&.instance
+
+    Rails.logger.info "  extract_domain result: #{domain.inspect}"
+    domain
   end
 end
