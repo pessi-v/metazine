@@ -4,7 +4,7 @@ class User < ApplicationRecord
   acts_as_federails_actor(
     username_field: :username,
     name_field: :display_name,
-    auto_create_actors: true
+    auto_create_actors: false  # Don't auto-create, we'll link to remote actor manually
   )
 
   has_many :sessions, dependent: :destroy
@@ -15,12 +15,24 @@ class User < ApplicationRecord
 
   # Create or update user from omniauth auth hash
   def self.from_omniauth(auth)
+    Rails.logger.info "=== from_omniauth called ==="
+    Rails.logger.info "  provider: #{auth.provider}"
+    Rails.logger.info "  uid: #{auth.uid}"
+    Rails.logger.info "  info.nickname: #{auth.info.nickname}"
+    Rails.logger.info "  info.name: #{auth.info.name}"
+    Rails.logger.info "  info.urls: #{auth.info.urls.inspect}"
+    Rails.logger.info "  extra.raw_info: #{auth.extra&.raw_info&.to_h&.keys&.inspect}"
+    Rails.logger.info "  extra.raw_info.instance: #{auth.extra&.raw_info&.instance}"
+    Rails.logger.info "  extra.raw_info.url: #{auth.extra&.raw_info&.url}"
+
     where(provider: auth.provider, uid: auth.uid).first_or_initialize.tap do |user|
       user.username = auth.info.nickname
       user.display_name = auth.info.name
       user.avatar_url = auth.info.image
       user.access_token = auth.credentials.token
       user.domain = extract_domain(auth)
+
+      Rails.logger.info "  Extracted domain: #{user.domain.inspect}"
       user.save!
 
       # Link to existing federated actor if one exists
@@ -28,7 +40,7 @@ class User < ApplicationRecord
     end
   end
 
-  # Links this user to an existing federated actor if they're the same person
+  # Links this user to an existing federated actor or fetches it from the remote server
   # This allows users who commented via ActivityPub to claim ownership when they log in
   def link_to_federated_actor!
     return unless domain.present? && username.present?
@@ -37,24 +49,40 @@ class User < ApplicationRecord
     # Format: https://domain/users/username (standard Mastodon format)
     expected_actor_url = "https://#{domain}/users/#{username}"
 
-    # Find an existing remote actor with this federated_url
-    remote_actor = Federails::Actor.find_by(
-      federated_url: expected_actor_url,
-      local: [false, nil],
-      entity_id: nil
-    )
+    Rails.logger.info "=== Linking User##{id} to actor ==="
+    Rails.logger.info "  Expected URL: #{expected_actor_url}"
 
-    if remote_actor
-      Rails.logger.info "Linking User##{id} to remote Federails::Actor##{remote_actor.id}"
+    # Find existing remote actor or fetch it from the remote server
+    remote_actor = Federails::Actor.find_or_create_by_federation_url(expected_actor_url)
 
-      # Associate any comments from this remote actor with the user
-      Comment.where(federails_actor: remote_actor, user_id: nil).update_all(user_id: id)
-
-      # Update the actor to point to this user entity
-      remote_actor.update!(entity_id: id, entity_type: 'User')
-
-      Rails.logger.info "  Claimed #{Comment.where(user_id: id, federails_actor: remote_actor).count} comments"
+    unless remote_actor
+      Rails.logger.warn "  Could not find or fetch actor from #{expected_actor_url}"
+      return
     end
+
+    Rails.logger.info "  Found/fetched Actor##{remote_actor.id}"
+    Rails.logger.info "    server: #{remote_actor.server}"
+    Rails.logger.info "    local: #{remote_actor.local}"
+
+    # If actor is already linked to this user, we're done
+    if remote_actor.entity_id == id && remote_actor.entity_type == 'User'
+      Rails.logger.info "  Already linked!"
+      return
+    end
+
+    # If actor is linked to a different entity, something is wrong
+    if remote_actor.entity_id.present? && remote_actor.entity_id != id
+      Rails.logger.warn "  Actor is already linked to #{remote_actor.entity_type}##{remote_actor.entity_id}"
+      return
+    end
+
+    # Link the actor to this user
+    remote_actor.update!(entity_id: id, entity_type: 'User', local: false)
+
+    # Claim any comments from this actor
+    claimed_count = Comment.where(federails_actor: remote_actor, user_id: nil).update_all(user_id: id)
+
+    Rails.logger.info "  Successfully linked! Claimed #{claimed_count} comments"
   end
 
   def name
