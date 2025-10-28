@@ -53,7 +53,7 @@ class User < ApplicationRecord
     Rails.logger.info "  Expected URL: #{expected_actor_url}"
 
     # Find existing remote actor or fetch it from the remote server
-    remote_actor = Federails::Actor.find_or_create_by_federation_url(expected_actor_url)
+    remote_actor = Federails::Actor.find_by_federation_url(expected_actor_url)
 
     unless remote_actor
       Rails.logger.warn "  Could not find or fetch actor from #{expected_actor_url}"
@@ -63,6 +63,13 @@ class User < ApplicationRecord
     Rails.logger.info "  Found/fetched Actor##{remote_actor.id}"
     Rails.logger.info "    server: #{remote_actor.server}"
     Rails.logger.info "    local: #{remote_actor.local}"
+    Rails.logger.info "    persisted: #{remote_actor.persisted?}"
+
+    # Ensure the actor is saved and marked as remote (not local)
+    unless remote_actor.persisted?
+      remote_actor.local = false
+      remote_actor.save!
+    end
 
     # If actor is already linked to this user, update attributes and we're done
     if remote_actor.entity_id == id && remote_actor.entity_type == 'User'
@@ -92,7 +99,18 @@ class User < ApplicationRecord
     updates = {}
     updates[:name] = display_name if display_name.present? && actor.name != display_name
     updates[:username] = username if username.present? && actor.username != username
-    updates[:avatar_url] = avatar_url if avatar_url.present? && actor.avatar_url != avatar_url
+
+    # Avatar URL is stored in extensions JSON field for remote actors
+    if avatar_url.present?
+      extensions = actor.extensions || {}
+      if extensions['icon'].is_a?(Hash) && extensions['icon']['url'] != avatar_url
+        extensions['icon'] = { 'type' => 'Image', 'mediaType' => 'image/jpeg', 'url' => avatar_url }
+        updates[:extensions] = extensions
+      elsif !extensions['icon']
+        extensions['icon'] = { 'type' => 'Image', 'mediaType' => 'image/jpeg', 'url' => avatar_url }
+        updates[:extensions] = extensions
+      end
+    end
 
     if updates.any?
       actor.update!(updates)
