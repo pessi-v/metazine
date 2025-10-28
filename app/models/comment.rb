@@ -65,9 +65,48 @@ class Comment < ApplicationRecord
       parent.federated_url
     end
 
+    # Build recipient list for proper ActivityPub addressing
+    to_addresses = []
+    cc_addresses = []
+
+    # Add parent author to "to" (direct recipients)
+    if parent.respond_to?(:federails_actor) && parent.federails_actor&.distant?
+      to_addresses << parent.federails_actor.federated_url
+    end
+
+    # Add all thread participants to "cc" (carbon copy)
+    if parent.is_a?(Article)
+      article = parent
+    elsif parent.is_a?(Comment)
+      # Walk up to find the root article
+      article = parent
+      article = article.parent while article.is_a?(Comment)
+    end
+
+    if article
+      # Get all unique remote actors who commented on this article
+      article.comments.includes(:federails_actor).find_each do |comment|
+        if comment.federails_actor&.distant? && comment.id != id
+          cc_addresses << comment.federails_actor.federated_url
+        end
+      end
+    end
+
+    # Add public addressing if needed (makes it visible to everyone)
+    to_addresses << 'https://www.w3.org/ns/activitystreams#Public'
+
+    # Add followers to cc
+    if federails_actor&.local? && federails_actor.followers_url
+      cc_addresses << federails_actor.followers_url
+    end
+
     Federails::DataTransformer::Note.to_federation self,
       content: content,
-      custom: { 'inReplyTo' => parent_url }
+      custom: {
+        'inReplyTo' => parent_url,
+        'to' => to_addresses.uniq.compact,
+        'cc' => cc_addresses.uniq.compact
+      }
   end
 
   def self.handle_federated_object?(hash)
