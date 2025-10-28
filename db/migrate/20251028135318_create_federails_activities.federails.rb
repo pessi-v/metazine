@@ -6,8 +6,8 @@ class CreateFederailsActivities < ActiveRecord::Migration[7.0]
     # t.references :entity, polymorphic: true, null: false
     # t.string :action, null: false, default: nil
     # t.references :actor, null: false, foreign_key: { to_table: :federails_actors }
-#
+    #
     # t.timestamps
-    end
+    # end
   end
 end
