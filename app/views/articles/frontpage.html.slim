@@ -4,7 +4,7 @@
   .item-a
     = render 'article_image_headline_summary_3_rows', article: next_article_with_image(@articles)
   
-  .item-b style="grid-area: B"
+  .item-b style="border-top: var(--border); grid-area: B;"
     = render 'many_articles_headline',
       articles: three_short_titles
       / articles: [next_article_with_short_title(@articles),
