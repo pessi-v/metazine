@@ -52,8 +52,13 @@ class User < ApplicationRecord
     Rails.logger.info "=== Linking User##{id} to actor ==="
     Rails.logger.info "  Expected URL: #{expected_actor_url}"
 
-    # Find existing remote actor or fetch it from the remote server
-    remote_actor = Federails::Actor.find_by_federation_url(expected_actor_url)
+    # First, try to find existing actor by federated_url
+    remote_actor = Federails::Actor.find_by(federated_url: expected_actor_url)
+
+    # If not found, try to fetch from remote server
+    unless remote_actor
+      remote_actor = Federails::Actor.find_by_federation_url(expected_actor_url)
+    end
 
     unless remote_actor
       Rails.logger.warn "  Could not find or fetch actor from #{expected_actor_url}"
@@ -68,7 +73,21 @@ class User < ApplicationRecord
     # Ensure the actor is saved and marked as remote (not local)
     unless remote_actor.persisted?
       remote_actor.local = false
-      remote_actor.save!
+      begin
+        remote_actor.save!
+      rescue ActiveRecord::RecordInvalid => e
+        # If save fails due to duplicate, try to find the existing one
+        if e.message.include?("Federated url has already been taken")
+          Rails.logger.warn "  Actor save failed (duplicate), finding existing actor..."
+          remote_actor = Federails::Actor.find_by(federated_url: expected_actor_url)
+          unless remote_actor
+            Rails.logger.error "  Could not find existing actor after duplicate error"
+            return
+          end
+        else
+          raise
+        end
+      end
     end
 
     # If actor is already linked to this user, update attributes and we're done

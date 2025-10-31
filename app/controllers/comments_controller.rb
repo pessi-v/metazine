@@ -27,7 +27,13 @@ class CommentsController < ApplicationController
       end
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Failed to post to Mastodon: #{e.message}"
-      redirect_back fallback_location: frontpage_path, alert: "Failed to post comment to Mastodon: #{e.message}"
+
+      # Check if it's a scope error
+      if e.message.include?("authorized scopes") || e.message.include?("Forbidden")
+        redirect_back fallback_location: frontpage_path, alert: "Your Mastodon login needs to be refreshed. Please log out and log back in to enable commenting."
+      else
+        redirect_back fallback_location: frontpage_path, alert: "Failed to post comment to Mastodon: #{e.message}"
+      end
     end
   end
 
