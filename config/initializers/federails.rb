@@ -22,9 +22,10 @@ Rails.application.config.after_initialize do
   User
   InstanceActor
 
-  # Register handlers for Create and Update activities with Note objects (comments/replies)
+  # Register handlers for Create, Update, and Delete activities with Note objects (comments/replies)
   Fediverse::Inbox.register_handler("Create", "Note", ActivityPub::NoteActivityHandler, :handle_create_note)
   Fediverse::Inbox.register_handler("Update", "Note", ActivityPub::NoteActivityHandler, :handle_update_note)
+  Fediverse::Inbox.register_handler("Delete", "Note", ActivityPub::NoteActivityHandler, :handle_delete_note)
 
   # Register handlers for Create and Update activities with Actor objects (Person, Application, etc.)
   Fediverse::Inbox.register_handler("Create", "Person", ActivityPub::ActorActivityHandler, :handle_create_activity)

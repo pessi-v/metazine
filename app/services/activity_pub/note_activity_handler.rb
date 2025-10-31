@@ -38,6 +38,7 @@ class ActivityPub::NoteActivityHandler
     if entity.persisted?
       # Update existing entity
       attrs = entity.class.from_activitypub_object(object)
+      entity.skip_federails_callbacks = true if entity.respond_to?(:skip_federails_callbacks=)
       entity.assign_attributes(attrs)
       entity.save!(touch: false)
       Rails.logger.info "  Updated entity: #{entity.class.name}##{entity.id}"
@@ -50,6 +51,36 @@ class ActivityPub::NoteActivityHandler
     entity
   rescue => e
     Rails.logger.error "=== Error handling Update Note activity ==="
+    Rails.logger.error "  Error: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    raise
+  end
+
+  # Handles Delete activities for Note objects
+  def self.handle_delete_note(activity_hash_or_id)
+    activity = Fediverse::Request.dereference(activity_hash_or_id)
+
+    # The object in a Delete activity is usually just a string URL
+    object_id = activity["object"].is_a?(String) ? activity["object"] : activity["object"]["id"]
+
+    Rails.logger.info "=== Received Delete Note activity ==="
+    Rails.logger.info "  Object ID: #{object_id}"
+
+    # Find the comment by federated_url
+    comment = Comment.find_by(federated_url: object_id)
+
+    if comment
+      Rails.logger.info "  Found comment: #{comment.id}"
+      comment.skip_federails_callbacks = true
+      comment.soft_delete!
+      Rails.logger.info "  Soft deleted comment"
+    else
+      Rails.logger.warn "  Comment not found for deletion"
+    end
+
+    comment
+  rescue => e
+    Rails.logger.error "=== Error handling Delete Note activity ==="
     Rails.logger.error "  Error: #{e.class}: #{e.message}"
     Rails.logger.error e.backtrace.join("\n")
     raise

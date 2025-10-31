@@ -19,6 +19,10 @@ class Comment < ApplicationRecord
   validates :parent_type, :parent_id, presence: true, allow_blank: false
   validates :federails_actor, presence: true
 
+  # Virtual attribute to skip Federails callbacks
+  # Used when posting directly to Mastodon outbox
+  attr_accessor :skip_federails_callbacks
+
   # After creating a federated comment, try to link it to an existing user
   after_create :link_to_user_if_exists
 
@@ -162,6 +166,11 @@ class Comment < ApplicationRecord
   end
 
   def federate?
+    # Don't federate if we're posting to Mastodon outbox directly
+    # or if the comment already has a federated_url from Mastodon
+    return false if skip_federails_callbacks
+    return false if federated_url.present? && federated_url.include?('mastodon')
+
     true
   end
 
