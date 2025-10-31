@@ -169,7 +169,10 @@ class Comment < ApplicationRecord
     # Don't federate if we're posting to Mastodon outbox directly
     # or if the comment already has a federated_url from Mastodon
     return false if skip_federails_callbacks
-    return false if federated_url.present? && federated_url.include?('mastodon')
+
+    # Use read_attribute to avoid any potential infinite loops from Federails
+    url = read_attribute(:federated_url)
+    return false if url.present? && url.include?('mastodon')
 
     true
   end
