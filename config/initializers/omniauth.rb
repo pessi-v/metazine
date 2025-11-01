@@ -1,7 +1,8 @@
 Rails.application.config.middleware.use OmniAuth::Builder do
   # Mastodon strategy with dynamic client credentials
+  # Using granular scopes for compatibility with modern Mastodon
   provider :mastodon,
-    scopes: "read write follow",
+    scopes: "read write:statuses write:follows",
     credentials: lambda { |domain, callback_url|
       puts "\n=== OmniAuth Credentials Phase ==="
       puts "Domain: #{domain}"
@@ -19,7 +20,9 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       client = Mastodon::REST::Client.new(base_url: "https://#{domain}")
       app = client.create_app(
         Rails.application.config.app_name || "Metazine",
-        callback_url
+        callback_url,
+        scopes: "read write:statuses write:follows",
+        website: "https://#{ENV['APP_HOST'] || 'newfutu.re'}"
       )
 
       puts "Successfully registered app, client_id: #{app.client_id}"

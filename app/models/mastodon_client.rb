@@ -14,7 +14,7 @@ class MastodonClient < ApplicationRecord
     app = client.create_app(
       app_name: Rails.application.config.app_name || "Metazine",
       redirect_uris: callback_url,
-      scopes: "read write follow",
+      scopes: "read write:statuses write:follows",
       website: root_url
     )
 
