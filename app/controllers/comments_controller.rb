@@ -6,10 +6,20 @@ class CommentsController < ApplicationController
   # POST /articles/:article_id/comments
   def create
     begin
-      # Check if user has federails_actor
+      # Check if user has federails_actor - try to link if missing
       unless current_user.federails_actor
-        redirect_back fallback_location: frontpage_path, alert: "Your account is not properly linked. Please log out and log back in."
-        return
+        Rails.logger.warn "User #{current_user.id} (#{current_user.username}@#{current_user.domain}) has no federails_actor, attempting to link..."
+        current_user.link_to_federated_actor!
+        current_user.reload
+
+        unless current_user.federails_actor
+          Rails.logger.error "Failed to link user to federails_actor"
+          flash[:alert] = "Your account is not properly linked. Please log out and log back in to enable commenting."
+          redirect_back fallback_location: frontpage_path
+          return
+        end
+
+        Rails.logger.info "Successfully linked user to federails_actor #{current_user.federails_actor.id}"
       end
 
       # Post to user's Mastodon outbox first
