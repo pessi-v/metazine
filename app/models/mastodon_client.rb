@@ -1,4 +1,8 @@
 class MastodonClient < ApplicationRecord
+  # Single source of truth for OAuth scopes
+  # Using granular scopes for modern Mastodon compatibility
+  SCOPES = "read write:statuses write:follows"
+
   validates :domain, :client_id, :client_secret, presence: true
   validates :domain, uniqueness: true
 
@@ -14,7 +18,7 @@ class MastodonClient < ApplicationRecord
     app = client.create_app(
       app_name: Rails.application.config.app_name || "Metazine",
       redirect_uris: callback_url,
-      scopes: "read write:statuses write:follows",
+      scopes: SCOPES,
       website: root_url
     )
 
