@@ -15,11 +15,12 @@ class MastodonClient < ApplicationRecord
     puts "Website URL: #{root_url}"
 
     client = Mastodon::REST::Client.new(base_url: "https://#{domain}")
+    # create_app takes positional arguments: (name, redirect_uri, scopes, website)
     app = client.create_app(
-      app_name: Rails.application.config.app_name || "Metazine",
-      redirect_uris: callback_url,
-      scopes: SCOPES,
-      website: root_url
+      Rails.application.config.app_name || "Metazine",
+      callback_url,
+      SCOPES,
+      root_url
     )
 
     puts "Successfully registered app for #{domain}: client_id=#{app.client_id}"
@@ -30,9 +31,11 @@ class MastodonClient < ApplicationRecord
       client_secret: app.client_secret
     )
   rescue StandardError => e
+    Rails.logger.error "ERROR: Failed to register Mastodon app for #{domain}: #{e.class} - #{e.message}"
+    Rails.logger.error e.backtrace.first(10).join("\n")
     puts "ERROR: Failed to register Mastodon app for #{domain}: #{e.class} - #{e.message}"
     puts e.backtrace.first(10).join("\n")
-    nil
+    raise # Re-raise so OmniAuth can show proper error
   end
 
   private
