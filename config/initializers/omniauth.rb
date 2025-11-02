@@ -2,7 +2,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
   # Mastodon strategy with dynamic client credentials
   # Scopes are defined in MastodonClient::SCOPES (single source of truth)
   provider :mastodon,
-    scopes: MastodonClient::SCOPES,
+    scope: MastodonClient::SCOPES,
     credentials: lambda { |domain, callback_url|
       puts "\n=== OmniAuth Credentials Phase ==="
       puts "Domain: #{domain}"
@@ -12,11 +12,11 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       begin
         mastodon_client = MastodonClient.find_by(domain: domain)
 
-        unless mastodon_client
+        if mastodon_client
+          puts "Found existing client for #{domain}"
+        else
           puts "No existing client found, registering new app..."
           mastodon_client = MastodonClient.register_app(domain)
-        else
-          puts "Found existing client for #{domain}"
         end
 
         unless mastodon_client
@@ -41,18 +41,18 @@ OmniAuth.config.silence_get_warning = true
 OmniAuth.config.request_validation_phase = proc { |env|
   # Store state in a more persistent way for Cloudflare Tunnel
   request = Rack::Request.new(env)
-  if request.params['state']
+  if request.params["state"]
     # During callback, retrieve state from cookie
-    stored_state = request.cookies['omniauth.state']
-    env['rack.session']['omniauth.state'] = stored_state if stored_state
+    stored_state = request.cookies["omniauth.state"]
+    env["rack.session"]["omniauth.state"] = stored_state if stored_state
   end
 }
 
 # Log all OmniAuth failures
 OmniAuth.config.on_failure = proc { |env|
   puts "\n=== OmniAuth Failure Detected ==="
-  error = env['omniauth.error']
-  error_type = env['omniauth.error.type']
+  error = env["omniauth.error"]
+  error_type = env["omniauth.error.type"]
   puts "Error Type: #{error_type}"
   puts "Error: #{error&.class} - #{error&.message}"
   puts error&.backtrace&.first(10)&.join("\n") if error
