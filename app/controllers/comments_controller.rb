@@ -6,6 +6,12 @@ class CommentsController < ApplicationController
   # POST /articles/:article_id/comments
   def create
     begin
+      # Check if user has federails_actor
+      unless current_user.federails_actor
+        redirect_back fallback_location: frontpage_path, alert: "Your account is not properly linked. Please log out and log back in."
+        return
+      end
+
       # Post to user's Mastodon outbox first
       mastodon_client = MastodonApiClient.new(current_user)
       mastodon_response = mastodon_client.create_comment(
@@ -14,17 +20,28 @@ class CommentsController < ApplicationController
       )
 
       # Create local comment with Mastodon's federated_url
-      @comment = @parent.comments.build(comment_params)
-      @comment.user = current_user
-      @comment.federails_actor = current_user.federails_actor
-      @comment.federated_url = mastodon_response[:uri] # Use ActivityPub URI, not web URL
-      @comment.skip_federails_callbacks = true # Don't federate again
+      # Use insert! to completely bypass Federails callbacks
+      comment_attributes = {
+        parent_type: @parent.class.name,
+        parent_id: @parent.id,
+        content: comment_params[:content],
+        user_id: current_user.id,
+        federails_actor_id: current_user.federails_actor.id,
+        federated_url: mastodon_response[:uri], # Use ActivityPub URI, not web URL
+        created_at: Time.current,
+        updated_at: Time.current
+      }
 
-      if @comment.save
-        redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!"
-      else
-        redirect_back fallback_location: frontpage_path, alert: "Failed to post comment: #{@comment.errors.full_messages.join(', ')}"
-      end
+      # insert! returns the inserted record's primary key
+      result = Comment.insert!(comment_attributes)
+      comment_id = result.is_a?(Hash) ? result["id"] : result
+      Rails.logger.info "Created comment #{comment_id} with federated_url: #{mastodon_response[:uri]}"
+
+      redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!"
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error "Failed to save comment: #{e.message}"
+      Rails.logger.error e.backtrace.first(10).join("\n")
+      redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{e.message}"
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Failed to post to Mastodon: #{e.message}"
 
@@ -57,13 +74,13 @@ class CommentsController < ApplicationController
         )
       end
 
-      # Update local comment
-      @comment.skip_federails_callbacks = true
-      if @comment.update(comment_params)
-        redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
-      else
-        redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
-      end
+      # Update local comment directly to bypass Federails
+      @comment.update_columns(
+        content: comment_params[:content],
+        updated_at: Time.current
+      )
+
+      redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Failed to update on Mastodon: #{e.message}"
       redirect_back fallback_location: frontpage_path, alert: "Failed to update comment on Mastodon: #{e.message}"
@@ -87,9 +104,13 @@ class CommentsController < ApplicationController
         mastodon_client.delete_comment(status_id: status_id)
       end
 
-      # Soft delete locally
-      @comment.skip_federails_callbacks = true
-      @comment.soft_delete!
+      # Soft delete locally - update_columns bypasses Federails callbacks
+      @comment.update_columns(
+        deleted_at: Time.current,
+        content: "[deleted]",
+        user_id: nil
+      )
+
       redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully."
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Failed to delete on Mastodon: #{e.message}"
