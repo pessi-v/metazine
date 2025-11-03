@@ -28,18 +28,12 @@ class AtprotoKeyManager
 
     def load_private_key
       # Try environment variable first (production)
-      if ENV['ATPROTO_PRIVATE_KEY'].present?
-        Rails.logger.info "Loading AT Protocol private key from environment variable"
-        begin
-          # Decode the Base64-encoded PEM key, stripping any whitespace
-          pem_data = Base64.strict_decode64(ENV['ATPROTO_PRIVATE_KEY'].strip)
-          # Use OpenSSL::PKey.read() to parse PEM-encoded keys (works with all key types)
-          OpenSSL::PKey.read(pem_data)
-        rescue => e
-          Rails.logger.error "Failed to parse AT Protocol private key from environment: #{e.class} - #{e.message}"
-          Rails.logger.error "Key preview (first 50 chars): #{ENV['ATPROTO_PRIVATE_KEY'][0..50]}"
-          raise
-        end
+      if ENV['ATPROTO_PRIVATE_KEY_PEM'].present?
+        Rails.logger.info "Loading AT Protocol private key from environment variable (PEM format)"
+        # The PEM is stored directly in the env var (not Base64 encoded)
+        # Replace literal \n with actual newlines
+        pem_data = ENV['ATPROTO_PRIVATE_KEY_PEM'].gsub('\n', "\n")
+        OpenSSL::PKey.read(pem_data)
       # Try file second (development)
       elsif File.exist?(KEY_PATH)
         Rails.logger.info "Loading AT Protocol private key from file: #{KEY_PATH}"
