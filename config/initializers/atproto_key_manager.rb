@@ -30,11 +30,13 @@ class AtprotoKeyManager
       # Try environment variable first (production)
       if ENV['ATPROTO_PRIVATE_KEY'].present?
         Rails.logger.info "Loading AT Protocol private key from environment variable"
-        OpenSSL::PKey::EC.new(Base64.decode64(ENV['ATPROTO_PRIVATE_KEY']))
+        # Use OpenSSL::PKey.read() to parse PEM-encoded keys (works with all key types)
+        OpenSSL::PKey.read(Base64.decode64(ENV['ATPROTO_PRIVATE_KEY']))
       # Try file second (development)
       elsif File.exist?(KEY_PATH)
         Rails.logger.info "Loading AT Protocol private key from file: #{KEY_PATH}"
-        OpenSSL::PKey::EC.new(File.read(KEY_PATH))
+        # Use OpenSSL::PKey.read() to parse PEM-encoded keys
+        OpenSSL::PKey.read(File.read(KEY_PATH))
       # Generate and store if neither exists
       else
         Rails.logger.warn "No AT Protocol keys found, generating new keys..."
