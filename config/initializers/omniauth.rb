@@ -123,8 +123,8 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     client_id: (Rails.env.development? ?
       "http://localhost:3000/oauth/client-metadata.json" :
       "https://#{ENV['APP_HOST']}/oauth/client-metadata.json"),
-    private_key: -> { AtprotoKeyManager.current_private_key },
-    client_jwk: -> { AtprotoKeyManager.current_jwk },
+    private_key: ->(_opts = nil) { AtprotoKeyManager.current_private_key },
+    client_jwk: ->(_opts = nil) { AtprotoKeyManager.current_jwk },
     setup: OmniAuth::Strategies::Atproto.enhanced_setup
 end
 
