@@ -7,26 +7,51 @@
 
 .login-container
   .login-box
-    h2 Login with Mastodon
+    h2 Login
 
     p.login-description
-      | Enter your Mastodon instance domain to login
+      | Choose your authentication method
 
-    = form_with url: auth_mastodon_path, method: :post, class: "login-form" do |f|
-      .form-group
-        = f.label :domain, "Mastodon Instance", class: "form-label"
-        = f.text_field :domain,
-          placeholder: "mastodon.social",
-          class: "form-input",
-          required: true,
-          autocomplete: "off"
-        .form-help
-          | Example: mastodon.social, fosstodon.org, etc.
+    / Mastodon Login
+    .login-section
+      h3 Login with Mastodon
+      = form_with url: login_mastodon_path, method: :post, class: "login-form" do |f|
+        .form-group
+          = f.label :domain, "Mastodon Instance", class: "form-label"
+          = f.text_field :domain,
+            placeholder: "mastodon.social",
+            class: "form-input",
+            required: true,
+            autocomplete: "off"
+          .form-help
+            | Example: mastodon.social, fosstodon.org, etc.
 
-      .form-actions
-        = f.submit "Continue with Mastodon", class: "btn-primary"
+        .form-actions
+          = f.submit "Continue with Mastodon", class: "btn-primary"
+
+    .login-divider
+      span or
+
+    / Bluesky Login
+    .login-section
+      h3 Login with Bluesky
+      = form_with url: login_bluesky_path, method: :post, class: "login-form" do |f|
+        .form-group
+          = f.label :handle, "Bluesky Handle", class: "form-label"
+          = f.text_field :handle,
+            placeholder: "yourname.bsky.social",
+            class: "form-input",
+            required: true,
+            autocomplete: "off"
+          .form-help
+            | Example: yourname.bsky.social, username.com, etc.
+
+        .form-actions
+          = f.submit "Continue with Bluesky", class: "btn-primary"
 
     .login-footer
       p
-        | Don't have a Mastodon account?
-        = link_to "Join a server", "https://joinmastodon.org/servers", target: "_blank", rel: "noopener"
+        | Don't have an account?
+        = link_to "Join Mastodon", "https://joinmastodon.org/servers", target: "_blank", rel: "noopener"
+        |  or
+        = link_to "Join Bluesky", "https://bsky.app", target: "_blank", rel: "noopener"

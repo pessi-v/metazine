@@ -1,5 +1,5 @@
 class SessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:create, :mastodon]
+  skip_before_action :verify_authenticity_token, only: [:create, :mastodon, :bluesky]
 
   # POST /login/mastodon - Initiate Mastodon OAuth
   def mastodon
@@ -20,6 +20,27 @@ class SessionsController < ApplicationController
     puts "Redirecting to /auth/mastodon with domain=#{domain}"
     # Redirect to OmniAuth with the domain - the credentials lambda will handle the rest
     redirect_to "/auth/mastodon?domain=#{domain}", allow_other_host: false
+  end
+
+  # POST /login/bluesky - Initiate Bluesky/AT Protocol OAuth
+  def bluesky
+    puts "\n\n=== SessionsController#bluesky called ==="
+    puts "Handle: #{params[:handle]}"
+
+    handle = params[:handle]&.strip&.downcase
+
+    if handle.blank?
+      puts "Handle is blank, redirecting back"
+      redirect_back fallback_location: frontpage_path, alert: "Please enter your Bluesky handle"
+      return
+    end
+
+    # Store the return URL to redirect back after login
+    session[:return_to] = request.referer || root_path
+
+    puts "Redirecting to /auth/atproto with handle=#{handle}"
+    # Redirect to OmniAuth with the handle - the strategy will resolve the PDS
+    redirect_to "/auth/atproto?handle=#{handle}", allow_other_host: false
   end
 
   # GET/POST /auth/mastodon/callback - OAuth callback

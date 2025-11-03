@@ -18,26 +18,60 @@ class User < ApplicationRecord
     Rails.logger.info "=== from_omniauth called ==="
     Rails.logger.info "  provider: #{auth.provider}"
     Rails.logger.info "  uid: #{auth.uid}"
-    Rails.logger.info "  info.nickname: #{auth.info.nickname}"
-    Rails.logger.info "  info.name: #{auth.info.name}"
-    Rails.logger.info "  info.urls: #{auth.info.urls.inspect}"
-    Rails.logger.info "  extra.raw_info: #{auth.extra&.raw_info&.to_h&.keys&.inspect}"
-    Rails.logger.info "  extra.raw_info.instance: #{auth.extra&.raw_info&.instance}"
-    Rails.logger.info "  extra.raw_info.url: #{auth.extra&.raw_info&.url}"
+    Rails.logger.info "  info: #{auth.info.inspect}"
+    Rails.logger.info "  credentials: #{auth.credentials.inspect}"
+    Rails.logger.info "  extra: #{auth.extra&.to_h&.keys&.inspect}"
 
     where(provider: auth.provider, uid: auth.uid).first_or_initialize.tap do |user|
-      user.username = auth.info.nickname
-      user.display_name = auth.info.name
-      user.avatar_url = auth.info.image
-      user.access_token = auth.credentials.token
-      user.domain = extract_domain(auth)
+      if auth.provider == 'atproto'
+        # Bluesky/AT Protocol authentication
+        user.access_token = auth.credentials.token
+
+        # Fetch profile info from Bluesky API using DID
+        profile = fetch_bluesky_profile(auth.info.did, auth.credentials.token)
+
+        if profile
+          user.username = profile['handle']
+          user.display_name = profile.dig('displayName') || profile['handle']
+          user.avatar_url = profile.dig('avatar')
+          user.domain = 'bsky.social' # Default for now, could extract from PDS
+        else
+          # Fallback if profile fetch fails
+          user.username = auth.info.did.split(':').last.slice(0, 20)
+          user.display_name = user.username
+          user.domain = 'bsky.social'
+        end
+      else
+        # Mastodon authentication
+        user.username = auth.info.nickname
+        user.display_name = auth.info.name
+        user.avatar_url = auth.info.image
+        user.access_token = auth.credentials.token
+        user.domain = extract_domain(auth)
+      end
 
       Rails.logger.info "  Extracted domain: #{user.domain.inspect}"
       user.save!
 
-      # Link to existing federated actor if one exists
-      user.link_to_federated_actor!
+      # Link to existing federated actor if one exists (Mastodon only for now)
+      user.link_to_federated_actor! if auth.provider != 'atproto'
     end
+  end
+
+  # Fetch Bluesky profile using the AT Protocol API
+  def self.fetch_bluesky_profile(did, access_token)
+    require 'bskyrb'
+
+    # Create a Bluesky client with the access token
+    credentials = Bskyrb::Credentials.new(did, access_token)
+    client = Bskyrb::Client.new(credentials)
+
+    # Fetch the profile
+    profile = client.get_profile(did)
+    profile
+  rescue => e
+    Rails.logger.error "Failed to fetch Bluesky profile for #{did}: #{e.message}"
+    nil
   end
 
   # Links this user to an existing federated actor or fetches it from the remote server

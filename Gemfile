@@ -117,6 +117,8 @@ gem "omniauth"
 gem "omniauth-rails_csrf_protection"
 gem 'omniauth-mastodon', git: 'https://github.com/trakt/omniauth-mastodon' # this fork works with omniauth gem version 2
 gem 'mastodon-api', require: 'mastodon', git: 'https://github.com/daverooneyca/mastodon-api' # this fork works with at least ruby 3.3.4
+gem 'omniauth-atproto', git: 'https://github.com/lasercatspro/omniauth-atproto' # AT Protocol OAuth
+gem 'bskyrb' # Bluesky/AT Protocol API client
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

@@ -52,3 +52,5 @@ Dockerfile_original
 Dockerfile_*
 
 mise.toml
+
+config/atproto_private_key.pem

@@ -31,6 +31,17 @@ Rails.application.config.middleware.use OmniAuth::Builder do
         raise
       end
     }
+
+  # AT Protocol (Bluesky) strategy
+  # Uses ES256 key-based authentication instead of client_id/client_secret
+  provider :atproto,
+    scope: 'atproto transition:generic',
+    client_id: (Rails.env.development? ?
+      "http://localhost:3000/oauth/client-metadata.json" :
+      "https://#{ENV['APP_HOST']}/oauth/client-metadata.json"),
+    private_key: -> { OmniAuth::Atproto::KeyManager.current_private_key },
+    client_jwk: -> { OmniAuth::Atproto::KeyManager.current_jwk },
+    setup: true
 end
 
 # Configure OmniAuth
