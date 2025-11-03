@@ -7,8 +7,14 @@ require 'json'
 # Supports both environment variables (production) and file storage (development)
 class AtprotoKeyManager
   class << self
-    KEY_PATH = Rails.root.join('config', 'atproto_private_key.pem')
-    JWK_PATH = Rails.root.join('config', 'atproto_jwk.json')
+    # In production, store keys in a persistent location outside the container
+    # Use /rails/storage which should be mounted as a volume in Kamal
+    KEY_PATH = Rails.env.production? ?
+      Pathname.new('/rails/storage/atproto_private_key.pem') :
+      Rails.root.join('config', 'atproto_private_key.pem')
+    JWK_PATH = Rails.env.production? ?
+      Pathname.new('/rails/storage/atproto_jwk.json') :
+      Rails.root.join('config', 'atproto_jwk.json')
 
     def current_private_key
       @current_private_key ||= load_private_key
@@ -27,36 +33,30 @@ class AtprotoKeyManager
     private
 
     def load_private_key
-      # Try environment variable first (production)
-      if ENV['ATPROTO_PRIVATE_KEY_PEM'].present?
-        Rails.logger.info "Loading AT Protocol private key from environment variable (PEM format)"
-        # The PEM is stored directly in the env var
-        # Handle both literal \n strings and actual newlines
-        pem_data = ENV['ATPROTO_PRIVATE_KEY_PEM']
-          .gsub('\\n', "\n")  # Replace literal backslash-n with newline
-          .strip
-
-        Rails.logger.info "PEM preview (first 100 chars): #{pem_data[0..100]}"
-        Rails.logger.info "PEM length: #{pem_data.length}"
-
-        OpenSSL::PKey.read(pem_data)
-      # Try file second (development)
-      elsif File.exist?(KEY_PATH)
+      # Check if key file exists
+      if File.exist?(KEY_PATH)
         Rails.logger.info "Loading AT Protocol private key from file: #{KEY_PATH}"
-        # Use OpenSSL::PKey.read() to parse PEM-encoded keys
         OpenSSL::PKey.read(File.read(KEY_PATH))
-      # Generate and store if neither exists
       else
+        # Generate new keys
         Rails.logger.warn "No AT Protocol keys found, generating new keys..."
         private_key, jwk = generate_key_pair
 
-        # Try to save to files (development)
+        # Ensure directory exists
+        KEY_PATH.dirname.mkpath unless KEY_PATH.dirname.exist?
+
+        # Save to files
         begin
           File.write(KEY_PATH, private_key.to_pem)
           File.write(JWK_PATH, JSON.pretty_generate(jwk))
           Rails.logger.info "Generated AT Protocol keys saved to #{KEY_PATH}"
-        rescue Errno::EACCES => e
-          Rails.logger.warn "Cannot write key files (permission denied), keys will be ephemeral: #{e.message}"
+
+          # Set appropriate permissions (readable only by owner)
+          File.chmod(0600, KEY_PATH)
+          File.chmod(0600, JWK_PATH)
+        rescue => e
+          Rails.logger.error "Failed to write key files: #{e.class} - #{e.message}"
+          Rails.logger.warn "Keys will be ephemeral (lost on restart)"
         end
 
         # Cache the JWK
