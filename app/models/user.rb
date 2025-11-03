@@ -22,21 +22,28 @@ class User < ApplicationRecord
     Rails.logger.info "  credentials: #{auth.credentials.inspect}"
     Rails.logger.info "  extra: #{auth.extra&.to_h&.keys&.inspect}"
 
-    where(provider: auth.provider, uid: auth.uid).first_or_initialize.tap do |user|
+    # For AT Protocol, the DID is in auth.info.did instead of auth.uid
+    uid = auth.provider == 'atproto' ? auth.info.did : auth.uid
+
+    where(provider: auth.provider, uid: uid).first_or_initialize.tap do |user|
       if auth.provider == 'atproto'
         # Bluesky/AT Protocol authentication
+        user.uid = uid  # Ensure UID is set (it's the DID)
         user.access_token = auth.credentials.token
 
         # Fetch profile info from Bluesky API using DID
+        Rails.logger.info "  Fetching Bluesky profile for DID: #{auth.info.did}"
         profile = fetch_bluesky_profile(auth.info.did, auth.credentials.token)
 
         if profile
+          Rails.logger.info "  Profile fetched successfully: #{profile['handle']}"
           user.username = profile['handle']
           user.display_name = profile.dig('displayName') || profile['handle']
           user.avatar_url = profile.dig('avatar')
           user.domain = 'bsky.social' # Default for now, could extract from PDS
         else
           # Fallback if profile fetch fails
+          Rails.logger.warn "  Profile fetch failed, using DID as username"
           user.username = auth.info.did.split(':').last.slice(0, 20)
           user.display_name = user.username
           user.domain = 'bsky.social'
@@ -60,17 +67,31 @@ class User < ApplicationRecord
 
   # Fetch Bluesky profile using the AT Protocol API
   def self.fetch_bluesky_profile(did, access_token)
-    require 'bskyrb'
+    require 'net/http'
+    require 'uri'
+    require 'json'
 
-    # Create a Bluesky client with the access token
-    credentials = Bskyrb::Credentials.new(did, access_token)
-    client = Bskyrb::Client.new(credentials)
+    # Use the public Bluesky API to fetch profile
+    # app.bsky.actor.getProfile requires authentication
+    uri = URI("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile")
+    uri.query = URI.encode_www_form(actor: did)
 
-    # Fetch the profile
-    profile = client.get_profile(did)
-    profile
+    request = Net::HTTP::Get.new(uri)
+    request['Authorization'] = "Bearer #{access_token}"
+
+    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    if response.is_a?(Net::HTTPSuccess)
+      JSON.parse(response.body)
+    else
+      Rails.logger.error "Failed to fetch Bluesky profile: #{response.code} #{response.message}"
+      nil
+    end
   rescue => e
     Rails.logger.error "Failed to fetch Bluesky profile for #{did}: #{e.message}"
+    Rails.logger.error e.backtrace.first(5).join("\n")
     nil
   end
 
