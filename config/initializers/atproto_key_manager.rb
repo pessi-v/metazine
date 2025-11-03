@@ -30,9 +30,15 @@ class AtprotoKeyManager
       # Try environment variable first (production)
       if ENV['ATPROTO_PRIVATE_KEY_PEM'].present?
         Rails.logger.info "Loading AT Protocol private key from environment variable (PEM format)"
-        # The PEM is stored directly in the env var (not Base64 encoded)
-        # Replace literal \n with actual newlines
-        pem_data = ENV['ATPROTO_PRIVATE_KEY_PEM'].gsub('\n', "\n")
+        # The PEM is stored directly in the env var
+        # Handle both literal \n strings and actual newlines
+        pem_data = ENV['ATPROTO_PRIVATE_KEY_PEM']
+          .gsub('\\n', "\n")  # Replace literal backslash-n with newline
+          .strip
+
+        Rails.logger.info "PEM preview (first 100 chars): #{pem_data[0..100]}"
+        Rails.logger.info "PEM length: #{pem_data.length}"
+
         OpenSSL::PKey.read(pem_data)
       # Try file second (development)
       elsif File.exist?(KEY_PATH)
