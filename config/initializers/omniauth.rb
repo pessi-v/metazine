@@ -8,14 +8,16 @@ module OmniAuth
           request = Rack::Request.new(env)
 
           Rails.logger.info "=== AT Protocol OAuth Setup Phase ==="
-          Rails.logger.info "  Handle param: #{request.params['handle']}"
 
-          handle = request.params['handle']
+          # Get handle from session (stored by SessionsController#bluesky)
+          handle = session["atproto_handle"]
+
+          Rails.logger.info "  Handle from session: #{handle}"
 
           unless handle
-            Rails.logger.error "  ERROR: No handle parameter provided"
+            Rails.logger.error "  ERROR: No handle found in session"
             env['omniauth.strategy'].fail!(:missing_handle,
-              OmniAuth::Error.new('Handle parameter is required'))
+              OmniAuth::Error.new('Handle not found in session. Please try again.'))
             return
           end
 
@@ -58,6 +60,7 @@ module OmniAuth
             Rails.logger.info "  Token URL: #{authorization_info['token_endpoint']}"
 
             session["authorization_info"] = authorization_info
+            # Handle is already in session from SessionsController#bluesky
 
             # Set the OAuth2 client options
             env['omniauth.strategy'].options.client_options.site = authorization_info["issuer"]

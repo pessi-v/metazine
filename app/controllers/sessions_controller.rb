@@ -35,12 +35,14 @@ class SessionsController < ApplicationController
       return
     end
 
+    # Store the handle in session for the OAuth flow
+    session[:atproto_handle] = handle
     # Store the return URL to redirect back after login
     session[:return_to] = request.referer || root_path
 
-    puts "Redirecting to /auth/atproto with handle=#{handle}"
-    # Redirect to OmniAuth with the handle - the strategy will resolve the PDS
-    redirect_to "/auth/atproto?handle=#{handle}", allow_other_host: false
+    puts "Redirecting to /auth/atproto"
+    # Redirect to OmniAuth - the handle is now in the session
+    redirect_to "/auth/atproto", allow_other_host: false
   end
 
   # GET/POST /auth/mastodon/callback - OAuth callback
