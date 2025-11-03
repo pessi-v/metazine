@@ -13,7 +13,7 @@ class OauthController < ApplicationController
       client_uri: base_url,
       redirect_uri: callback_url,
       scope: "atproto transition:generic",
-      client_jwk: OmniAuth::Atproto::KeyManager.current_jwk
+      client_jwk: AtprotoKeyManager.current_jwk
     )
 
     render json: metadata
