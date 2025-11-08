@@ -27,6 +27,9 @@ class Article < ApplicationRecord
   validates :title, uniqueness: true
   validates :description, presence: true, allow_blank: false
 
+  # Publish to Bluesky after creation
+  after_create_commit :publish_to_bluesky, if: -> { Rails.env.production? && federated_url.blank? }
+
   pg_search_scope :search_by_title_source_and_readability_output,
     against: %i[title source_name readability_output_jsonb],
     using: {tsearch: {prefix: true}}, # tsearch = full text search
@@ -80,5 +83,16 @@ class Article < ApplicationRecord
         title: hash["published"] || "A post",
         content: hash["content"]
       )
+  end
+
+  private
+
+  # Publish article to Bluesky via our PDS
+  def publish_to_bluesky
+    BlueskyPublisher.new.publish_article(self)
+  rescue => e
+    Rails.logger.error "Failed to publish article to Bluesky: #{e.message}"
+    Rails.logger.error e.backtrace.first(5).join("\n")
+    # Don't raise - we don't want to block article creation if Bluesky publish fails
   end
 end

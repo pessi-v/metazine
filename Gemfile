@@ -56,6 +56,9 @@ gem 'slim-rails'
 gem 'faraday', '~> 2.0'
 gem 'faraday-follow_redirects'
 
+# request compressed http responses
+gem 'faraday-gzip', '~> 3'
+
 # RSS and Atom feed parsing
 gem 'feedjira'
 
@@ -86,9 +89,6 @@ gem 'pagy', '~> 9.1'
 
  # decode compressed http responses
 gem 'brotli'
-
- # request compressed http responses
-gem 'faraday-gzip', '~> 3'
 
  # hide partial rendering logs
 # gem 'lograge'
