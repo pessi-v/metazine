@@ -1,22 +1,21 @@
 class MakeUnaccentImmutable < ActiveRecord::Migration[8.0]
   def up
-    # Ensure the unaccent extension is installed
-    # Use raw SQL to ensure it's created before we reference it
-    execute "CREATE EXTENSION IF NOT EXISTS unaccent;"
+    # Ensure the unaccent extension is installed in the public schema
+    execute "CREATE EXTENSION IF NOT EXISTS unaccent SCHEMA public;"
 
     # Create an IMMUTABLE wrapper around unaccent
     # This allows it to be used in GIN indexes
     # WARNING: This assumes the unaccent dictionary won't change
     # If you modify unaccent.rules, you'll need to REINDEX
-    # Using plpgsql instead of sql to avoid inlining issues during creation
+    # Using the single-argument form which uses the default dictionary
 
     execute <<-SQL
-      CREATE OR REPLACE FUNCTION public.f_unaccent(text)
+      CREATE OR REPLACE FUNCTION public.f_unaccent(input_text text)
       RETURNS text
       LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE STRICT AS
       $$
       BEGIN
-        RETURN unaccent($1);
+        RETURN public.unaccent(input_text);
       END
       $$;
     SQL
