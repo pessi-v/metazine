@@ -27,13 +27,15 @@ class Article < ApplicationRecord
   validates :title, uniqueness: true
   validates :description, presence: true, allow_blank: false
 
+  # Extract searchable content from readability_output_jsonb
+  before_save :extract_searchable_content
+
   # Publish to Bluesky after creation
   after_create_commit :publish_to_bluesky, if: -> { Rails.env.production? && federated_url.blank? }
 
   pg_search_scope :search_by_title_source_and_readability_output,
-    against: %i[title source_name readability_output_jsonb],
-    using: {tsearch: {prefix: true}}, # tsearch = full text search
-    ignoring: :accents
+    against: %i[title source_name searchable_content],
+    using: {tsearch: {prefix: true}} # tsearch = full text search
 
   scope :today, -> { where("DATE(published_at) = CURRENT_DATE") }
   scope :yesterday, -> { where("DATE(published_at) = CURRENT_DATE - 1") }
@@ -86,6 +88,31 @@ class Article < ApplicationRecord
   end
 
   private
+
+  # Extract plain text content from readability_output_jsonb for search indexing
+  def extract_searchable_content
+    return unless readability_output_jsonb.present? && readability_output_jsonb["content"].present?
+
+    # Skip if searchable_content hasn't changed
+    return if !readability_output_jsonb_changed? && searchable_content.present?
+
+    html_content = readability_output_jsonb["content"]
+
+    # Parse HTML and extract text
+    doc = Nokogiri::HTML(html_content)
+
+    # Remove script and style tags
+    doc.css('script, style').remove
+
+    # Extract text and clean it up
+    text = doc.text
+      .gsub(/\s+/, ' ')  # Collapse multiple spaces
+      .strip
+
+    # Truncate to reasonable length for search (first 10000 chars)
+    # This prevents the column from getting too large while keeping enough for search
+    self.searchable_content = text[0...10000]
+  end
 
   # Publish article to Bluesky via our PDS
   def publish_to_bluesky

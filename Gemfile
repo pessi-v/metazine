@@ -8,7 +8,7 @@ gem "propshaft"
 gem "pg", "~> 1.1"
 
 # Postgres full-text search
-gem 'pg_search'
+gem "pg_search"
 
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
@@ -27,7 +27,7 @@ gem "jbuilder"
 # gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "tzinfo-data", platforms: %i[windows jruby]
 
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
@@ -50,79 +50,79 @@ gem "thruster", require: false
 # gem "image_processing", "~> 1.2"
 
 # Slim HTML templating engine
-gem 'slim-rails'
+gem "slim-rails"
 
 # Simple, but flexible HTTP client library, with support for multiple backends.
-gem 'faraday', '~> 2.0'
-gem 'faraday-follow_redirects'
+gem "faraday", "~> 2.0"
+gem "faraday-follow_redirects"
 
 # request compressed http responses
-gem 'faraday-gzip', '~> 3'
+gem "faraday-gzip", "~> 3"
 
 # RSS and Atom feed parsing
-gem 'feedjira'
+gem "feedjira"
 
 # a ruby library to fetch and parse meta tags which represent OpenGraph Protocol and TwitterCard.
-gem 'ogp'
-gem 'ostruct'
+gem "ogp"
+gem "ostruct"
 # Addressable is an alternative implementation to the URI implementation that is part of Ruby's standard library.
 # It is flexible, offers heuristic parsing, and additionally provides extensive support for IRIs and URI templates.
-gem 'addressable'
+gem "addressable"
 
 # HTML document parsing
-gem 'nokogiri'
+gem "nokogiri"
 
 # Run backend JS code
-gem 'node-runner', '~> 1.2'
+gem "node-runner", "~> 1.2"
 
 # Use .env files
-gem 'dotenv'
+gem "dotenv"
 
 # gem 'rufus-scheduler'
 
 # ActivityPub
 # gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
-gem 'federails', git: 'https://gitlab.com/experimentslabs/federails/'
+gem "federails", git: "https://gitlab.com/experimentslabs/federails/"
 
- # pagination
-gem 'pagy', '~> 9.1'
-
- # decode compressed http responses
-gem 'brotli'
-
- # hide partial rendering logs
-# gem 'lograge'
-
- # Similar to Mozilla's Readability JS package, used as a fallback
-gem 'ruby-readability', require: 'readability'
+# pagination
+gem "pagy", "~> 9.1"
 
 # decode compressed http responses
-gem 'zstd-ruby'
+gem "brotli"
+
+# hide partial rendering logs
+# gem 'lograge'
+
+# Similar to Mozilla's Readability JS package, used as a fallback
+gem "ruby-readability", require: "readability"
+
+# decode compressed http responses
+gem "zstd-ruby"
 
 # Compact language detection
-gem 'cld'
+gem "cld"
 
 # Image manipulation
 # gem 'mini_magick'
 
 # Compare image similarity
-gem 'dhash-vips'
+gem "dhash-vips"
 
 # Database metrics
-gem 'pghero'
+gem "pghero"
 gem "pg_query", ">= 2"
 
 # Authentication with omniauth
 gem "omniauth"
 gem "omniauth-rails_csrf_protection"
-gem 'omniauth-mastodon', git: 'https://github.com/trakt/omniauth-mastodon' # this fork works with omniauth gem version 2
-gem 'mastodon-api', require: 'mastodon', git: 'https://github.com/daverooneyca/mastodon-api' # this fork works with at least ruby 3.3.4
-gem 'omniauth-atproto', git: 'https://github.com/lasercatspro/omniauth-atproto' # AT Protocol OAuth
-gem 'bskyrb' # Bluesky/AT Protocol API client
+gem "omniauth-mastodon", git: "https://github.com/trakt/omniauth-mastodon" # this fork works with omniauth gem version 2
+gem "mastodon-api", require: "mastodon", git: "https://github.com/daverooneyca/mastodon-api" # this fork works with at least ruby 3.3.4
+gem "omniauth-atproto", git: "https://github.com/lasercatspro/omniauth-atproto" # AT Protocol OAuth
+gem "bskyrb" # Bluesky/AT Protocol API client
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "debug", platforms: %i[mri windows], require: "debug/prelude"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
@@ -130,17 +130,17 @@ group :development, :test do
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
 
-  gem 'minitest'
-  gem 'minitest-reporters', '~> 1.6' 
+  gem "minitest"
+  gem "minitest-reporters", "~> 1.6"
 end
 
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 
-  gem 'fastimage'
-  gem 'webfinger'
-  gem 'standard'
+  gem "fastimage"
+  gem "webfinger"
+  gem "standard"
 
-  gem 'mocha'
+  gem "mocha"
 end
