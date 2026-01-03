@@ -13,7 +13,7 @@ class MakeUnaccentImmutable < ActiveRecord::Migration[8.0]
       RETURNS text
       LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT AS
       $func$
-        SELECT public.unaccent('unaccent', $1)
+        SELECT unaccent($1)
       $func$;
     SQL
 
