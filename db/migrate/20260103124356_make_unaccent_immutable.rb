@@ -1,5 +1,8 @@
 class MakeUnaccentImmutable < ActiveRecord::Migration[8.0]
   def up
+    # Ensure the unaccent extension is installed
+    enable_extension "unaccent"
+
     # Create an IMMUTABLE wrapper around unaccent
     # This allows it to be used in GIN indexes
     # WARNING: This assumes the unaccent dictionary won't change
