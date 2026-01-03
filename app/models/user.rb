@@ -23,77 +23,83 @@ class User < ApplicationRecord
     Rails.logger.info "  extra: #{auth.extra&.to_h&.keys&.inspect}"
 
     # For AT Protocol, the DID is in auth.info.did instead of auth.uid
-    uid = auth.provider == 'atproto' ? auth.info.did : auth.uid
+    # DISABLED: ATProto/Bluesky integration temporarily disabled
+    # uid = auth.provider == 'atproto' ? auth.info.did : auth.uid
+    uid = auth.uid
 
     where(provider: auth.provider, uid: uid).first_or_initialize.tap do |user|
-      if auth.provider == 'atproto'
-        # Bluesky/AT Protocol authentication
-        user.uid = uid  # Ensure UID is set (it's the DID)
-        user.access_token = auth.credentials.token
-
-        # Fetch profile info from Bluesky API using DID
-        Rails.logger.info "  Fetching Bluesky profile for DID: #{auth.info.did}"
-        profile = fetch_bluesky_profile(auth.info.did, auth.credentials.token)
-
-        if profile
-          Rails.logger.info "  Profile fetched successfully: #{profile['handle']}"
-          user.username = profile['handle']
-          user.display_name = profile.dig('displayName') || profile['handle']
-          user.avatar_url = profile.dig('avatar')
-          user.domain = 'bsky.social' # Default for now, could extract from PDS
-        else
-          # Fallback if profile fetch fails
-          Rails.logger.warn "  Profile fetch failed, using DID as username"
-          user.username = auth.info.did.split(':').last.slice(0, 20)
-          user.display_name = user.username
-          user.domain = 'bsky.social'
-        end
-      else
+      # DISABLED: ATProto/Bluesky integration temporarily disabled
+      # if auth.provider == 'atproto'
+      #   # Bluesky/AT Protocol authentication
+      #   user.uid = uid  # Ensure UID is set (it's the DID)
+      #   user.access_token = auth.credentials.token
+      #
+      #   # Fetch profile info from Bluesky API using DID
+      #   Rails.logger.info "  Fetching Bluesky profile for DID: #{auth.info.did}"
+      #   profile = fetch_bluesky_profile(auth.info.did, auth.credentials.token)
+      #
+      #   if profile
+      #     Rails.logger.info "  Profile fetched successfully: #{profile['handle']}"
+      #     user.username = profile['handle']
+      #     user.display_name = profile.dig('displayName') || profile['handle']
+      #     user.avatar_url = profile.dig('avatar')
+      #     user.domain = 'bsky.social' # Default for now, could extract from PDS
+      #   else
+      #     # Fallback if profile fetch fails
+      #     Rails.logger.warn "  Profile fetch failed, using DID as username"
+      #     user.username = auth.info.did.split(':').last.slice(0, 20)
+      #     user.display_name = user.username
+      #     user.domain = 'bsky.social'
+      #   end
+      # else
         # Mastodon authentication
         user.username = auth.info.nickname
         user.display_name = auth.info.name
         user.avatar_url = auth.info.image
         user.access_token = auth.credentials.token
         user.domain = extract_domain(auth)
-      end
+      # end # DISABLED: ATProto/Bluesky integration temporarily disabled
 
       Rails.logger.info "  Extracted domain: #{user.domain.inspect}"
       user.save!
 
       # Link to existing federated actor if one exists (Mastodon only for now)
-      user.link_to_federated_actor! if auth.provider != 'atproto'
+      # DISABLED: ATProto/Bluesky integration temporarily disabled
+      # user.link_to_federated_actor! if auth.provider != 'atproto'
+      user.link_to_federated_actor!
     end
   end
 
   # Fetch Bluesky profile using the AT Protocol API
-  def self.fetch_bluesky_profile(did, access_token)
-    require 'net/http'
-    require 'uri'
-    require 'json'
-
-    # Use the public Bluesky API to fetch profile
-    # app.bsky.actor.getProfile requires authentication
-    uri = URI("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile")
-    uri.query = URI.encode_www_form(actor: did)
-
-    request = Net::HTTP::Get.new(uri)
-    request['Authorization'] = "Bearer #{access_token}"
-
-    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(request)
-    end
-
-    if response.is_a?(Net::HTTPSuccess)
-      JSON.parse(response.body)
-    else
-      Rails.logger.error "Failed to fetch Bluesky profile: #{response.code} #{response.message}"
-      nil
-    end
-  rescue => e
-    Rails.logger.error "Failed to fetch Bluesky profile for #{did}: #{e.message}"
-    Rails.logger.error e.backtrace.first(5).join("\n")
-    nil
-  end
+  # DISABLED: ATProto/Bluesky integration temporarily disabled
+  # def self.fetch_bluesky_profile(did, access_token)
+  #   require 'net/http'
+  #   require 'uri'
+  #   require 'json'
+  #
+  #   # Use the public Bluesky API to fetch profile
+  #   # app.bsky.actor.getProfile requires authentication
+  #   uri = URI("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfile")
+  #   uri.query = URI.encode_www_form(actor: did)
+  #
+  #   request = Net::HTTP::Get.new(uri)
+  #   request['Authorization'] = "Bearer #{access_token}"
+  #
+  #   response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+  #     http.request(request)
+  #   end
+  #
+  #   if response.is_a?(Net::HTTPSuccess)
+  #     JSON.parse(response.body)
+  #   else
+  #     Rails.logger.error "Failed to fetch Bluesky profile: #{response.code} #{response.message}"
+  #     nil
+  #   end
+  # rescue => e
+  #   Rails.logger.error "Failed to fetch Bluesky profile for #{did}: #{e.message}"
+  #   Rails.logger.error e.backtrace.first(5).join("\n")
+  #   nil
+  # end
 
   # Links this user to an existing federated actor or fetches it from the remote server
   # This allows users who commented via ActivityPub to claim ownership when they log in

@@ -16,26 +16,28 @@
       .form-help
         | Example: mastodon.social, fosstodon.org
 
-  .login-divider-small
-    span or
-
-  / Bluesky Login
-  .login-method
-    = form_with url: login_bluesky_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
-      .form-group
-        = f.label :handle, "Bluesky handle:", class: "form-label"
-        .form-input-group
-          = f.text_field :handle,
-            placeholder: "yourname.bsky.social",
-            class: "form-input",
-            required: true,
-            autocomplete: "off"
-          = f.submit "Login with Bluesky", class: "btn-login"
-      .form-help
-        | Example: yourname.bsky.social, username.com
+  / DISABLED: ATProto/Bluesky integration temporarily disabled
+  / .login-divider-small
+  /   span or
+  /
+  / / Bluesky Login
+  / .login-method
+  /   = form_with url: login_bluesky_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
+  /     .form-group
+  /       = f.label :handle, "Bluesky handle:", class: "form-label"
+  /       .form-input-group
+  /         = f.text_field :handle,
+  /           placeholder: "yourname.bsky.social",
+  /           class: "form-input",
+  /           required: true,
+  /           autocomplete: "off"
+  /         = f.submit "Login with Bluesky", class: "btn-login"
+  /     .form-help
+  /       | Example: yourname.bsky.social, username.com
 
   .form-help.signup-help
     | Don't have an account?
     = link_to "Join Mastodon", "https://joinmastodon.org/servers", target: "_blank", rel: "noopener"
-    |  or
-    = link_to "Join Bluesky", "https://bsky.app", target: "_blank", rel: "noopener"
+    / DISABLED: ATProto/Bluesky integration temporarily disabled
+    / |  or
+    / = link_to "Join Bluesky", "https://bsky.app", target: "_blank", rel: "noopener"

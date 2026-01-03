@@ -20,16 +20,19 @@ Rails.application.routes.draw do
 
   # Authentication routes
   post "login/mastodon", to: "sessions#mastodon", as: :login_mastodon
-  post "login/bluesky", to: "sessions#bluesky", as: :login_bluesky
+  # DISABLED: ATProto/Bluesky integration temporarily disabled
+  # post "login/bluesky", to: "sessions#bluesky", as: :login_bluesky
   get "auth/mastodon/callback", to: "sessions#create"
   post "auth/mastodon/callback", to: "sessions#create"
-  get "auth/atproto/callback", to: "sessions#create"
-  post "auth/atproto/callback", to: "sessions#create"
+  # DISABLED: ATProto/Bluesky integration temporarily disabled
+  # get "auth/atproto/callback", to: "sessions#create"
+  # post "auth/atproto/callback", to: "sessions#create"
   get "auth/failure", to: "sessions#failure"
   delete "logout", to: "sessions#destroy", as: :logout
 
   # AT Protocol OAuth client metadata
-  get "oauth/client-metadata.json", to: "oauth#client_metadata"
+  # DISABLED: ATProto/Bluesky integration temporarily disabled
+  # get "oauth/client-metadata.json", to: "oauth#client_metadata"
 
   mount Federails::Engine => "/"
 
