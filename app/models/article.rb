@@ -35,7 +35,8 @@ class Article < ApplicationRecord
 
   pg_search_scope :search_by_title_source_and_readability_output,
     against: %i[title source_name searchable_content],
-    using: {tsearch: {prefix: true}} # tsearch = full text search
+    using: {tsearch: {prefix: true}}, # tsearch = full text search
+    ignoring: :accents
 
   scope :today, -> { where("DATE(published_at) = CURRENT_DATE") }
   scope :yesterday, -> { where("DATE(published_at) = CURRENT_DATE - 1") }
