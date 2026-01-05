@@ -1,7 +1,7 @@
 .page_footer
   .footer_items
     = render 'layouts/search_bar'
-    - if @article && current_page?(reader_path(@article))
-      = link_to(frontpage_path, class: 'back-link')
-        h4.font-muted
-          '← BACK
+    / - if @article && current_page?(reader_path(@article))
+    /   = link_to(frontpage_path, class: 'back-link')
+    /     h4.font-muted
+    /       '← BACK
