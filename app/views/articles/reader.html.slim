@@ -73,3 +73,8 @@
           = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
       - else
         p.no-comments No comments yet. Be the first to comment!
+
+.navigate-back    
+  = link_to(frontpage_path, class: 'back-link')
+    h4.font-muted
+      '← BACK

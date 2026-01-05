@@ -43,3 +43,6 @@
       = render 'article_small_image_headline_summary_preview', article: article
       - unless article == @articles.last
         .line
+
+.bottom-pagy
+  = render 'layouts/header_pagy', pagy: @pagy 
