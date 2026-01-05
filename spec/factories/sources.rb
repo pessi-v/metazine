@@ -9,6 +9,11 @@ FactoryBot.define do
     description { "A great source of news and information" }
     image_url { "https://example.com/image.jpg" }
 
+    # Skip the add_description_and_image callback to avoid HTTP requests in tests
+    after(:build) do |source|
+      source.define_singleton_method(:add_description_and_image) { }
+    end
+
     trait :inactive do
       active { false }
     end
