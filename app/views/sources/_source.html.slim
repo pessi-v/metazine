@@ -12,11 +12,7 @@ css:
   .half {
     width: 50%;
   }
-  
-  .right {
-    padding: var(--space-s);
-  }
-  
+
   .line-clamp {
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -45,7 +41,7 @@ css:
 = turbo_frame_tag source
   .source_card
     .half
-      .right.flex-column.justify-space-between style="height: 100%"
+      .flex-column.justify-space-between style="height: 100%; padding: var(--space-s); border-right: var(--border)"
         .flex-column style="gap: 0.3rem"
           
           - if source.active
@@ -53,7 +49,7 @@ css:
               = source.name
           - else
             h3 style="margin-bottom: var(--space-xs)"
-              s
+              s 
                 = source.name
           p.line-clamp
             = source.description
