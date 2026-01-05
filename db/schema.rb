@@ -16,6 +16,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_03_124356) do
   enable_extension "pg_stat_statements"
   enable_extension "unaccent"
 
+  # Custom immutable wrapper around unaccent for use in GIN indexes
+  execute <<-SQL
+    CREATE OR REPLACE FUNCTION public.f_unaccent(input_text text)
+    RETURNS text
+    LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE STRICT AS
+    $$
+    BEGIN
+      RETURN public.unaccent(input_text);
+    END
+    $$;
+  SQL
+
   create_table "articles", force: :cascade do |t|
     t.string "title"
     t.string "image_url"
