@@ -1,0 +1,23 @@
+one:
+  name: Test Source
+  url: https://example.com/feed.xml
+  last_modified: <%= 1.day.ago.to_s %>
+  etag: "123456"
+  last_built: <%= 1.day.ago.iso8601 %>
+  last_error_status: null
+
+two:
+  name: Test Source 2
+  url: https://example.com/feed2.xml
+  last_modified: <%= 1.day.ago.to_s %>
+  etag: "123456"
+  last_built: <%= 1.day.ago.iso8601 %>
+  last_error_status: null
+
+three:
+  name: Test Source 3
+  url: https://example.com/feed3.xml
+  last_modified: <%= 1.day.ago.to_s %>
+  etag: "123456"
+  last_built: <%= 1.day.ago.iso8601 %>
+  last_error_status: null
