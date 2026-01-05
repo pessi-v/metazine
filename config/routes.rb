@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
+  get "sources/cancel_new", to: "sources#cancel_new", as: :cancel_new_source
   resources :sources
 
   # Comments routes

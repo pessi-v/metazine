@@ -1,59 +1,78 @@
 css:
-  .form {
+  .source_card {
     width: 40em;
-    height: 12em;
-    margin-left: auto;
-    margin-right: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
+    aspect-ratio: 1 / 0.6;
     border: var(--border);
     border-radius: var(--border-radius);
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-= form_with(model: source, class: 'form') do |form|
-  h2 style="text-align: center;"
-    'New
-    br
-    'source
+  .half {
+    width: 50%;
+  }
 
-  - if source.errors.any?
-    div style="color: red"
-      h4
-        = "#{pluralize(source.errors.count, "error")} prohibited this source from being saved:"
+  .right {
+    padding: var(--space-s);
+  }
 
-      ul
-        - source.errors.each do |error|
-          li
-            = error.full_message
-  div
-    div
-      = link_to 'Cancel', sources_path, class: 'button'
-    div
-      = form.submit class: 'button'
+  .image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: black;
+  }
 
-  div
-    div
-      = form.label :name, style: "display: none;"
-      = form.text_field :name, placeholder: 'Name'
+  .buttons {
+    width: 100%;
+    gap: var(--space-xs);
+  }
 
-    div
-      = form.label :url, style: "display: none"
-      = form.text_field :url, placeholder: 'Url'
-    
-    div
-      = form.check_box :active, checked: true
-      = form.label :active, style: "display: inline-block"
+= form_with(model: source) do |form|
+  .source_card
+    .half
+      .right.flex-column.justify-space-between style="height: 100%"
+        .flex-column style="gap: 0.3rem"
+          - if source.errors.any?
+            div style="color: red"
+              h4
+                = "#{pluralize(source.errors.count, "error")} prohibited this source from being saved:"
+              ul
+                - source.errors.each do |error|
+                  li
+                    = error.full_message
 
-    div
-      = form.check_box :show_images, checked: true
-      = form.label :show_images, style: "display: inline-block"
+          div
+            = form.label :name
+            = form.text_field :name, placeholder: 'Name'
 
-    div
-      = form.check_box :allow_video
-      = form.label :allow_video, style: "display: inline-block"
+          div
+            = form.label :url
+            = form.text_field :url, placeholder: 'Url'
 
-    div
-      = form.check_box :allow_audio
-      = form.label :allow_audio, style: "display: inline-block"
+          div
+            = form.check_box :active
+            = form.label :active, style: "display: inline-block"
+
+          div
+            = form.check_box :show_images
+            = form.label :show_images, style: "display: inline-block"
+
+          div
+            = form.check_box :allow_video
+            = form.label :allow_video, style: "display: inline-block"
+
+          div
+            = form.check_box :allow_audio
+            = form.label :allow_audio, style: "display: inline-block"
+
+        .buttons.flex-row.justify-center
+          - if source.persisted?
+            = link_to 'Cancel', source, class: 'button'
+          - else
+            = link_to 'Cancel', cancel_new_source_path, class: 'button', data: { turbo_frame: 'new_source' }
+          = form.submit class: 'button'
+
+    .half
+      img.image src=source.image_url referrerpolicy="no-referrer"

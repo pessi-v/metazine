@@ -142,8 +142,8 @@ module Sources
     end
 
     def process_feed(feed, source, response)
-      process_entries(feed.entries, source)
-      update_source_metadata(source, feed, response)
+      cloudflare_error = process_entries(feed.entries, source)
+      update_source_metadata(source, feed, response, cloudflare_error)
       true
     rescue => e
       Rails.logger.error("Failed to process feed for source #{source.name}: #{e.message}")
@@ -153,22 +153,31 @@ module Sources
 
     def process_entries(entries, source)
       Rails.logger.info("Processing #{entries.count} entries for source: #{source.name}")
+      cloudflare_blocked_count = 0
+
       entries.each do |entry|
-        Articles::CreateService.new(source, entry).create_article
+        service = Articles::CreateService.new(source, entry)
+        cloudflare_blocked_count += 1 if service.cloudflare_blocked?
+        service.create_article
       rescue ActiveRecord::RecordNotUnique
         Rails.logger.info "Skipping duplicate article: #{entry.url}"
         next
       end
 
-      true
+      # Return error message if most articles are blocked by Cloudflare
+      if cloudflare_blocked_count > 0 && cloudflare_blocked_count >= (entries.count * 0.5).ceil
+        "Cloudflare challenge detected (#{cloudflare_blocked_count}/#{entries.count} articles blocked)"
+      else
+        nil
+      end
     end
 
-    def update_source_metadata(source, feed, response)
+    def update_source_metadata(source, feed, response, cloudflare_error = nil)
       source.assign_attributes(
         last_modified: response.headers["last-modified"] || feed.last_modified,
         etag: response.headers["etag"],
         last_built: feed.respond_to?(:last_built) ? feed.last_built : nil,
-        last_error_status: nil
+        last_error_status: cloudflare_error
       )
       source.save if source.changed?
     end
