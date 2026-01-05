@@ -130,8 +130,11 @@ group :development, :test do
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
 
-  gem "minitest"
-  gem "minitest-reporters", "~> 1.6"
+  # RSpec testing framework
+  gem "rspec-rails", "~> 7.1"
+  gem "factory_bot_rails"
+  gem "faker"
+  gem "shoulda-matchers", "~> 7.0"
 end
 
 group :development do
@@ -141,6 +144,4 @@ group :development do
   gem "fastimage"
   gem "webfinger"
   gem "standard"
-
-  gem "mocha"
 end
