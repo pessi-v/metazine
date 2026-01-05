@@ -96,6 +96,7 @@ module Articles
         # Try your current approach first
         connection = Faraday.new do |conn|
           conn.use Faraday::Gzip::Middleware
+          conn.response :follow_redirects, limit: 5
           conn.options.timeout = 30
           conn.options.open_timeout = 10
         end
@@ -127,7 +128,10 @@ module Articles
       end
 
       # Fallback to a simpler request if the first attempt fails
-      response = Faraday.get(@entry.url)
+      connection = Faraday.new do |conn|
+        conn.response :follow_redirects, limit: 5
+      end
+      response = connection.get(@entry.url)
 
       if CloudflareDetector.is_cloudflare_challenge?(response)
         # Handle the challenge case
