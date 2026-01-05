@@ -6,9 +6,14 @@ module Articles
       @instance_actor = Federails::Actor.where(entity_type: "InstanceActor").first
       @source = source
       @entry = entry
+      @cloudflare_blocked = false
       @original_page = fetch_original_page
       @description = make_description
       @clean_title = TextCleaner.clean_title(@entry.title)
+    end
+
+    def cloudflare_blocked?
+      @cloudflare_blocked
     end
 
     def create_article
@@ -119,6 +124,7 @@ module Articles
         if CloudflareDetector.is_cloudflare_challenge?(response)
           # Handle the challenge case
           Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+          @cloudflare_blocked = true
           return false
         end
 
@@ -136,14 +142,15 @@ module Articles
       if CloudflareDetector.is_cloudflare_challenge?(response)
         # Handle the challenge case
         Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
-        return {error: "Access blocked by Cloudflare security check", success: false}
+        @cloudflare_blocked = true
+        return false
       end
 
       response
     end
 
     def fetch_og_data
-      return nil if @original_page.body.empty?
+      return nil if !@original_page || @original_page.body.empty?
 
       @fetch_og_data ||= OGP::OpenGraph.new(@original_page.body, required_attributes: [])
     rescue OGP::MalformedSourceError
