@@ -2,7 +2,7 @@
 
 class SourcesController < ApplicationController
   before_action :set_source, only: %i[show edit update destroy]
-  http_basic_authenticate_with name: "admin", password: "metazine", only: %i[new edit create destroy update fetch_feed]
+  http_basic_authenticate_with name: "admin", password: "metazine", only: %i[new edit create destroy update fetch_feed fetch_feeds]
 
   # GET /sources or /sources.json
   def index
@@ -41,13 +41,11 @@ class SourcesController < ApplicationController
   end
 
   def fetch_feeds
-    # TODO: make this action only available to admin
     Sources::FeedFetcher.new.consume_all
     redirect_to sources_path
   end
 
   def fetch_feed
-    p "HELLO"
     source = Source.find(params[:source_id])
     source.consume_feed
     # Sources::FeedFetcher.new.consume(source)
