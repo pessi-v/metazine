@@ -91,7 +91,7 @@ css:
               = source.last_error_status
         .buttons.flex-row.justify-center
           = button_to "Change", edit_source_path(source), method: :get
-          = button_to "Get feed", fetch_feed_path(source_id: source), method: :post
+          = button_to "Get feed", fetch_feed_path(source_id: source), method: :post, data: { turbo_frame: dom_id(source), turbo_submits_with: "Updating..." }
           = button_to "Unsubscribe", source, method: :delete, form: {data: {turbo_confirm: "Unsubscribing from this source will remove all of it's articles from the database. If you want to keep the articles, you should just deactivate the source."}}
    
     .half

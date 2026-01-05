@@ -2,7 +2,7 @@
 
 class SourcesController < ApplicationController
   before_action :set_source, only: %i[show edit update destroy]
-  http_basic_authenticate_with name: "admin", password: "metazine", only: %i[new edit create destroy update]
+  http_basic_authenticate_with name: "admin", password: "metazine", only: %i[new edit create destroy update fetch_feed]
 
   # GET /sources or /sources.json
   def index
@@ -47,9 +47,22 @@ class SourcesController < ApplicationController
   end
 
   def fetch_feed
-    # TODO: make this action only available to admin
-    Sources::FeedFetcher.new.consume(Source.find(params[:source_id]))
-    redirect_to sources_path
+    p "HELLO"
+    source = Source.find(params[:source_id])
+    source.consume_feed
+    # Sources::FeedFetcher.new.consume(source)
+    source.reload
+
+    respond_to do |format|
+      format.html { redirect_to sources_path }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.replace(source, partial: "sources/source", locals: {source: source})
+      end
+    end
+  end
+
+  def cancel_new
+    render turbo_stream: turbo_stream.update("new_source", "")
   end
 
   # POST /sources or /sources.json
