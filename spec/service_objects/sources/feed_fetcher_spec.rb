@@ -1,13 +1,13 @@
-require 'rails_helper'
+require "rails_helper"
 
 RSpec.describe Sources::FeedFetcher do
   let(:feed_fetcher) { described_class.new }
   let(:source) do
     # Stub the OGP fetch that happens in the before_create callback
-    stub_request(:get, 'https://example.com/')
-      .to_return(status: 200, body: '<html></html>', headers: { 'Content-Type' => 'text/html' })
+    stub_request(:get, "https://example.com/")
+      .to_return(status: 200, body: "<html></html>", headers: {"Content-Type" => "text/html"})
 
-    create(:source, url: 'https://example.com/feed.xml')
+    create(:source, url: "https://example.com/feed.xml")
   end
 
   # Sample RSS feed XML
@@ -44,33 +44,33 @@ RSpec.describe Sources::FeedFetcher do
     XML
   end
 
-  describe '#consume_all' do
+  describe "#consume_all" do
     let!(:active_source1) do
-      stub_request(:get, 'https://example1.com/').to_return(status: 200, body: '<html></html>')
-      create(:source, active: true, url: 'https://example1.com/feed.xml')
+      stub_request(:get, "https://example1.com/").to_return(status: 200, body: "<html></html>")
+      create(:source, active: true, url: "https://example1.com/feed.xml")
     end
     let!(:active_source2) do
-      stub_request(:get, 'https://example2.com/').to_return(status: 200, body: '<html></html>')
-      create(:source, active: true, url: 'https://example2.com/feed.xml')
+      stub_request(:get, "https://example2.com/").to_return(status: 200, body: "<html></html>")
+      create(:source, active: true, url: "https://example2.com/feed.xml")
     end
     let!(:inactive_source) do
-      stub_request(:get, 'https://example3.com/').to_return(status: 200, body: '<html></html>')
-      create(:source, :inactive, url: 'https://example3.com/feed.xml')
+      stub_request(:get, "https://example3.com/").to_return(status: 200, body: "<html></html>")
+      create(:source, :inactive, url: "https://example3.com/feed.xml")
     end
 
     before do
-      stub_request(:get, 'https://example1.com/feed.xml')
-        .to_return(status: 200, body: valid_rss_feed, headers: { 'Content-Type' => 'application/rss+xml' })
+      stub_request(:get, "https://example1.com/feed.xml")
+        .to_return(status: 200, body: valid_rss_feed, headers: {"Content-Type" => "application/rss+xml"})
 
-      stub_request(:get, 'https://example2.com/feed.xml')
-        .to_return(status: 200, body: valid_rss_feed, headers: { 'Content-Type' => 'application/rss+xml' })
+      stub_request(:get, "https://example2.com/feed.xml")
+        .to_return(status: 200, body: valid_rss_feed, headers: {"Content-Type" => "application/rss+xml"})
 
       allow(Articles::CreateService).to receive(:new).and_return(
         double(create_article: true, cloudflare_blocked?: false)
       )
     end
 
-    it 'processes all active sources' do
+    it "processes all active sources" do
       feed_fetcher.consume_all
 
       active_source1.reload
@@ -83,8 +83,8 @@ RSpec.describe Sources::FeedFetcher do
       expect(inactive_source.last_modified).to be_nil
     end
 
-    it 'handles errors gracefully' do
-      stub_request(:get, 'https://example1.com/feed.xml')
+    it "handles errors gracefully" do
+      stub_request(:get, "https://example1.com/feed.xml")
         .to_return(status: 404)
 
       expect {
@@ -92,32 +92,32 @@ RSpec.describe Sources::FeedFetcher do
       }.not_to raise_error
 
       active_source1.reload
-      expect(active_source1.last_error_status).to eq('Not found (404)')
+      expect(active_source1.last_error_status).to eq("Not found (404)")
     end
 
-    it 'continues processing after an error' do
-      stub_request(:get, 'https://example1.com/feed.xml')
-        .to_raise(StandardError.new('Some error'))
+    it "continues processing after an error" do
+      stub_request(:get, "https://example1.com/feed.xml")
+        .to_raise(StandardError.new("Some error"))
 
       feed_fetcher.consume_all
 
       active_source1.reload
       active_source2.reload
 
-      expect(active_source1.last_error_status).to include('processing_error')
+      expect(active_source1.last_error_status).to include("processing_error")
       expect(active_source2.last_error_status).to be_nil
     end
   end
 
-  describe '#consume' do
-    context 'when feed returns 304 Not Modified' do
+  describe "#consume" do
+    context "when feed returns 304 Not Modified" do
       before do
         stub_request(:get, source.url)
           .to_return(status: 304)
       end
 
-      it 'logs not modified and clears error status' do
-        source.update(last_error_status: 'some error')
+      it "logs not modified and clears error status" do
+        source.update(last_error_status: "some error")
 
         feed_fetcher.consume(source)
 
@@ -125,50 +125,50 @@ RSpec.describe Sources::FeedFetcher do
         expect(source.last_error_status).to be_nil
       end
 
-      it 'does not process feed entries' do
+      it "does not process feed entries" do
         expect(Articles::CreateService).not_to receive(:new)
         feed_fetcher.consume(source)
       end
     end
 
-    context 'when feed returns 404 Not Found' do
+    context "when feed returns 404 Not Found" do
       before do
         stub_request(:get, source.url)
           .to_return(status: 404)
       end
 
-      it 'sets error status to not found' do
+      it "sets error status to not found" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('Not found (404)')
+        expect(source.last_error_status).to eq("Not found (404)")
       end
     end
 
-    context 'when feed returns 500 Internal Server Error' do
+    context "when feed returns 500 Internal Server Error" do
       before do
         stub_request(:get, source.url)
           .to_return(status: 500)
       end
 
-      it 'sets error status to internal server error' do
+      it "sets error status to internal server error" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('Internal server error (HTTP error 500)')
+        expect(source.last_error_status).to eq("Internal server error (HTTP error 500)")
       end
     end
 
-    context 'when feed returns 200 OK with valid feed' do
+    context "when feed returns 200 OK with valid feed" do
       before do
         stub_request(:get, source.url)
           .to_return(
             status: 200,
             body: valid_rss_feed,
             headers: {
-              'Content-Type' => 'application/rss+xml',
-              'Last-Modified' => 'Wed, 01 Jan 2025 12:00:00 GMT',
-              'ETag' => '"abc123"'
+              "Content-Type" => "application/rss+xml",
+              "Last-Modified" => "Wed, 01 Jan 2025 12:00:00 GMT",
+              "ETag" => '"abc123"'
             }
           )
 
@@ -177,22 +177,22 @@ RSpec.describe Sources::FeedFetcher do
         )
       end
 
-      it 'processes the feed successfully' do
+      it "processes the feed successfully" do
         feed_fetcher.consume(source)
 
         source.reload
         expect(source.last_error_status).to be_nil
       end
 
-      it 'updates source metadata' do
+      it "updates source metadata" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_modified).to eq('Wed, 01 Jan 2025 12:00:00 GMT')
+        expect(source.last_modified).to eq("Wed, 01 Jan 2025 12:00:00 GMT")
         expect(source.etag).to eq('"abc123"')
       end
 
-      it 'creates articles from feed entries' do
+      it "creates articles from feed entries" do
         service_double = double(create_article: true, cloudflare_blocked?: false)
         expect(Articles::CreateService).to receive(:new).and_return(service_double)
         expect(service_double).to receive(:create_article)
@@ -201,7 +201,7 @@ RSpec.describe Sources::FeedFetcher do
       end
     end
 
-    context 'when response is compressed with gzip' do
+    context "when response is compressed with gzip" do
       let(:compressed_body) do
         io = StringIO.new
         gz = Zlib::GzipWriter.new(io)
@@ -216,8 +216,8 @@ RSpec.describe Sources::FeedFetcher do
             status: 200,
             body: compressed_body,
             headers: {
-              'Content-Type' => 'application/rss+xml',
-              'Content-Encoding' => 'gzip'
+              "Content-Type" => "application/rss+xml",
+              "Content-Encoding" => "gzip"
             }
           )
 
@@ -226,7 +226,7 @@ RSpec.describe Sources::FeedFetcher do
         )
       end
 
-      it 'decodes and processes the feed' do
+      it "decodes and processes the feed" do
         expect {
           feed_fetcher.consume(source)
         }.not_to raise_error
@@ -236,17 +236,17 @@ RSpec.describe Sources::FeedFetcher do
       end
     end
 
-    context 'when feed is empty' do
+    context "when feed is empty" do
       before do
         stub_request(:get, source.url)
           .to_return(
             status: 200,
             body: empty_rss_feed,
-            headers: { 'Content-Type' => 'application/rss+xml' }
+            headers: {"Content-Type" => "application/rss+xml"}
           )
       end
 
-      it 'handles empty feed' do
+      it "handles empty feed" do
         feed_fetcher.consume(source)
 
         source.reload
@@ -256,87 +256,82 @@ RSpec.describe Sources::FeedFetcher do
       end
     end
 
-    context 'when feed is not parseable' do
+    context "when feed is not parseable" do
       before do
         stub_request(:get, source.url)
           .to_return(
             status: 200,
-            body: '<html><body>Not a feed</body></html>',
-            headers: { 'Content-Type' => 'text/html' }
+            body: "<html><body>Not a feed</body></html>",
+            headers: {"Content-Type" => "text/html"}
           )
       end
 
-      it 'sets error status to XML parse error' do
+      it "sets error status to XML parse error" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('XML parsing error: response body is probably not a feed')
+        expect(source.last_error_status).to eq("XML parsing error: response body is probably not a feed")
       end
     end
 
-    # Note: The following error scenarios reveal a bug in the implementation
-    # where make_request returns a boolean instead of nil, causing consume
-    # to try calling .status on a boolean. These tests are skipped pending
-    # a fix to the implementation.
-
-    context 'when connection fails', :skip do
+    context "when connection fails" do
       before do
         stub_request(:get, source.url)
-          .to_raise(Faraday::ConnectionFailed.new('Connection refused'))
+          .to_raise(Faraday::ConnectionFailed.new("Connection refused"))
       end
 
-      it 'sets error status to connection failed' do
+      it "sets error status to connection failed" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('Connection failed')
+        expect(source.last_error_status).to eq("Connection failed")
       end
     end
 
-    context 'when SSL error occurs', :skip do
+    context "when SSL error occurs" do
       before do
         stub_request(:get, source.url)
-          .to_raise(Faraday::SSLError.new('SSL certificate problem'))
+          .to_raise(Faraday::SSLError.new("SSL certificate problem"))
       end
 
-      it 'sets error status to SSL error' do
+      it "sets error status to SSL error" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('SSL Error')
+        expect(source.last_error_status).to eq("SSL Error")
       end
     end
 
-    context 'when timeout occurs', :skip do
+    context "when timeout occurs" do
       before do
         stub_request(:get, source.url)
-          .to_raise(Faraday::TimeoutError.new('Request timeout'))
+          .to_raise(Faraday::TimeoutError.new("Request timeout"))
       end
 
-      it 'sets error status to timeout' do
+      it "sets error status to timeout" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('Timeout Error')
+        expect(source.last_error_status).to eq("Timeout Error")
       end
     end
 
-    context 'when redirect limit is reached', :skip do
+    context "when redirect limit is reached" do
       before do
         stub_request(:get, source.url)
-          .to_raise(Faraday::FollowRedirects::RedirectLimitReached.new('Too many redirects'))
+          .to_raise(Faraday::FollowRedirects::RedirectLimitReached.new("Too many redirects"))
       end
 
-      it 'sets error status to redirect limit reached' do
+      it "sets error status to redirect limit reached" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to eq('Redirect limit reached')
+        expect(source.last_error_status).to eq("Redirect limit reached")
       end
     end
 
-    context 'when feed is not modified based on last_built' do
-      let(:last_built) { 'Wed, 01 Jan 2025 12:00:00 GMT' }
+    context "when feed is not modified based on last_built" do
+      let(:last_built) { "Wed, 01 Jan 2025 12:00:00 GMT" }
 
       before do
         source.update(last_built: last_built)
@@ -345,17 +340,17 @@ RSpec.describe Sources::FeedFetcher do
           .to_return(
             status: 200,
             body: valid_rss_feed,
-            headers: { 'Content-Type' => 'application/rss+xml' }
+            headers: {"Content-Type" => "application/rss+xml"}
           )
       end
 
-      it 'does not process feed entries' do
+      it "does not process feed entries" do
         expect(Articles::CreateService).not_to receive(:new)
         feed_fetcher.consume(source)
       end
 
-      it 'clears error status' do
-        source.update(last_error_status: 'some error')
+      it "clears error status" do
+        source.update(last_error_status: "some error")
         feed_fetcher.consume(source)
 
         source.reload
@@ -363,7 +358,7 @@ RSpec.describe Sources::FeedFetcher do
       end
     end
 
-    context 'when most articles are blocked by Cloudflare' do
+    context "when most articles are blocked by Cloudflare" do
       let(:multi_item_feed) do
         <<~XML
           <?xml version="1.0" encoding="UTF-8"?>
@@ -384,8 +379,8 @@ RSpec.describe Sources::FeedFetcher do
             status: 200,
             body: multi_item_feed,
             headers: {
-              'Content-Type' => 'application/rss+xml',
-              'Last-Modified' => 'Thu, 02 Jan 2025 12:00:00 GMT'
+              "Content-Type" => "application/rss+xml",
+              "Last-Modified" => "Thu, 02 Jan 2025 12:00:00 GMT"
             }
           )
 
@@ -405,26 +400,26 @@ RSpec.describe Sources::FeedFetcher do
         end
       end
 
-      it 'sets Cloudflare error status' do
+      it "sets Cloudflare error status" do
         feed_fetcher.consume(source)
 
         source.reload
-        expect(source.last_error_status).to include('Cloudflare challenge detected')
-        expect(source.last_error_status).to include('2/3')
+        expect(source.last_error_status).to include("Cloudflare challenge detected")
+        expect(source.last_error_status).to include("2/3")
       end
     end
 
-    context 'with conditional request headers' do
-      let(:last_modified) { 'Tue, 31 Dec 2024 12:00:00 GMT' }
+    context "with conditional request headers" do
+      let(:last_modified) { "Tue, 31 Dec 2024 12:00:00 GMT" }
       let(:etag) { '"xyz789"' }
 
       before do
         source.update(last_modified: last_modified, etag: etag)
       end
 
-      it 'sends If-Modified-Since header' do
+      it "sends If-Modified-Since header" do
         stub = stub_request(:get, source.url)
-          .with(headers: { 'If-Modified-Since' => last_modified })
+          .with(headers: {"If-Modified-Since" => last_modified})
           .to_return(status: 304)
 
         feed_fetcher.consume(source)
@@ -432,9 +427,9 @@ RSpec.describe Sources::FeedFetcher do
         expect(stub).to have_been_requested
       end
 
-      it 'sends If-None-Match header' do
+      it "sends If-None-Match header" do
         stub = stub_request(:get, source.url)
-          .with(headers: { 'If-None-Match' => etag })
+          .with(headers: {"If-None-Match" => etag})
           .to_return(status: 304)
 
         feed_fetcher.consume(source)
@@ -444,13 +439,11 @@ RSpec.describe Sources::FeedFetcher do
     end
   end
 
-  describe 'URL validation' do
-    context 'with invalid URL', :skip do
-      # Note: This test reveals a bug where invalid URLs cause NoMethodError
-      # The implementation should check if response is nil before calling .status
+  describe "URL validation" do
+    context "with invalid URL" do
       let(:invalid_source) do
         # Skip the before_create callback for this test
-        Source.new(name: 'Invalid Source', url: 'not a valid url').tap { |s| s.save(validate: false) }
+        Source.new(name: "Invalid Source", url: "not a valid url").tap { |s| s.save(validate: false) }
       end
 
       before do
@@ -459,7 +452,7 @@ RSpec.describe Sources::FeedFetcher do
         )
       end
 
-      it 'handles invalid URL gracefully' do
+      it "handles invalid URL gracefully" do
         expect {
           feed_fetcher.consume(invalid_source)
         }.not_to raise_error

@@ -21,7 +21,7 @@ module Sources
       Rails.logger.info("Processing feed for source: #{source.name}")
 
       response = make_request(source: source)
-      # binding.break
+      return unless response
 
       if response.status == 500
         handle_fetch_error(source, :internal_server_error)
@@ -68,14 +68,19 @@ module Sources
       connection.get
     rescue Faraday::ConnectionFailed => e
       handle_fetch_error(source, :connection_failed, e)
+      nil
     rescue URI::InvalidURIError => e
       handle_fetch_error(source, :invalid_url, e)
+      nil
     rescue Faraday::SSLError => e
       handle_fetch_error(source, :ssl_error, e)
+      nil
     rescue Faraday::TimeoutError => e
       handle_fetch_error(source, :timeout, e)
+      nil
     rescue Faraday::FollowRedirects::RedirectLimitReached => e
       handle_fetch_error(source, :redirect_limit_reached, e)
+      nil
     end
 
     def valid_url?(url)
