@@ -14,5 +14,6 @@ Source.create(name: "Le Monde Diplomatique", url: "https://mondediplo.com/backen
 Source.create(name: "The Ecologist", url: "https://theecologist.org/whats_new/feed")
 Source.create(name: "Grist", url: "https://grist.org/feed")
 Source.create(name: "e360", url: "https://e360.yale.edu/feed.xml")
+Source.create(name: "London Review of Books", url: "https://www.lrb.co.uk/feeds/rss")
 
 Source.consume_all
