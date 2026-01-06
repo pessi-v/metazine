@@ -196,7 +196,7 @@ button,
   font-family: var(--font-family-headlines);
   color: var(--color-text-header);
   background-color: var(--color-light);
-  cursor: unset;
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -209,6 +209,14 @@ button,
 button:active,
 .button:active {
   transform: translateY(2px);
+}
+
+button {
+  cursor: pointer;
+}
+
+.tts_button {
+  cursor: pointer;
 }
 
 a.button {

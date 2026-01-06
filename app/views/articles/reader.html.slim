@@ -51,28 +51,42 @@
 
   .line
 
-  h2 Discussion
+  .discussion-header.flex-row.align-end style="padding-bottom: var(--space-s)"
+    .half
+      h2 Discussion
+    .half
+      - if logged_in?
+        .user-info
+          p
+            | Logged in as
+            strong<> = current_user.full_username
+            = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
 
-  .discussion-section
-    - if logged_in?
-      .user-info
-        p
-          | Logged in as
-          strong<> = current_user.full_username
-          = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
+        = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
+      - else
+        = render partial: 'sessions/login_form'
 
-      = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
-    - else
-      = render partial: 'sessions/login_form'
+
+  / .discussion-section
+  /   - if logged_in?
+  /     .user-info
+  /       p
+  /         | Logged in as
+  /         strong<> = current_user.full_username
+  /         = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
+
+  /     = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
+  /   - else
+  /     = render partial: 'sessions/login_form'
 
     .line
 
-    .comments-list
-      - if @article.comments.any?
-        - @article.comments.where(parent_type: 'Article').each do |comment|
-          = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
-      - else
-        p.no-comments No comments yet. Be the first to comment!
+  .comments-list
+    - if @article.comments.any?
+      - @article.comments.where(parent_type: 'Article').each do |comment|
+        = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
+    - else
+      p.no-comments No comments yet. Be the first to comment!
 
 .navigate-back    
   = link_to(frontpage_path, class: 'back-link')
