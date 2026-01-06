@@ -1,3 +1,5 @@
+= turbo_stream_from "feed_updates"
+
 css:
   .admin_header {
     width: 40em;
@@ -23,7 +25,7 @@ css:
     margin-bottom: var(--space-m)
   }
 
-  
+
 .instance-title
   = link_to('/') do
     h4.desktop
@@ -41,9 +43,11 @@ css:
         h2
           'Sources
         .flex-row.justify-start.buttons
-          = button_to('Reload all feeds', fetch_feeds_path)
+          / = button_to "Get feed", fetch_feed_path(source_id: source), method: :post, data: { turbo_frame: dom_id(source), turbo_submits_with: "Updating..." }
           = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
             = link_to "New source", new_source_path, class: 'button', data: { turbo_frame: 'new_source' }
+          #reload_feeds_button
+            = button_to('Reload all feeds', fetch_feeds_path, method: :post)
 
       .half.flex-row.justify-end id="article_counts"
         table

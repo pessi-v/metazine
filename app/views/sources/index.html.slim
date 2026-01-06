@@ -26,4 +26,6 @@
               li
                 h4
                   = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
-end
+
+div style="margin-top: var(--space-l);"
+  = render 'layouts/footer'

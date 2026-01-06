@@ -41,8 +41,15 @@ class SourcesController < ApplicationController
   end
 
   def fetch_feeds
-    Sources::FeedFetcher.new.consume_all
-    redirect_to sources_path
+    FeedFetcherJob.perform_later
+
+    respond_to do |format|
+      format.html { redirect_to sources_path, notice: "Feed refresh started in background" }
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update("reload_feeds_button",
+          partial: "sources/reload_feeds_updating")
+      end
+    end
   end
 
   def fetch_feed
