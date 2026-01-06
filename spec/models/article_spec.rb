@@ -12,7 +12,7 @@ RSpec.describe Article, type: :model do
       expect(article).to respond_to(:federails_actor)
     end
 
-    it { is_expected.to have_many(:comments).dependent(:destroy) }
+    it { is_expected.to have_many(:comments).dependent(:delete_all) }
   end
 
   describe 'validations' do
@@ -160,6 +160,31 @@ RSpec.describe Article, type: :model do
     it 'includes reader URL in content' do
       result = article.to_activitypub_object
       expect(result['content']).to include('reader')
+    end
+  end
+
+  describe 'dependent associations' do
+    context 'when destroying an article with comments' do
+      it 'successfully deletes the article and its comments' do
+        article = create(:article, :with_comments, comments_count: 3)
+
+        expect(article.comments.count).to eq(3)
+        expect { article.destroy }.not_to raise_error
+        expect(Article.exists?(article.id)).to be false
+        expect(Comment.where(parent: article)).to be_empty
+      end
+
+      it 'bypasses comment soft-delete callbacks when deleting article' do
+        article = create(:article)
+        comment = create(:comment, parent: article)
+
+        # The comment should be hard-deleted (not soft-deleted) when article is destroyed
+        article.destroy
+
+        expect(Comment.exists?(comment.id)).to be false
+        # Verify it was actually deleted, not soft-deleted
+        expect(Comment.unscoped.find_by(id: comment.id)).to be_nil
+      end
     end
   end
 

@@ -142,6 +142,9 @@ group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
 
+  # Automatically reload the browser when files change
+  gem "hotwire-livereload"
+
   gem "fastimage"
   gem "webfinger"
   gem "standard"

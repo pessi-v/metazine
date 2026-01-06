@@ -1,20 +1,66 @@
+css:
+  .form-input {
+    padding-top: var(--space-m) !important;
+    margin-right: var(--space-xxs);
+    width: 100%;
+    border-bottom: var(--border);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 1px;
+    padding-left: var(--space-xxxs);
+    font-weight: bold;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-headlines);
+
+    @include media.media(tabletAndUp) {
+      width: var(--column);
+    }
+
+    input[type="text"] {
+      width: 100%;
+      border-bottom: var(--border);
+      border-top: 0;
+      border-left: 0;
+      border-right: 0;
+      border-radius: 1px;
+      padding-left: var(--space-xxxs);
+      font-weight: bold;
+      font-size: var(--font-size-xs);
+      font-family: var(--font-family-headlines);
+    }
+  }
+
 .login-prompt
-  h3 Login to participate in the discussion
+  / h3 Login to participate in the discussion
 
   / Mastodon Login
-  .login-method
+  h4 Login with Mastodon to participate in the discussion
+  .login-input
     = form_with url: login_mastodon_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
       .form-group
-        = f.label :domain, "Mastodon instance:", class: "form-label"
-        .form-input-group
+        / = f.label :domain, "Login to participate in the discussion", class: "form-label"
+        .flex-row
           = f.text_field :domain,
             placeholder: "mastodon.social",
             class: "form-input",
             required: true,
             autocomplete: "off"
-          = f.submit "Login with Mastodon", class: "btn-login"
-      .form-help
-        | Example: mastodon.social, fosstodon.org
+
+          = f.submit "Login with Mastodon", class: "button"
+      / .form-help
+      /   | Example: mastodon.social, fosstodon.org
+
+  - if Rails.env.development?
+    .dev-login-divider
+      | OR (dev only)
+    .dev-login
+      = form_with url: dev_login_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
+        .form-group
+          .flex-row
+            = f.text_field :username, placeholder: "devuser", class: "form-input"
+            = f.submit "Quick Dev Login", class: "button"
+        = f.hidden_field :return_to, value: request.path
 
   / DISABLED: ATProto/Bluesky integration temporarily disabled
   / .login-divider-small
@@ -35,9 +81,9 @@
   /     .form-help
   /       | Example: yourname.bsky.social, username.com
 
-  .form-help.signup-help
-    | Don't have an account?
-    = link_to "Join Mastodon", "https://joinmastodon.org/servers", target: "_blank", rel: "noopener"
+  / .form-help.signup-help
+  /   | Don't have an account?
+  /   = link_to "Join Mastodon", "https://joinmastodon.org/servers", target: "_blank", rel: "noopener"
     / DISABLED: ATProto/Bluesky integration temporarily disabled
     / |  or
     / = link_to "Join Bluesky", "https://bsky.app", target: "_blank", rel: "noopener"

@@ -1,5 +1,62 @@
 module Articles
   class ImageHelper
+    def self.remove_small_images(article)
+      require "fastimage"
+      require "nokogiri"
+
+      # Parse the readability content
+      content = article.readability_output_jsonb&.dig("content")
+      return article unless content.present?
+
+      # Parse HTML content
+      doc = Nokogiri::HTML(content)
+      images_to_remove = []
+
+      # Find all images in the content
+      doc.css("img").each do |img|
+        img_src = img["src"]
+        next unless img_src.present?
+
+        begin
+          # Get image dimensions using FastImage
+          size = FastImage.size(img_src)
+
+          if size
+            width, height = size
+
+            # Remove images smaller than 250px wide (matching the JS logic)
+            if width < 250
+              Rails.logger.info("Removing small image (#{width}x#{height}): #{img_src}")
+              images_to_remove << img
+            end
+          end
+        rescue => e
+          # If we can't fetch the image, log but don't fail
+          Rails.logger.info("Could not check image dimensions for #{img_src}: #{e.message}")
+        end
+      end
+
+      # Remove small images
+      images_to_remove.each do |img|
+        parent_element = img.parent
+
+        # If the image is wrapped in a figure tag, remove the entire figure
+        if parent_element.name.downcase == "figure"
+          parent_element.remove
+        else
+          # Otherwise just remove the image
+          img.remove
+        end
+      end
+
+      # Update the article's content with the modified HTML if any images were removed
+      if images_to_remove.any?
+        article.readability_output_jsonb["content"] = doc.to_html
+      end
+
+      article
+    end
+
     def self.compare_and_update_article_images(article)
       require "dhash-vips"
       require "open-uri"

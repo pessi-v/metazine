@@ -21,7 +21,7 @@ class Article < ApplicationRecord
   belongs_to :source, counter_cache: true
   belongs_to :federails_actor, optional: false, class_name: "Federails::Actor"
 
-  has_many :comments, dependent: :destroy, as: :parent
+  has_many :comments, dependent: :delete_all, as: :parent
 
   validates :title, :source_name, presence: true
   validates :title, uniqueness: true

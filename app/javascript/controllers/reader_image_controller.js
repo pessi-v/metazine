@@ -3,7 +3,7 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   connect() {
-    this.element.onload = () => {
+    const setImageProperties = () => {
       const imageWidth = this.element.naturalWidth;
       const imageHeight = this.element.naturalHeight;
       const containerWidth = this.element.parentElement.clientWidth;
@@ -27,5 +27,12 @@ export default class extends Controller {
         aspectRatio > 1 ? "'yes'" : "'no'"
       );
     };
+
+    // Check if image is already loaded (cached)
+    if (this.element.complete && this.element.naturalWidth > 0) {
+      setImageProperties();
+    } else {
+      this.element.onload = setImageProperties;
+    }
   }
 }

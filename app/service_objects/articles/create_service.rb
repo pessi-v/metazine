@@ -22,10 +22,13 @@ module Articles
       return if article_exists? || !english? || !allowed_media_type?
 
       article = Article.new(article_attributes)
-      return unless ApprovalHelper.new(article).approve?
+      return unless ApprovalHelper.new(article, original_page_body: @original_page.body).approve?
 
       # clean up duplicate image, in case headline image is also in the text body
       article = ImageHelper.compare_and_update_article_images(article)
+
+      # remove small images that would be hidden by CSS anyway
+      article = ImageHelper.remove_small_images(article)
 
       article.save
       article
@@ -63,7 +66,6 @@ module Articles
         source_id: @source.id,
         published_at: determine_published_at,
         image_url: find_image_url,
-        paywalled: paywalled?,
         readability_output_jsonb: readability_output,
         # tags: readability_output["tags"],
         federails_actor: @instance_actor
@@ -155,25 +157,6 @@ module Articles
       @fetch_og_data ||= OGP::OpenGraph.new(@original_page.body, required_attributes: [])
     rescue OGP::MalformedSourceError
       # TODO
-    end
-
-    def paywalled?
-      return false unless (response_body = @original_page.body)
-
-      doc = Nokogiri::HTML(response_body)
-
-      # Check for the presence of paywall form div
-      return true if doc.css("#paywall-form").any?
-
-      # Check for paywall message text
-      paywall_message = doc.css(".po-ln__message")
-      return true if paywall_message.text.include?("available to subscribers only")
-
-      # Check if intro section ends with ellipsis [...] which indicates truncated content
-      intro_section = doc.css(".po-cn__intro").text
-      return true if intro_section&.strip&.end_with?("[\u2026]")
-
-      false
     end
 
     def article_readability_output(html)

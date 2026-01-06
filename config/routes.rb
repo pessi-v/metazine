@@ -31,6 +31,11 @@ Rails.application.routes.draw do
   get "auth/failure", to: "sessions#failure"
   delete "logout", to: "sessions#destroy", as: :logout
 
+  # Development-only test login (bypass OAuth)
+  if Rails.env.development?
+    post "dev/login", to: "sessions#dev_login", as: :dev_login
+  end
+
   # AT Protocol OAuth client metadata
   # DISABLED: ATProto/Bluesky integration temporarily disabled
   # get "oauth/client-metadata.json", to: "oauth#client_metadata"
@@ -40,6 +45,8 @@ Rails.application.routes.draw do
   mount PgHero::Engine, at: "pghero"
 
   mount MissionControl::Jobs::Engine, at: "/jobs"
+
+  mount ActionCable.server => "/cable"
 
   get "reader/(:id)", to: "articles#reader", as: :reader
   post "fetch_feeds", to: "sources#fetch_feeds", as: :fetch_feeds

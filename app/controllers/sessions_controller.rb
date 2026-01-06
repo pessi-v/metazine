@@ -17,11 +17,11 @@ class SessionsController < ApplicationController
     end
 
     # Store the return URL to redirect back after login
-    session[:return_to] = request.referer || root_path
+    session[:return_to] = request.referer || frontpage_path
 
-    puts "Redirecting to /auth/mastodon with domain=#{domain}"
-    # Redirect to OmniAuth with the domain - the credentials lambda will handle the rest
-    redirect_to "/auth/mastodon?domain=#{domain}", allow_other_host: false
+    puts "Redirecting to /auth/mastodon with identifier=#{domain}"
+    # Redirect to OmniAuth with the domain as 'identifier' - the credentials lambda will handle the rest
+    redirect_to "/auth/mastodon?identifier=#{domain}", allow_other_host: false
   end
 
   # POST /login/bluesky - Initiate Bluesky/AT Protocol OAuth
@@ -110,5 +110,65 @@ class SessionsController < ApplicationController
   # GET /auth/failure - OAuth failure callback
   def failure
     redirect_back fallback_location: frontpage_path, alert: "Authentication failed: #{params[:message]}"
+  end
+
+  # POST /dev/login - Development-only test login (bypasses OAuth)
+  def dev_login
+    unless Rails.env.development?
+      redirect_to frontpage_path, alert: "Not available in production"
+      return
+    end
+
+    username = params[:username].presence || 'devuser'
+    display_name = params[:display_name].presence || 'Dev Test User'
+    domain = params[:domain].presence || 'mastodon.local'
+
+    # Find or create a test user
+    @user = User.find_or_create_by!(
+      provider: 'mastodon',
+      uid: 'dev_test_user'
+    ) do |user|
+      user.username = username
+      user.display_name = display_name
+      user.domain = domain
+      user.avatar_url = 'https://mastodon.social/avatars/original/missing.png'
+      user.access_token = 'dev_token'
+    end
+
+    # Update username/display_name if they changed
+    @user.update!(username: username, display_name: display_name, domain: domain)
+
+    # Create or find a local Federails::Actor for this dev user
+    actor = Federails::Actor.find_or_create_by!(
+      entity_type: 'User',
+      entity_id: @user.id
+    ) do |a|
+      a.username = @user.username
+      a.name = @user.display_name
+      a.local = true
+      a.server = nil
+      a.federated_url = nil
+    end
+
+    # Update actor attributes in case username changed
+    actor.update!(username: @user.username, name: @user.display_name)
+
+    # Create a session
+    @session = @user.sessions.create!(
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent
+    )
+
+    # Set cookies and session
+    cookies.signed.permanent[:session_id] = {
+      value: @session.id,
+      httponly: true,
+      same_site: :lax,
+      secure: false
+    }
+    session[:session_id] = @session.id
+    session[:user_id] = @user.id
+
+    redirect_to (params[:return_to] || frontpage_path), notice: "Dev login successful as @#{@user.username}@#{@user.domain}"
   end
 end

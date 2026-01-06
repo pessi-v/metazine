@@ -22,30 +22,49 @@ class CommentsController < ApplicationController
         Rails.logger.info "Successfully linked user to federails_actor #{current_user.federails_actor.id}"
       end
 
-      # Post to user's Mastodon outbox first
-      mastodon_client = MastodonApiClient.new(current_user)
-      mastodon_response = mastodon_client.create_comment(
-        content: comment_params[:content],
-        parent: @parent
-      )
+      # For dev users in development, skip Mastodon posting
+      if Rails.env.development? && current_user.access_token == 'dev_token'
+        # Create local-only comment (no federated_url)
+        comment_attributes = {
+          parent_type: @parent.class.name,
+          parent_id: @parent.id,
+          content: comment_params[:content],
+          user_id: current_user.id,
+          federails_actor_id: current_user.federails_actor.id,
+          federated_url: nil, # Local-only comment
+          created_at: Time.current,
+          updated_at: Time.current
+        }
 
-      # Create local comment with Mastodon's federated_url
-      # Use insert! to completely bypass Federails callbacks
-      comment_attributes = {
-        parent_type: @parent.class.name,
-        parent_id: @parent.id,
-        content: comment_params[:content],
-        user_id: current_user.id,
-        federails_actor_id: current_user.federails_actor.id,
-        federated_url: mastodon_response[:uri], # Use ActivityPub URI, not web URL
-        created_at: Time.current,
-        updated_at: Time.current
-      }
+        result = Comment.insert!(comment_attributes)
+        comment_id = result.is_a?(Hash) ? result["id"] : result
+        Rails.logger.info "Created local dev comment #{comment_id}"
+      else
+        # Post to user's Mastodon outbox first
+        mastodon_client = MastodonApiClient.new(current_user)
+        mastodon_response = mastodon_client.create_comment(
+          content: comment_params[:content],
+          parent: @parent
+        )
 
-      # insert! returns the inserted record's primary key
-      result = Comment.insert!(comment_attributes)
-      comment_id = result.is_a?(Hash) ? result["id"] : result
-      Rails.logger.info "Created comment #{comment_id} with federated_url: #{mastodon_response[:uri]}"
+        # Create local comment with Mastodon's federated_url
+        # Use insert! to completely bypass Federails callbacks
+        comment_attributes = {
+          parent_type: @parent.class.name,
+          parent_id: @parent.id,
+          content: comment_params[:content],
+          user_id: current_user.id,
+          federails_actor_id: current_user.federails_actor.id,
+          federated_url: mastodon_response[:uri], # Use ActivityPub URI, not web URL
+          created_at: Time.current,
+          updated_at: Time.current
+        }
+
+        # insert! returns the inserted record's primary key
+        result = Comment.insert!(comment_attributes)
+        comment_id = result.is_a?(Hash) ? result["id"] : result
+        Rails.logger.info "Created comment #{comment_id} with federated_url: #{mastodon_response[:uri]}"
+      end
 
       redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!"
     rescue ActiveRecord::RecordInvalid => e
@@ -72,16 +91,19 @@ class CommentsController < ApplicationController
     end
 
     begin
-      # Extract status ID from federated_url
-      status_id = extract_mastodon_status_id(@comment.federated_url)
+      # For dev users in development, skip Mastodon update
+      unless Rails.env.development? && current_user.access_token == 'dev_token'
+        # Extract status ID from federated_url
+        status_id = extract_mastodon_status_id(@comment.federated_url)
 
-      if status_id
-        # Update on Mastodon first
-        mastodon_client = MastodonApiClient.new(current_user)
-        mastodon_client.update_comment(
-          status_id: status_id,
-          content: comment_params[:content]
-        )
+        if status_id
+          # Update on Mastodon first
+          mastodon_client = MastodonApiClient.new(current_user)
+          mastodon_client.update_comment(
+            status_id: status_id,
+            content: comment_params[:content]
+          )
+        end
       end
 
       # Update local comment directly to bypass Federails
@@ -105,13 +127,16 @@ class CommentsController < ApplicationController
     end
 
     begin
-      # Extract status ID from federated_url
-      status_id = extract_mastodon_status_id(@comment.federated_url)
+      # For dev users in development, skip Mastodon delete
+      unless Rails.env.development? && current_user.access_token == 'dev_token'
+        # Extract status ID from federated_url
+        status_id = extract_mastodon_status_id(@comment.federated_url)
 
-      if status_id
-        # Delete on Mastodon first
-        mastodon_client = MastodonApiClient.new(current_user)
-        mastodon_client.delete_comment(status_id: status_id)
+        if status_id
+          # Delete on Mastodon first
+          mastodon_client = MastodonApiClient.new(current_user)
+          mastodon_client.delete_comment(status_id: status_id)
+        end
       end
 
       # Soft delete locally - update_columns bypasses Federails callbacks

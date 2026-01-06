@@ -106,6 +106,13 @@ class User < ApplicationRecord
   def link_to_federated_actor!
     return unless domain.present? && username.present?
 
+    # If user is already linked to an actor, skip linking (prevents double-login errors)
+    existing_link = Federails::Actor.find_by(entity_type: 'User', entity_id: id)
+    if existing_link
+      Rails.logger.info "=== User##{id} already linked to Actor##{existing_link.id}, skipping ==="
+      return
+    end
+
     # Construct the expected ActivityPub actor URL
     # Format: https://domain/users/username (standard Mastodon format)
     expected_actor_url = "https://#{domain}/users/#{username}"

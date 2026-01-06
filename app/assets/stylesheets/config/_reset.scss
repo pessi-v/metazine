@@ -196,7 +196,7 @@ button,
   font-family: var(--font-family-headlines);
   color: var(--color-text-header);
   background-color: var(--color-light);
-  cursor: unset;
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -209,6 +209,21 @@ button,
 button:active,
 .button:active {
   transform: translateY(2px);
+}
+
+button {
+  cursor: pointer;
+}
+
+.tts_button {
+  cursor: pointer;
+}
+
+a.button {
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-flex;
+  text-decoration: none;
 }
 
 .flex-row {
@@ -255,6 +270,14 @@ button:active,
 
 .font-muted {
   color: var(--color-text-muted);
+}
+
+.half {
+  width: 50%;
+}
+
+.align-end {
+  align-items: flex-end;
 }
 
 // .text-fit {

@@ -9,10 +9,6 @@ css:
     margin-right: auto;
   }
 
-  .half {
-    width: 50%;
-  }
-
   .right {
     padding: var(--space-s);
   }
@@ -29,50 +25,51 @@ css:
     gap: var(--space-xs);
   }
 
-= form_with(model: source) do |form|
-  .source_card
-    .half
-      .right.flex-column.justify-space-between style="height: 100%"
-        .flex-column style="gap: 0.3rem"
-          - if source.errors.any?
-            div style="color: red"
-              h4
-                = "#{pluralize(source.errors.count, "error")} prohibited this source from being saved:"
-              ul
-                - source.errors.each do |error|
-                  li
-                    = error.full_message
+div style="margin-top: var(--space-s);"
+  = form_with(model: source) do |form|
+    .source_card
+      .half
+        .right.flex-column.justify-space-between style="height: 100%"
+          .flex-column style="gap: 0.3rem"
+            - if source.errors.any?
+              div style="color: red"
+                h4
+                  = "#{pluralize(source.errors.count, "error")} prohibited this source from being saved:"
+                ul
+                  - source.errors.each do |error|
+                    li
+                      = error.full_message
 
-          div
-            = form.label :name
-            = form.text_field :name, placeholder: 'Name'
+            div
+              = form.label :name
+              = form.text_field :name, placeholder: 'Name'
 
-          div
-            = form.label :url
-            = form.text_field :url, placeholder: 'Url'
+            div
+              = form.label :url
+              = form.text_field :url, placeholder: 'Url'
 
-          div
-            = form.check_box :active
-            = form.label :active, style: "display: inline-block"
+            div
+              = form.check_box :active
+              = form.label :active, style: "display: inline-block"
 
-          div
-            = form.check_box :show_images
-            = form.label :show_images, style: "display: inline-block"
+            div
+              = form.check_box :show_images
+              = form.label :show_images, style: "display: inline-block"
 
-          div
-            = form.check_box :allow_video
-            = form.label :allow_video, style: "display: inline-block"
+            div
+              = form.check_box :allow_video
+              = form.label :allow_video, style: "display: inline-block"
 
-          div
-            = form.check_box :allow_audio
-            = form.label :allow_audio, style: "display: inline-block"
+            div
+              = form.check_box :allow_audio
+              = form.label :allow_audio, style: "display: inline-block"
 
-        .buttons.flex-row.justify-center
-          - if source.persisted?
-            = link_to 'Cancel', source, class: 'button'
-          - else
-            = link_to 'Cancel', cancel_new_source_path, class: 'button', data: { turbo_frame: 'new_source' }
-          = form.submit class: 'button'
+          .buttons.flex-row.justify-center
+            - if source.persisted?
+              = link_to 'Cancel', source, class: 'button', data: { turbo_prefetch: false }
+            - else
+              = link_to 'Cancel', cancel_new_source_path, class: 'button', data: { turbo_frame: 'new_source', turbo_prefetch: false }
+            = form.submit class: 'button'
 
-    .half
-      img.image src=source.image_url referrerpolicy="no-referrer"
+      .half
+        img.image src=source.image_url referrerpolicy="no-referrer"
