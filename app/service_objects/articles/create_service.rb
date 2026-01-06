@@ -27,6 +27,9 @@ module Articles
       # clean up duplicate image, in case headline image is also in the text body
       article = ImageHelper.compare_and_update_article_images(article)
 
+      # remove small images that would be hidden by CSS anyway
+      article = ImageHelper.remove_small_images(article)
+
       article.save
       article
     end

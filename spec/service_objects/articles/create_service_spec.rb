@@ -105,6 +105,7 @@ RSpec.describe Articles::CreateService do
       allow(Articles::TextCleaner).to receive(:clean_description).and_return("Cleaned description")
       allow(Articles::ApprovalHelper).to receive_message_chain(:new, :approve?).and_return(true)
       allow(Articles::ImageHelper).to receive(:compare_and_update_article_images).and_return(Article.new)
+      allow(Articles::ImageHelper).to receive(:remove_small_images).and_return(Article.new)
       allow(Articles::ReadabilityService).to receive_message_chain(:new, :parse).and_return({
         "title" => "Article",
         "content" => "<p>Content</p>"
@@ -209,6 +210,9 @@ RSpec.describe Articles::CreateService do
 
         # Stub ImageHelper to return article unchanged and stub save
         allow(Articles::ImageHelper).to receive(:compare_and_update_article_images) do |article|
+          article
+        end
+        allow(Articles::ImageHelper).to receive(:remove_small_images) do |article|
           allow(article).to receive(:save).and_return(true)
           article
         end
@@ -238,6 +242,9 @@ RSpec.describe Articles::CreateService do
           expect(article.federails_actor).to eq(instance_actor)
           article
         end
+        allow(Articles::ImageHelper).to receive(:remove_small_images) do |article|
+          article
+        end
 
         service.create_article
       end
@@ -247,7 +254,44 @@ RSpec.describe Articles::CreateService do
         service = described_class.new(source, entry)
 
         expect(Articles::ImageHelper).to receive(:compare_and_update_article_images).and_call_original
+        expect(Articles::ImageHelper).to receive(:remove_small_images).and_call_original
         service.create_article
+      end
+
+      it "calls ImageHelper to remove small images" do
+        allow(CLD).to receive(:detect_language).and_return({ code: "en" })
+        service = described_class.new(source, entry)
+
+        allow(Articles::ImageHelper).to receive(:compare_and_update_article_images) do |article|
+          article
+        end
+
+        expect(Articles::ImageHelper).to receive(:remove_small_images) do |article|
+          allow(article).to receive(:save).and_return(true)
+          article
+        end
+
+        service.create_article
+      end
+
+      it "removes small images after comparing duplicate images" do
+        allow(CLD).to receive(:detect_language).and_return({ code: "en" })
+        service = described_class.new(source, entry)
+        call_order = []
+
+        allow(Articles::ImageHelper).to receive(:compare_and_update_article_images) do |article|
+          call_order << :compare_images
+          article
+        end
+
+        allow(Articles::ImageHelper).to receive(:remove_small_images) do |article|
+          call_order << :remove_small_images
+          allow(article).to receive(:save).and_return(true)
+          article
+        end
+
+        service.create_article
+        expect(call_order).to eq([:compare_images, :remove_small_images])
       end
     end
   end
