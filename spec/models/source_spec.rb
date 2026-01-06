@@ -147,4 +147,33 @@ RSpec.describe Source, type: :model do
       Source.consume_all
     end
   end
+
+  describe 'dependent associations' do
+    context 'when destroying a source with articles that have comments' do
+      it 'successfully deletes the source, articles, and comments' do
+        source = create(:source, :with_articles, articles_count: 2)
+        article1 = source.articles.first
+        article2 = source.articles.second
+
+        # Add comments to the articles
+        comment1 = create(:comment, parent: article1)
+        comment2 = create(:comment, parent: article1)
+        comment3 = create(:comment, parent: article2)
+
+        expect(source.articles.count).to eq(2)
+        expect(Comment.where(parent: [article1, article2]).count).to eq(3)
+
+        # This should not raise an error (regression test for the bug)
+        expect { source.destroy }.not_to raise_error
+
+        # Verify everything was deleted
+        expect(Source.exists?(source.id)).to be false
+        expect(Article.exists?(article1.id)).to be false
+        expect(Article.exists?(article2.id)).to be false
+        expect(Comment.exists?(comment1.id)).to be false
+        expect(Comment.exists?(comment2.id)).to be false
+        expect(Comment.exists?(comment3.id)).to be false
+      end
+    end
+  end
 end

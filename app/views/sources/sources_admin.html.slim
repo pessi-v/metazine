@@ -1,5 +1,5 @@
 css:
-  .controls_box {
+  .admin_header {
     width: 40em;
     height: 12em;
     margin-left: auto;
@@ -8,15 +8,11 @@ css:
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    border: var(--border);
+    border-bottom: var(--border);
     border-radius: var(--border-radius);
 
     .buttons {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      height: 100%;
-      gap: var(--space-xxs)
+      gap: var(--space-xs)
     }
   }
 
@@ -26,6 +22,7 @@ css:
     gap: var(--space-s);
     margin-bottom: var(--space-m)
   }
+
   
 .instance-title
   = link_to('/') do
@@ -36,22 +33,19 @@ css:
 
 .index
   .list_view_desktop
-    .controls_box
-      p style="color: green"
-        = notice
+    .admin_header
+      / p style="color: green"
+      /   = notice
 
-      div
+      .flex-column.justify-end.gap-s.half style="height: 100%; padding-bottom: var(--space-s);"
         h2
           'Sources
-      
-      .buttons
-        = button_to('Reload all feeds', fetch_feeds_path)
-        = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
-          .button
-            / = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
-            = link_to "New source", new_source_path, data: { turbo_frame: 'new_source' }
+        .flex-row.justify-start.buttons
+          = button_to('Reload all feeds', fetch_feeds_path)
+          = turbo_frame_tag 'first_turbo_frame' do # 1) this will intercept the link clicks
+            = link_to "New source", new_source_path, class: 'button', data: { turbo_frame: 'new_source' }
 
-      div id="article_counts"
+      .half.flex-row.justify-end id="article_counts"
         table
           - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
             tr
@@ -64,6 +58,6 @@ css:
 
   
   / .list_view_desktop
+  = turbo_frame_tag 'new_source'
   = turbo_frame_tag 'sources', class: 'sources'
-    = turbo_frame_tag 'new_source'
     = render @sources

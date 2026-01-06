@@ -211,6 +211,13 @@ button:active,
   transform: translateY(2px);
 }
 
+a.button {
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-flex;
+  text-decoration: none;
+}
+
 .flex-row {
   display: flex;
   flex-direction: row;
@@ -255,6 +262,14 @@ button:active,
 
 .font-muted {
   color: var(--color-text-muted);
+}
+
+.half {
+  width: 50%;
+}
+
+.align-end {
+  align-items: flex-end;
 }
 
 // .text-fit {
