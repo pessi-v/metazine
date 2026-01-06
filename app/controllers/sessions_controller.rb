@@ -17,7 +17,7 @@ class SessionsController < ApplicationController
     end
 
     # Store the return URL to redirect back after login
-    session[:return_to] = request.referer || root_path
+    session[:return_to] = request.referer || frontpage_path
 
     puts "Redirecting to /auth/mastodon with identifier=#{domain}"
     # Redirect to OmniAuth with the domain as 'identifier' - the credentials lambda will handle the rest
