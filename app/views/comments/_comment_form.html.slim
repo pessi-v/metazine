@@ -1,14 +1,16 @@
 .comment-form
-  h3 Add a comment
 
-  = form_with(model: comment, url: article_comments_path(parent), method: :post, class: "new-comment-form") do |f|
+  = form_with(model: comment, url: article_comments_path(parent), method: :post, class: "flex-row gap-m new-comment-form") do |f|
+    .flex-column
+      / h4 Add a comment
+      = f.submit "Add Comment", class: "button"
+      
+      
     .form-group
-      = f.label :content, "Your comment:", class: "form-label"
+      / = f.label :content, "Your comment:", class: "form-label"
       = f.text_area :content,
         rows: 4,
         class: "form-textarea",
-        placeholder: "Share your thoughts...",
+        placeholder: "Your comment",
         required: true
 
-    .form-actions
-      = f.submit "Post Comment", class: "btn-primary"

@@ -1,33 +1,33 @@
-.flex-column.comment-item style="padding-left: #{depth * 20}px;" data-controller="comment" data-comment-id=comment.id
+.flex-column.comment style="padding-left: #{depth * 20}px;" data-controller="comment" data-comment-id=comment.id
+
+  / DELETED COMMENT
   - if comment.deleted?
     .comment-header
       .comment-author
-        span.deleted-author = "[deleted]"
+        h4 = "[deleted]"
 
     .comment-content.deleted-content
       p.deleted-text = "[deleted]"
+
+  / COMMENT NOT DELETED
   - else
     .comment-header
       .comment-author
+
+        / COMMENT CREATED ON ANOTER ACTIVITYPUB INSTANCE
         - if comment.federated_url
           = link_to comment.federated_url, target: "_blank", rel: "noopener" do
-            strong = comment.author_name
-            span.username = " (#{comment.author_username})"
+            / strong = comment.author_name
+            h4 = " (#{comment.author_name})"
+      
+        / COMMENT CREATED ON THIS METAZINE INSTANCE
         - else
-          strong = comment.author_name
-          span.username = " (#{comment.author_username})"
-
-      .comment-actions
-        - if logged_in?
-          button.btn-reply-comment data-action="click->comment#toggleReply" type="button" Reply
-        - if logged_in? && comment.owned_by?(current_user)
-          button.btn-edit-comment data-action="click->comment#toggleEdit" type="button" Edit
-          = button_to "Delete", comment_path(comment), method: :delete, class: "btn-delete-comment", data: { confirm: "Are you sure you want to delete this comment?" }
-        /! DEBUG: logged_in=#{logged_in?}, current_user_id=#{current_user&.id}, comment.user_id=#{comment.user_id}, owned=#{logged_in? && comment.owned_by?(current_user)}
+          / strong = comment.author_name
+          h4 = " (#{comment.author_name})"
 
     .comment-content data-comment-target="content"
       == comment.content
-
+    
     .comment-edit-form style="display: none;" data-comment-target="editForm"
       = form_with(model: comment, url: comment_path(comment), method: :patch, class: "edit-comment-form") do |f|
         .form-group
@@ -36,12 +36,22 @@
           = f.submit "Save", class: "btn-primary"
           button.btn-cancel type="button" data-action="click->comment#cancelEdit" Cancel
 
+    .comment-actions.flex-row.gap-s
+      - if logged_in?
+        button data-action="click->comment#toggleReply" type="button" Reply
+      - if logged_in? && comment.owned_by?(current_user)
+        button data-action="click->comment#toggleEdit" type="button" Edit
+        = button_to "Delete", comment_path(comment), method: :delete, class: "btn-delete-comment", data: { confirm: "Are you sure you want to delete this comment?" }
+        /! DEBUG: logged_in=#{logged_in?}, current_user_id=#{current_user&.id}, comment.user_id=#{comment.user_id}, owned=#{logged_in? && comment.owned_by?(current_user)}
+
+
+
     - if logged_in?
       .comment-reply-form style="display: none;" data-comment-target="replyForm"
         = form_with(model: Comment.new, url: comment_comments_path(comment), method: :post, class: "new-reply-form") do |f|
           .form-group
-            = f.label :content, "Reply to #{comment.author_name}:", class: "form-label"
-            = f.text_area :content, rows: 4, class: "form-textarea", placeholder: "Share your thoughts...", required: true
+            / = f.label :content, "Reply to #{comment.author_name}:", class: "form-label"
+            = f.text_area :content, rows: 4, class: "form-textarea", placeholder: "Reply to #{comment.author_name}:", required: true
           .form-actions
             = f.submit "Post Reply", class: "btn-primary"
             button.btn-cancel type="button" data-action="click->comment#cancelReply" Cancel

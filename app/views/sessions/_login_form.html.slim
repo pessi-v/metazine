@@ -38,7 +38,7 @@ css:
   h4 Login with Mastodon to participate in the discussion
   .login-input
     = form_with url: login_mastodon_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
-      .form-group 
+      .form-group
         / = f.label :domain, "Login to participate in the discussion", class: "form-label"
         .flex-row
           = f.text_field :domain,
@@ -46,10 +46,21 @@ css:
             class: "form-input",
             required: true,
             autocomplete: "off"
-          
+
           = f.submit "Login with Mastodon", class: "button"
       / .form-help
       /   | Example: mastodon.social, fosstodon.org
+
+  - if Rails.env.development?
+    .dev-login-divider
+      | OR (dev only)
+    .dev-login
+      = form_with url: dev_login_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
+        .form-group
+          .flex-row
+            = f.text_field :username, placeholder: "devuser", class: "form-input"
+            = f.submit "Quick Dev Login", class: "button"
+        = f.hidden_field :return_to, value: request.path
 
   / DISABLED: ATProto/Bluesky integration temporarily disabled
   / .login-divider-small

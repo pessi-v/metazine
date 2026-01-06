@@ -51,18 +51,19 @@
 
   .line
 
-  .discussion-header.flex-row.align-end style="padding-bottom: var(--space-s)"
+  .discussion-header.flex-row.align-end style="padding-bottom: var(--space-s); margin-top: var(--space-xxxl);"
     .half
       h2 Discussion
     .half
       - if logged_in?
-        .user-info
+        .user-info.flex-row.gap-s
           p
             | Logged in as
             strong<> = current_user.full_username
-            = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
+          = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
 
-        = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
+        / = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
+      
       - else
         = render partial: 'sessions/login_form'
 
@@ -79,7 +80,10 @@
   /   - else
   /     = render partial: 'sessions/login_form'
 
-    .line
+  / .line
+
+  - if logged_in?
+    = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
 
   .comments-list
     - if @article.comments.any?
