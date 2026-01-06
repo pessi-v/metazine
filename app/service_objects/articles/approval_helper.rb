@@ -7,8 +7,9 @@ module Articles
     FORBIDDEN_STRINGS = [
       "Of the principles and themes outlined in this issue, Tribune readers will easily discern." \
       " \u2018Gastropolitics\u2019 discusses how food matters to socialist politics. Food institutions historic," \
-      " existing or imagined, are discussed, as well as the transformative urges behind their establishment."
-
+      " existing or imagined, are discussed, as well as the transformative urges behind their establishment.",
+      "This article can be read by subscribers",
+      "Full article"
     ].freeze
 
     def initialize(article)
