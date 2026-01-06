@@ -19,9 +19,9 @@ class SessionsController < ApplicationController
     # Store the return URL to redirect back after login
     session[:return_to] = request.referer || root_path
 
-    puts "Redirecting to /auth/mastodon with domain=#{domain}"
-    # Redirect to OmniAuth with the domain - the credentials lambda will handle the rest
-    redirect_to "/auth/mastodon?domain=#{domain}", allow_other_host: false
+    puts "Redirecting to /auth/mastodon with identifier=#{domain}"
+    # Redirect to OmniAuth with the domain as 'identifier' - the credentials lambda will handle the rest
+    redirect_to "/auth/mastodon?identifier=#{domain}", allow_other_host: false
   end
 
   # POST /login/bluesky - Initiate Bluesky/AT Protocol OAuth
