@@ -4,11 +4,12 @@
   width: 100%;
   max-height: 100%;
   display: flex;
-  gap: var(--space-s);
+  gap: var(--space-xxxs);
   flex-direction: column;
   justify-content: flex-start;
+
   @include media.media(tabletAndUp) {
-    
+    gap: var(--space-xxs);
   }
 
   .image {
@@ -24,4 +25,3 @@
     overflow: hidden;
   }
 }
-
