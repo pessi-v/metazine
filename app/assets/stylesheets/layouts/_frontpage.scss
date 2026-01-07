@@ -15,7 +15,7 @@
     display: grid;
 
     grid-template-columns: repeat(6, 1fr);
-    column-gap: var(--space-m);
+    column-gap: var(--space-l);
 
     grid-template-rows: repeat(8, var(--space-7xl));
     row-gap: var(--space-xl);
@@ -84,14 +84,14 @@
     grid-area: D;
     flex-direction: row;
     row-gap: var(--space-xxxl);
-    column-gap: var(--space-m);
+    column-gap: var(--column-gap);
     flex-wrap: wrap;
     justify-content: space-between;
     padding-top: var(--space-m);
 
     .article {
       // width: 50% !important;
-      width: calc(50% - var(--space-m) / 2) !important;
+      width: calc(50% - var(--column-gap) / 2) !important;
     }
 
     .without_image {
