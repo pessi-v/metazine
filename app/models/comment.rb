@@ -48,19 +48,14 @@ class Comment < ApplicationRecord
   on_federails_delete_requested -> { update_columns(deleted_at: Time.current, content: "[deleted]", user_id: nil) }
 
   # Override destroy to soft delete instead of hard delete
-  # Use prepend: true to run before Federails callbacks
-  before_destroy :manually_federate_delete, prepend: true
-  before_destroy :soft_delete_instead_of_destroy
+  # Completely bypass ActiveRecord callbacks and handle manually
+  def destroy
+    # Return early if already deleted
+    return false if deleted?
 
-  def manually_federate_delete
-    # Only proceed if not already deleted and should federate
-    return if deleted?
-    return unless federate?
-
-    begin
-      # Create and enqueue the Delete activity in a separate transaction
-      # This ensures it commits even if the destroy is aborted
-      Comment.transaction(requires_new: true) do
+    # Create Delete activity first if we should federate
+    if federate?
+      begin
         activity = Federails::Activity.create!(
           actor: federails_actor,
           entity: self,
@@ -69,25 +64,22 @@ class Comment < ApplicationRecord
 
         Federails::NotifyInboxJob.perform_later(activity)
         Rails.logger.info "Created Delete activity for Comment##{id}, Activity##{activity.id}"
+      rescue => e
+        Rails.logger.error "Error creating Delete activity for Comment##{id}: #{e.message}"
       end
-    rescue => e
-      Rails.logger.error "Error creating Delete activity for Comment##{id}: #{e.message}"
-    end
-  end
-
-  def soft_delete_instead_of_destroy
-    # Only soft delete if not already deleted
-    unless deleted?
-      update_columns(
-        deleted_at: Time.current,
-        content: "[deleted]",
-        user_id: nil
-      )
-      Rails.logger.info "Soft deleted Comment##{id}"
     end
 
-    # Halt the destroy chain to prevent actual database deletion
-    throw(:abort)
+    # Soft delete the comment
+    update_columns(
+      deleted_at: Time.current,
+      content: "[deleted]",
+      user_id: nil
+    )
+
+    Rails.logger.info "Soft deleted Comment##{id}"
+
+    # Return self to indicate success (mimics destroy behavior)
+    self
   end
 
   def to_activitypub_object
