@@ -88,6 +88,12 @@ class Comment < ApplicationRecord
     end
 
     if article
+      # IMPORTANT: Add the article's author (InstanceActor) to cc
+      # This ensures replies to comments are sent to our instance's inbox
+      if article.respond_to?(:federails_actor) && article.federails_actor
+        cc_addresses << article.federails_actor.federated_url
+      end
+
       # Get all unique remote actors who commented on this article
       article.comments.includes(:federails_actor).find_each do |comment|
         if comment.federails_actor&.distant? && comment.id != id
