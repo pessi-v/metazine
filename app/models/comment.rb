@@ -33,10 +33,38 @@ class Comment < ApplicationRecord
   # Prevent editing deleted comments
   validate :cannot_edit_deleted_comment, on: :update
 
+  # Prevent parent reassignment on existing comments
+  before_save :prevent_parent_reassignment, if: :persisted?
+
   def cannot_edit_deleted_comment
     if deleted_at_was.present? && !deleted_at_changed?
       errors.add(:base, "Cannot edit a deleted comment")
     end
+  end
+
+  def prevent_parent_reassignment
+    if parent_type_changed? || parent_id_changed?
+      self.parent_type = parent_type_was
+      self.parent_id = parent_id_was
+      Rails.logger.warn "Prevented parent reassignment on Comment##{id}"
+    end
+  end
+
+  # Override assign_attributes to filter out invalid attributes like 'title'
+  def assign_attributes(new_attributes)
+    return super if new_attributes.blank?
+
+    # Filter out attributes that don't belong to Comment
+    valid_attributes = new_attributes.select { |key, _|
+      self.class.column_names.include?(key.to_s) || respond_to?("#{key}=")
+    }
+
+    if valid_attributes.size != new_attributes.size
+      filtered = new_attributes.keys - valid_attributes.keys
+      Rails.logger.warn "Filtered out invalid attributes for Comment: #{filtered.inspect}"
+    end
+
+    super(valid_attributes)
   end
 
   scope :top_level_comments, -> { where parent_id: nil }
@@ -222,7 +250,7 @@ class Comment < ApplicationRecord
 
   # Custom handler for incoming ActivityPub activities (Create, Update, Delete)
   # This ensures Update activities only update content/timestamps, not parent
-  def self.handle_incoming_fediverse_data(activity_hash_or_id)
+  def handle_incoming_fediverse_data(activity_hash_or_id)
     activity = Fediverse::Request.dereference(activity_hash_or_id)
     object = Fediverse::Request.dereference(activity["object"])
 

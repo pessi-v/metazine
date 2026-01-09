@@ -26,6 +26,8 @@ class ActivityPub::NoteActivityHandler
 
   # Handles Update activities for Note objects
   def self.handle_update_note(activity_hash_or_id)
+    Rails.logger.info "=== handle_update_note CALLED IN ACTIVITYPUB::NOTEACTIVITYHANDLER ==="
+
     activity = Fediverse::Request.dereference(activity_hash_or_id)
     object = Fediverse::Request.dereference(activity["object"])
 
