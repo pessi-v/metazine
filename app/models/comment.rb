@@ -299,6 +299,18 @@ class Comment < ApplicationRecord
     if comment_count == 1
       Rails.logger.info "=== First comment on Article##{parent.id}, triggering Article federation ==="
 
+      # Generate the federated_url for the Article
+      # This must be set BEFORE creating the Activity so the published endpoint allows access
+      article_url = Federails::Engine.routes.url_helpers.published_url(
+        parent,
+        host: Rails.application.config.action_mailer.default_url_options[:host],
+        protocol: 'https'
+      )
+
+      # Set the federated_url on the Article
+      parent.update_column(:federated_url, article_url)
+      Rails.logger.info "  Set Article federated_url: #{article_url}"
+
       # Manually trigger federation of the Article
       # Create a Federails Activity for the Article
       activity = Federails::Activity.create!(
