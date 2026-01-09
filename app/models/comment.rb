@@ -301,7 +301,7 @@ class Comment < ApplicationRecord
 
       # Generate the federated_url for the Article
       # This must be set BEFORE creating the Activity so the published endpoint allows access
-      host = Rails.application.config.action_mailer.default_url_options[:host]
+      host = Rails.application.routes.default_url_options[:host] || ENV["APP_HOST"] || "localhost:3000"
       article_url = "https://#{host}/federation/published/articles/#{parent.id}"
 
       # Set the federated_url on the Article
