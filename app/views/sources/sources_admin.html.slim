@@ -8,10 +8,11 @@ css:
     margin-right: auto;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-around;
     border-bottom: var(--border);
     border-radius: var(--border-radius);
+    padding-bottom: var(--space-m);
 
     .buttons {
       gap: var(--space-xs)
@@ -39,7 +40,7 @@ css:
       / p style="color: green"
       /   = notice
 
-      .flex-column.justify-end.gap-s.half style="height: 100%; padding-bottom: var(--space-s);"
+      .flex-column.justify-end.gap-s style="height: 100%; flex-grow: 1.5"
         h2
           'Sources
         .flex-row.justify-start.buttons
@@ -48,8 +49,38 @@ css:
             = link_to "New source", new_source_path, class: 'button', data: { turbo_frame: 'new_source' }
           #reload_feeds_button
             = button_to('Reload all feeds', fetch_feeds_path, method: :post)
+      
+      div style="flex-grow: 1"
+        - if @last_feed_fetch
+          .flex-column.justify-center.align-center.gap-xs
+            p style="font-size: 0.9em; margin: 0;"
+              strong Last feed fetch:
+              '
+              = time_ago_in_words(@last_feed_fetch.started_at)
+              '  ago
+            - if @last_feed_fetch.running?
+              p style="font-size: 0.9em; margin: 0; color: var(--accent-color);"
+                | Running...
+            - elsif @last_feed_fetch.success
+              p style="font-size: 0.9em; margin: 0; color: green;"
+                | ✓ Successful
+                - if @last_feed_fetch.duration
+                  '  (
+                  = "#{(@last_feed_fetch.duration).round(1)}s"
+                  | )
+            - else
+              p style="font-size: 0.9em; margin: 0; color: red;"
+                | ✗ Failed
+              - if @last_feed_fetch.error_message
+                details style="font-size: 0.85em; margin-top: var(--space-xs);"
+                  summary Error details
+                  pre style="white-space: pre-wrap; font-size: 0.8em; background: var(--background-color); padding: var(--space-xs); border-radius: var(--border-radius); margin-top: var(--space-xs);"
+                    = @last_feed_fetch.error_message
+        - else
+          p style="font-size: 0.9em; margin: 0; color: var(--muted-color);"
+            | No feed fetches recorded yet
 
-      .half.flex-row.justify-end id="article_counts"
+      .flex-row.justify-end id="article_counts" style="flex-grow: 1"
         table
           - (Date.current - 7.days .. Date.current).to_a.reverse.each_with_index do |date, index|
             tr
@@ -59,6 +90,7 @@ css:
               th
                 p
                   = @article_counts_by_day[index]
+          
 
   
   / .list_view_desktop

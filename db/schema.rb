@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_03_124356) do
+ActiveRecord::Schema[8.0].define(version: 2026_01_09_171753) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -123,6 +123,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_03_124356) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
+  end
+
+  create_table "job_runs", force: :cascade do |t|
+    t.string "job_name"
+    t.datetime "started_at"
+    t.datetime "finished_at"
+    t.boolean "success"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["job_name", "started_at"], name: "index_job_runs_on_job_name_and_started_at"
   end
 
   create_table "mastodon_clients", force: :cascade do |t|
