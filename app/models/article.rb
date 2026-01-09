@@ -50,7 +50,8 @@ class Article < ApplicationRecord
     # Only federate if already has a federated_url (has been explicitly federated)
     # This prevents auto-federation on create/update
     # Articles are only federated when they receive their first comment
-    federated_url.present?
+    # Use read_attribute to avoid infinite recursion with Federails
+    read_attribute(:federated_url).present?
   end
 
   def to_activitypub_object
