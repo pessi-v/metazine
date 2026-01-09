@@ -63,28 +63,45 @@ class Comment < ApplicationRecord
 
   def to_activitypub_object
     # Get the parent's federated URL for inReplyTo field
-    parent_url = if parent.is_a?(Article)
-      parent.federated_url
-    elsif parent.is_a?(Comment)
-      parent.federated_url
+    parent_url = if parent.present?
+      if parent.is_a?(Article) || parent.is_a?(Comment)
+        parent.federated_url
+      end
     end
+
+    Rails.logger.info "=== Building ActivityPub object for Comment##{id} ==="
+    Rails.logger.info "  Parent: #{parent.class.name}##{parent.id}" if parent
+    Rails.logger.info "  Parent URL (inReplyTo): #{parent_url}"
 
     # Build recipient list for proper ActivityPub addressing
     to_addresses = []
     cc_addresses = []
 
     # Add parent author to "to" (direct recipients)
-    if parent.respond_to?(:federails_actor) && parent.federails_actor&.distant?
-      to_addresses << parent.federails_actor.federated_url
+    # This is critical for replies to federated comments from Mastodon
+    if parent.present? && parent.respond_to?(:federails_actor)
+      parent_actor = parent.federails_actor
+      if parent_actor&.distant?
+        to_addresses << parent_actor.federated_url
+        Rails.logger.info "  Added parent author to 'to': #{parent_actor.username}@#{parent_actor.server}"
+      end
     end
 
     # Add all thread participants to "cc" (carbon copy)
+    article = nil
     if parent.is_a?(Article)
       article = parent
     elsif parent.is_a?(Comment)
-      # Walk up to find the root article
-      article = parent
-      article = article.parent while article.is_a?(Comment)
+      # Walk up to find the root article with loop protection
+      current = parent
+      max_depth = 50
+      depth = 0
+      while current.is_a?(Comment) && depth < max_depth
+        current = current.parent if current.present?
+        depth += 1
+        break unless current.is_a?(Comment)
+      end
+      article = current if current.is_a?(Article)
     end
 
     if article
@@ -109,6 +126,9 @@ class Comment < ApplicationRecord
     if federails_actor&.local? && federails_actor.followers_url
       cc_addresses << federails_actor.followers_url
     end
+
+    Rails.logger.info "  To addresses: #{to_addresses.uniq.compact.join(', ')}"
+    Rails.logger.info "  CC addresses: #{cc_addresses.uniq.compact.join(', ')}"
 
     Federails::DataTransformer::Note.to_federation self,
       content: content,

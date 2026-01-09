@@ -13,7 +13,7 @@ Rails.application.config.to_prepare do
       when 'Accept'
         return [] unless actor.local?
         [entity.actor]
-      when 'Create', 'Update'
+      when 'Create', 'Update', 'Delete'
         # Custom logic for Comment entities
         # Comments can be created by remote users logged in via OAuth
         if entity.is_a?(Comment)
@@ -46,16 +46,30 @@ Rails.application.config.to_prepare do
       end
 
       # Add the parent's author if they're on a remote server
-      if comment.parent.respond_to?(:federails_actor) && comment.parent.federails_actor&.distant?
-        recipients << comment.parent.federails_actor
+      # This handles both Article parents and Comment parents (replies to federated comments)
+      if comment.parent.present? && comment.parent.respond_to?(:federails_actor)
+        parent_actor = comment.parent.federails_actor
+        if parent_actor&.distant?
+          Rails.logger.info "  Adding parent author to recipients: #{parent_actor.username}@#{parent_actor.server}"
+          recipients << parent_actor
+        end
       end
 
-      # Find the root article
+      # Find the root article by walking up the parent chain
+      article = nil
       if comment.parent.is_a?(Article)
         article = comment.parent
       elsif comment.parent.is_a?(Comment)
-        article = comment.parent
-        article = article.parent while article.is_a?(Comment)
+        # Walk up the comment chain to find the root article
+        current = comment.parent
+        max_depth = 50 # Prevent infinite loops
+        depth = 0
+        while current.is_a?(Comment) && depth < max_depth
+          current = current.parent if current.parent.present?
+          depth += 1
+          break unless current.is_a?(Comment)
+        end
+        article = current if current.is_a?(Article)
       end
 
       # Add all remote actors who have commented on this article (at ANY nesting level)
