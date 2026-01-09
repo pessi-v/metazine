@@ -13,3 +13,6 @@ Disallow: /
 
 User-agent: LivelapBot
 Disallow: /
+
+User-agent: Barkrowler
+Disallow: /
