@@ -195,19 +195,23 @@ class Comment < ApplicationRecord
 
   # Get the display name for the comment author
   def author_name
-    if local?
+    if local? && user.present?
       user.name
+    elsif federails_actor
+      federails_actor.name || "Anonymous"
     else
-      federails_actor&.name || "Anonymous"
+      "Anonymous"
     end
   end
 
   # Get the username for the comment author
   def author_username
-    if local?
+    if local? && user.present?
       user.full_username
+    elsif federails_actor
+      federails_actor.username || "unknown"
     else
-      federails_actor&.username || "unknown"
+      "unknown"
     end
   end
 
