@@ -64,10 +64,9 @@ Rails.application.config.to_prepare do
         current = comment.parent
         max_depth = 50 # Prevent infinite loops
         depth = 0
-        while current.is_a?(Comment) && depth < max_depth
-          current = current.parent if current.parent.present?
+        while current.is_a?(Comment) && current.parent.present? && depth < max_depth
+          current = current.parent
           depth += 1
-          break unless current.is_a?(Comment)
         end
         article = current if current.is_a?(Article)
       end
