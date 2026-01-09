@@ -26,6 +26,9 @@ class Comment < ApplicationRecord
   # After creating a federated comment, try to link it to an existing user
   after_create :link_to_user_if_exists
 
+  # Federate parent Article on first comment
+  after_create :federate_parent_article_on_first_comment
+
   # Prevent editing deleted comments
   validate :cannot_edit_deleted_comment, on: :update
 
@@ -124,6 +127,14 @@ class Comment < ApplicationRecord
     # Add followers to cc
     if federails_actor&.local? && federails_actor.followers_url
       cc_addresses << federails_actor.followers_url
+    end
+
+    # IMPORTANT: Add InstanceActor's followers_url to cc
+    # This ensures all comments are visible to everyone following the instance
+    instance_actor = InstanceActor.first&.federails_actor
+    if instance_actor&.followers_url
+      cc_addresses << instance_actor.followers_url
+      Rails.logger.info "  Added InstanceActor followers_url to CC"
     end
 
     Rails.logger.info "  To addresses: #{to_addresses.uniq.compact.join(', ')}"
@@ -276,5 +287,35 @@ class Comment < ApplicationRecord
       update_column(:user_id, federails_actor.entity_id)
       Rails.logger.info "Linked Comment##{id} to User##{federails_actor.entity_id}"
     end
+  end
+
+  # When this is the first comment on an Article, federate the Article
+  def federate_parent_article_on_first_comment
+    return unless parent.is_a?(Article)
+    return if parent.federated_url.present? # Already federated
+
+    # Check if this is the first comment (should be, since we just created it)
+    comment_count = parent.comments.count
+    if comment_count == 1
+      Rails.logger.info "=== First comment on Article##{parent.id}, triggering Article federation ==="
+
+      # Manually trigger federation of the Article
+      # Create a Federails Activity for the Article
+      activity = Federails::Activity.create!(
+        actor: parent.federails_actor,
+        entity: parent,
+        action: 'Create'
+      )
+
+      # Enqueue the federation job
+      Federails::NotifyInboxJob.perform_later(activity)
+
+      Rails.logger.info "  Article federation Activity##{activity.id} created and enqueued"
+    end
+  rescue => e
+    Rails.logger.error "=== Error federating parent Article ==="
+    Rails.logger.error "  Error: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    # Don't raise - allow comment creation to proceed even if Article federation fails
   end
 end

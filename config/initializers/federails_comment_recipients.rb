@@ -94,8 +94,27 @@ Rails.application.config.to_prepare do
         end
       end
 
-      # Don't add followers since users are remote actors logged in via OAuth
+      # Don't add followers for remote actors since they're logged in via OAuth
       # Their followers are on their home server, not here
+
+      # ALWAYS add InstanceActor's followers to recipients
+      # This ensures all comments are visible to instance followers
+      instance_actor = InstanceActor.first&.federails_actor
+      if instance_actor
+        instance_followers = instance_actor.followers
+        recipients.concat(instance_followers)
+        Rails.logger.info "  Added #{instance_followers.count} InstanceActor followers to recipients"
+      end
+
+      # If actor is local and we still have no recipients, use default recipient list
+      # This handles edge cases for local users
+      if actor.local? && recipients.uniq.compact.empty?
+        Rails.logger.info "=== Comment recipients for Activity##{id} ==="
+        Rails.logger.info "  Comment: #{comment.id}"
+        Rails.logger.info "  Comment author: #{actor.username}@#{actor.server} (local: #{actor.local?})"
+        Rails.logger.info "  No remote thread participants found, using default recipient list for local actor"
+        return default_recipient_list
+      end
 
       Rails.logger.info "=== Comment recipients for Activity##{id} ==="
       Rails.logger.info "  Comment: #{comment.id}"
