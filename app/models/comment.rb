@@ -5,6 +5,7 @@ class Comment < ApplicationRecord
 
   acts_as_federails_data(
     handles: "Note",
+    with: :handle_incoming_fediverse_data,
     actor_entity_method: :federails_actor,
     should_federate_method: :federate?,
     route_path_segment: :comments,
@@ -217,6 +218,47 @@ class Comment < ApplicationRecord
     attrs[:parent_id] = parent.id
 
     attrs
+  end
+
+  # Custom handler for incoming ActivityPub activities (Create, Update, Delete)
+  # This ensures Update activities only update content/timestamps, not parent
+  def handle_incoming_fediverse_data(activity_hash_or_id)
+    activity = Fediverse::Request.dereference(activity_hash_or_id)
+    object = Fediverse::Request.dereference(activity["object"])
+
+    Rails.logger.info "=== Received #{activity['type']} Note activity for Comment ==="
+    Rails.logger.info "  Note ID: #{object['id']}"
+
+    # Find or initialize the entity
+    entity = Federails::Utils::Object.find_or_initialize!(object)
+
+    if activity["type"] == "Update"
+      # For Update activities, only update content and timestamps (not parent)
+      if entity.persisted?
+        entity.skip_federails_callbacks = true
+        entity.content = object["content"] if object["content"]
+        entity.updated_at = Time.parse(object["updated"]) if object["updated"]
+        entity.save!(touch: false)
+        Rails.logger.info "  Updated Comment##{entity.id}"
+      else
+        # If it doesn't exist yet, create it normally
+        entity.save!(touch: false)
+        Rails.logger.info "  Created Comment##{entity.id}"
+      end
+    else
+      # For Create and other activities, use normal flow
+      if entity.new_record?
+        entity.save!(touch: false)
+        Rails.logger.info "  Created Comment##{entity.id}"
+      end
+    end
+
+    entity
+  rescue => e
+    Rails.logger.error "=== Error handling #{activity['type']} Note activity for Comment ==="
+    Rails.logger.error "  Error: #{e.class}: #{e.message}"
+    Rails.logger.error e.backtrace.first(10).join("\n")
+    raise
   end
 
   def federate?
