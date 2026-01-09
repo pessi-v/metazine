@@ -222,7 +222,7 @@ class Comment < ApplicationRecord
 
   # Custom handler for incoming ActivityPub activities (Create, Update, Delete)
   # This ensures Update activities only update content/timestamps, not parent
-  def handle_incoming_fediverse_data(activity_hash_or_id)
+  def self.handle_incoming_fediverse_data(activity_hash_or_id)
     activity = Fediverse::Request.dereference(activity_hash_or_id)
     object = Fediverse::Request.dereference(activity["object"])
 
