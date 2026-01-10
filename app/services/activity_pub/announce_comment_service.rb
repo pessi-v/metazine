@@ -32,8 +32,9 @@ class ActivityPub::AnnounceCommentService
       action: 'Announce'
     )
 
+    remote_url = comment.read_attribute(:federated_url)
     Rails.logger.info "=== Created Announce activity for Comment##{comment.id} ==="
-    Rails.logger.info "  Remote URL: #{comment.federated_url}"
+    Rails.logger.info "  Remote URL: #{remote_url}"
     Rails.logger.info "  InstanceActor followers: #{instance_actor.followers.count}"
 
     Federails::NotifyInboxJob.perform_later(activity)
@@ -46,14 +47,18 @@ class ActivityPub::AnnounceCommentService
   def should_announce?
     Rails.logger.info "  Checking should_announce?"
 
+    # Access the raw federated_url column (federails overrides the method)
+    remote_url = comment.read_attribute(:federated_url)
+    Rails.logger.info "    Remote federated_url: #{remote_url}"
+
     # Only announce federated comments (not local ones)
-    unless comment.federated_url.present?
-      Rails.logger.info "    No federated_url present"
+    unless remote_url.present?
+      Rails.logger.info "    No remote federated_url present"
       return false
     end
 
-    unless comment.federated_url.include?("mastodon") || comment.federated_url.match?(/https?:\/\/[^\/]+\/@/)
-      Rails.logger.info "    federated_url doesn't match mastodon pattern: #{comment.federated_url}"
+    unless remote_url.include?("mastodon") || remote_url.match?(/https?:\/\/[^\/]+\/@/)
+      Rails.logger.info "    federated_url doesn't match mastodon pattern: #{remote_url}"
       return false
     end
 
