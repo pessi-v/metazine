@@ -16,6 +16,11 @@ class ActivityPub::NoteActivityHandler
 
     Rails.logger.info "  Created/found entity: #{entity.class.name}##{entity.id}"
 
+    # Announce incoming comments to followers
+    if entity.is_a?(Comment) && entity.persisted?
+      ActivityPub::AnnounceCommentService.call(entity)
+    end
+
     entity
   rescue => e
     Rails.logger.error "=== Error handling Create Note activity ==="

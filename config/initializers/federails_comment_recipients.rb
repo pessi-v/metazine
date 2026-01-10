@@ -13,6 +13,10 @@ Rails.application.config.to_prepare do
       when 'Accept'
         return [] unless actor.local?
         [entity.actor]
+      when 'Announce'
+        # Use default behavior: send to InstanceActor's followers
+        return [] unless actor.local?
+        default_recipient_list
       when 'Create', 'Update', 'Delete'
         # Custom logic for Comment entities
         # Comments can be created by remote users logged in via OAuth
