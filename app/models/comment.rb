@@ -50,6 +50,19 @@ class Comment < ApplicationRecord
     end
   end
 
+  # Override federails federated_url to return remote URL for remote comments
+  # This is crucial for Announce activities to reference the original Mastodon post
+  def federated_url
+    remote_url = read_attribute(:federated_url)
+    if remote_url.present?
+      # Return the remote Mastodon URL from the database column
+      remote_url
+    else
+      # Fall back to federails' local URL for local comments
+      super
+    end
+  end
+
   # Override assign_attributes to filter out invalid attributes like 'title'
   def assign_attributes(new_attributes)
     return super if new_attributes.blank?
