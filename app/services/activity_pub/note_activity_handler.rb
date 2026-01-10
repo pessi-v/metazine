@@ -18,6 +18,9 @@ class ActivityPub::NoteActivityHandler
 
     # Announce incoming comments to followers
     if entity.is_a?(Comment) && entity.persisted?
+      # Reload to ensure we have the latest data from DB
+      entity.reload
+      Rails.logger.info "  Comment federated_url after reload: #{entity.federated_url}"
       ActivityPub::AnnounceCommentService.call(entity)
     end
 
