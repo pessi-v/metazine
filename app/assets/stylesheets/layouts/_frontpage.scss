@@ -7,12 +7,15 @@
   flex-direction: column;
   // row-gap: var(--column-gap);
   row-gap: var(--space-xl);
+  padding-bottom: var(--space-m);
 
   @include media.media(tabletAndUp) {
+    padding-bottom: 0;
+
     display: grid;
 
     grid-template-columns: repeat(6, 1fr);
-    column-gap: var(--space-m);
+    column-gap: var(--space-l);
 
     grid-template-rows: repeat(8, var(--space-7xl));
     row-gap: var(--space-xl);
@@ -48,11 +51,13 @@
   border-left: var(--border);
   border-radius: var(--border-radius);
   padding-left: var(--space-s);
+  padding-top: var(--space-s);
   row-gap: var(--space-xl);
 
   @include media.media(tabletAndUp) {
     grid-area: B;
     row-gap: var(--space-l);
+    padding-top: 0;
   }
 }
 
@@ -72,21 +77,21 @@
 
 .item-d {
   display: flex;
-  row-gap: var(--space-xl);
+  row-gap: var(--space-xxl);
   flex-direction: column;
 
   @include media.media(tabletAndUp) {
     grid-area: D;
     flex-direction: row;
-    row-gap: var(--space-xl);
-    column-gap: var(--space-m);
+    row-gap: var(--space-xxxl);
+    column-gap: var(--column-gap);
     flex-wrap: wrap;
     justify-content: space-between;
     padding-top: var(--space-m);
 
     .article {
       // width: 50% !important;
-      width: calc(50% - var(--space-m) / 2) !important;
+      width: calc(50% - var(--column-gap) / 2) !important;
     }
 
     .without_image {

@@ -112,6 +112,9 @@ gem "dhash-vips"
 gem "pghero"
 gem "pg_query", ">= 2"
 
+# Image dimension detection
+gem "fastimage"
+
 # Authentication with omniauth
 gem "omniauth"
 gem "omniauth-rails_csrf_protection"
@@ -145,7 +148,6 @@ group :development do
   # Automatically reload the browser when files change
   gem "hotwire-livereload"
 
-  gem "fastimage"
   gem "webfinger"
   gem "standard"
 end

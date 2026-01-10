@@ -16,6 +16,14 @@ class ActivityPub::NoteActivityHandler
 
     Rails.logger.info "  Created/found entity: #{entity.class.name}##{entity.id}"
 
+    # Announce incoming comments to followers
+    if entity.is_a?(Comment) && entity.persisted?
+      # Reload to ensure we have the latest data from DB
+      entity.reload
+      Rails.logger.info "  Comment remote federated_url: #{entity.read_attribute(:federated_url)}"
+      ActivityPub::AnnounceCommentService.call(entity)
+    end
+
     entity
   rescue => e
     Rails.logger.error "=== Error handling Create Note activity ==="
@@ -26,6 +34,8 @@ class ActivityPub::NoteActivityHandler
 
   # Handles Update activities for Note objects
   def self.handle_update_note(activity_hash_or_id)
+    Rails.logger.info "=== handle_update_note CALLED IN ACTIVITYPUB::NOTEACTIVITYHANDLER ==="
+
     activity = Fediverse::Request.dereference(activity_hash_or_id)
     object = Fediverse::Request.dereference(activity["object"])
 
@@ -36,10 +46,10 @@ class ActivityPub::NoteActivityHandler
     entity = Federails::Utils::Object.find_or_initialize!(object)
 
     if entity.persisted?
-      # Update existing entity
-      attrs = entity.class.from_activitypub_object(object)
+      # Update existing entity - only update content and timestamps, NOT parent
       entity.skip_federails_callbacks = true if entity.respond_to?(:skip_federails_callbacks=)
-      entity.assign_attributes(attrs)
+      entity.content = object["content"] if object["content"]
+      entity.updated_at = Time.parse(object["updated"]) if object["updated"]
       entity.save!(touch: false)
       Rails.logger.info "  Updated entity: #{entity.class.name}##{entity.id}"
     else
@@ -60,22 +70,51 @@ class ActivityPub::NoteActivityHandler
   def self.handle_delete_note(activity_hash_or_id)
     activity = Fediverse::Request.dereference(activity_hash_or_id)
 
-    # The object in a Delete activity is usually just a string URL
-    object_id = activity["object"].is_a?(String) ? activity["object"] : activity["object"]["id"]
+    # The object in a Delete activity can be:
+    # 1. A string URL
+    # 2. A hash with an "id" field
+    # 3. A Tombstone object with an "id" field
+    object = activity["object"]
+    object_id = case object
+                when String
+                  object
+                when Hash
+                  # Handle Tombstone objects or regular objects
+                  object["id"]
+                else
+                  nil
+                end
 
     Rails.logger.info "=== Received Delete Note activity ==="
+    Rails.logger.info "  Activity ID: #{activity['id']}"
     Rails.logger.info "  Object ID: #{object_id}"
+    Rails.logger.info "  Object type: #{object.is_a?(Hash) ? object['type'] : 'String'}"
+
+    unless object_id
+      Rails.logger.error "  Could not extract object ID from Delete activity"
+      return nil
+    end
 
     # Find the comment by federated_url
     comment = Comment.find_by(federated_url: object_id)
 
     if comment
-      Rails.logger.info "  Found comment: #{comment.id}"
+      Rails.logger.info "  Found comment: #{comment.id} (parent: #{comment.parent_type}##{comment.parent_id})"
       comment.skip_federails_callbacks = true
-      comment.soft_delete!
-      Rails.logger.info "  Soft deleted comment"
+
+      # Soft delete the comment
+      begin
+        comment.soft_delete!
+        Rails.logger.info "  Successfully soft deleted comment"
+      rescue => e
+        Rails.logger.error "  Error during soft_delete: #{e.class}: #{e.message}"
+        # Try direct update as fallback
+        comment.update_columns(deleted_at: Time.current, content: "[deleted]", user_id: nil)
+        Rails.logger.info "  Soft deleted via fallback method"
+      end
     else
-      Rails.logger.warn "  Comment not found for deletion"
+      Rails.logger.warn "  Comment not found for deletion (federated_url: #{object_id})"
+      Rails.logger.warn "  This may be normal if the comment was already deleted or never existed locally"
     end
 
     comment

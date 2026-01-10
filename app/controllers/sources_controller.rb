@@ -25,6 +25,7 @@ class SourcesController < ApplicationController
       Article.days_ago(6).count,
       Article.days_ago(7).count
     ]
+    @last_feed_fetch = JobRun.for_job("FeedFetcherJob").recent.first
   end
 
   # GET /sources/1 or /sources/1.json

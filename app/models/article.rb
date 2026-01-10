@@ -14,6 +14,7 @@ class Article < ApplicationRecord
     handles: "Note",
     with: :handle_incoming_fediverse_data,
     actor_entity_method: :federails_actor,
+    should_federate_method: :should_federate?,
     route_path_segment: :articles,
     url_param: :id
   )
@@ -44,6 +45,14 @@ class Article < ApplicationRecord
   scope :days_ago, ->(days) { where("DATE(published_at) = CURRENT_DATE - #{days}") }
 
   on_federails_delete_requested -> { Rails.logger.info "someone tried to Delete an Article via AP: #{self}" }
+
+  def should_federate?
+    # Only federate if already has a federated_url (has been explicitly federated)
+    # This prevents auto-federation on create/update
+    # Articles are only federated when they receive their first comment
+    # Use read_attribute to avoid infinite recursion with Federails
+    read_attribute(:federated_url).present?
+  end
 
   def to_activitypub_object
     Federails::DataTransformer::Note.to_federation(

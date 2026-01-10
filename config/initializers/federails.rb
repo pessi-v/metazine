@@ -33,6 +33,9 @@ Rails.application.config.after_initialize do
   Fediverse::Inbox.register_handler("Create", "Application", ActivityPub::ActorActivityHandler, :handle_create_activity)
   Fediverse::Inbox.register_handler("Update", "Application", ActivityPub::ActorActivityHandler, :handle_update_activity)
 
+  # Register handler for Announce activities (boosts/reblogs from other instances)
+  Fediverse::Inbox.register_handler("Announce", "*", ActivityPub::AnnounceActivityHandler, :handle_announce)
+
   # Follow activities are handled by federails built-in handlers
   # They should already be registered automatically when federails loads
 

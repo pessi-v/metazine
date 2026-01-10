@@ -48,12 +48,12 @@
 
     - if logged_in?
       .comment-reply-form style="display: none;" data-comment-target="replyForm"
-        = form_with(model: Comment.new, url: comment_comments_path(comment), method: :post, class: "new-reply-form") do |f|
+        = form_with(model: Comment.new, url: comment_comments_path(comment), method: :post, class: "flex-column gap-s new-reply-form") do |f|
           .form-group
             / = f.label :content, "Reply to #{comment.author_name}:", class: "form-label"
             = f.text_area :content, rows: 4, class: "form-textarea", placeholder: "Reply to #{comment.author_name}:", required: true
-          .form-actions
-            = f.submit "Post Reply", class: "btn-primary"
+          .form-actions.flex-row.gap-s
+            = f.submit "Post Reply", class: "button"
             button.btn-cancel type="button" data-action="click->comment#cancelReply" Cancel
 
   .comment-replies

@@ -6,10 +6,10 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: var(--space-xxss);
+  gap: var(--space-xxxs);
 
   @include media.media(tabletAndUp) {
-    gap: var(--space-s);
+    gap: var(--space-xxs);
   }
 
   .summary {

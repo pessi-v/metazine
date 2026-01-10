@@ -13,7 +13,11 @@ Rails.application.config.to_prepare do
       when 'Accept'
         return [] unless actor.local?
         [entity.actor]
-      when 'Create', 'Update'
+      when 'Announce'
+        # Use default behavior: send to InstanceActor's followers
+        return [] unless actor.local?
+        default_recipient_list
+      when 'Create', 'Update', 'Delete'
         # Custom logic for Comment entities
         # Comments can be created by remote users logged in via OAuth
         if entity.is_a?(Comment)
@@ -46,16 +50,29 @@ Rails.application.config.to_prepare do
       end
 
       # Add the parent's author if they're on a remote server
-      if comment.parent.respond_to?(:federails_actor) && comment.parent.federails_actor&.distant?
-        recipients << comment.parent.federails_actor
+      # This handles both Article parents and Comment parents (replies to federated comments)
+      if comment.parent.present? && comment.parent.respond_to?(:federails_actor)
+        parent_actor = comment.parent.federails_actor
+        if parent_actor&.distant?
+          Rails.logger.info "  Adding parent author to recipients: #{parent_actor.username}@#{parent_actor.server}"
+          recipients << parent_actor
+        end
       end
 
-      # Find the root article
+      # Find the root article by walking up the parent chain
+      article = nil
       if comment.parent.is_a?(Article)
         article = comment.parent
       elsif comment.parent.is_a?(Comment)
-        article = comment.parent
-        article = article.parent while article.is_a?(Comment)
+        # Walk up the comment chain to find the root article
+        current = comment.parent
+        max_depth = 50 # Prevent infinite loops
+        depth = 0
+        while current.is_a?(Comment) && current.parent.present? && depth < max_depth
+          current = current.parent
+          depth += 1
+        end
+        article = current if current.is_a?(Article)
       end
 
       # Add all remote actors who have commented on this article (at ANY nesting level)
@@ -81,8 +98,27 @@ Rails.application.config.to_prepare do
         end
       end
 
-      # Don't add followers since users are remote actors logged in via OAuth
+      # Don't add followers for remote actors since they're logged in via OAuth
       # Their followers are on their home server, not here
+
+      # ALWAYS add InstanceActor's followers to recipients
+      # This ensures all comments are visible to instance followers
+      instance_actor = InstanceActor.first&.federails_actor
+      if instance_actor
+        instance_followers = instance_actor.followers
+        recipients.concat(instance_followers)
+        Rails.logger.info "  Added #{instance_followers.count} InstanceActor followers to recipients"
+      end
+
+      # If actor is local and we still have no recipients, use default recipient list
+      # This handles edge cases for local users
+      if actor.local? && recipients.uniq.compact.empty?
+        Rails.logger.info "=== Comment recipients for Activity##{id} ==="
+        Rails.logger.info "  Comment: #{comment.id}"
+        Rails.logger.info "  Comment author: #{actor.username}@#{actor.server} (local: #{actor.local?})"
+        Rails.logger.info "  No remote thread participants found, using default recipient list for local actor"
+        return default_recipient_list
+      end
 
       Rails.logger.info "=== Comment recipients for Activity##{id} ==="
       Rails.logger.info "  Comment: #{comment.id}"

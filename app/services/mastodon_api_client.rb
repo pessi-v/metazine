@@ -25,6 +25,16 @@ class MastodonApiClient
     begin
       status = client.create_status(content, status_params)
 
+      # Handle case where API returns an error hash instead of a status object
+      if status.respond_to?(:attrs) && status.attrs.is_a?(Hash)
+        attrs = status.attrs
+        if attrs['error'].present?
+          Rails.logger.error "  Mastodon API error: #{attrs['error']}"
+          Rails.logger.error "  Full response: #{attrs.inspect}"
+          raise ApiError, "Mastodon API error: #{attrs['error']}"
+        end
+      end
+
       Rails.logger.info "  Success! Status ID: #{status.id}"
       Rails.logger.info "  URL: #{status.url}"
       Rails.logger.info "  URI: #{status.uri}"
@@ -35,8 +45,20 @@ class MastodonApiClient
         uri: status.uri,
         created_at: status.created_at
       }
+    rescue NoMethodError => e
+      # This happens when status doesn't have expected fields like .id
+      Rails.logger.error "  Status object missing expected fields: #{e.message}"
+      if status.respond_to?(:to_h)
+        Rails.logger.error "  Status response: #{status.to_h.inspect}"
+      elsif status.respond_to?(:attrs)
+        Rails.logger.error "  Status attrs: #{status.attrs.inspect}"
+      else
+        Rails.logger.error "  Status class: #{status.class}, inspect: #{status.inspect}"
+      end
+      raise ApiError, "Invalid response from Mastodon API: #{e.message}"
     rescue StandardError => e
       Rails.logger.error "  Failed to create status: #{e.class} - #{e.message}"
+      Rails.logger.error "  Backtrace: #{e.backtrace.first(3).join("\n  ")}"
       raise ApiError, "Failed to create status on Mastodon: #{e.message}"
     end
   end
@@ -87,6 +109,33 @@ class MastodonApiClient
     end
   end
 
+  # Search for a remote status by its URL to get the local ID
+  # This makes the server fetch and cache the remote status
+  #
+  # @param status_url [String] The full URL of the status
+  # @return [String, nil] The local status ID or nil if not found
+  def search_status(status_url)
+    Rails.logger.info "=== MastodonApiClient: Searching for status ==="
+    Rails.logger.info "  URL: #{status_url}"
+
+    begin
+      # Use the v2/search endpoint which supports resolving remote resources
+      results = client.search(status_url, resolve: true)
+
+      if results.statuses.any?
+        local_status = results.statuses.first
+        Rails.logger.info "  Found status with local ID: #{local_status.id}"
+        local_status.id
+      else
+        Rails.logger.warn "  Status not found via search"
+        nil
+      end
+    rescue StandardError => e
+      Rails.logger.error "  Failed to search status: #{e.class} - #{e.message}"
+      nil
+    end
+  end
+
   private
 
   def validate_user!
@@ -107,12 +156,25 @@ class MastodonApiClient
       visibility: 'public'
     }
 
-    # If parent is a Comment with federated_url, use it as in_reply_to_id
+    # If parent is a Comment with federated_url, search for it first to get local ID
     if parent.is_a?(Comment) && parent.federated_url.present?
-      in_reply_to_id = extract_status_id(parent.federated_url)
-      if in_reply_to_id
-        params[:in_reply_to_id] = in_reply_to_id
-        Rails.logger.info "  Replying to status: #{in_reply_to_id}"
+      Rails.logger.info "  Parent comment URL: #{parent.federated_url}"
+
+      # First try to search for the remote status to get the local ID
+      local_id = search_status(parent.federated_url)
+
+      if local_id
+        params[:in_reply_to_id] = local_id
+        Rails.logger.info "  Replying to status (local ID): #{local_id}"
+      else
+        # Fallback: try extracting status ID from URL (for same-server replies)
+        in_reply_to_id = extract_status_id(parent.federated_url)
+        if in_reply_to_id
+          params[:in_reply_to_id] = in_reply_to_id
+          Rails.logger.info "  Replying to status (extracted ID): #{in_reply_to_id}"
+        else
+          Rails.logger.warn "  Could not find or extract status ID from parent comment"
+        end
       end
     elsif parent.is_a?(Article)
       # For articles, we'll include the article URL in the content
