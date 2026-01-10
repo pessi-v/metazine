@@ -9,9 +9,22 @@ class ActivityPub::AnnounceCommentService
   end
 
   def announce
-    return unless should_announce?
-    return unless instance_actor
-    return if already_announced?
+    Rails.logger.info "=== AnnounceCommentService called for Comment##{comment.id} ==="
+
+    unless should_announce?
+      Rails.logger.info "  Skipping announce: should_announce? returned false"
+      return
+    end
+
+    unless instance_actor
+      Rails.logger.info "  Skipping announce: no instance_actor found"
+      return
+    end
+
+    if already_announced?
+      Rails.logger.info "  Skipping announce: already announced"
+      return
+    end
 
     activity = Federails::Activity.create!(
       actor: instance_actor,
@@ -31,21 +44,46 @@ class ActivityPub::AnnounceCommentService
   attr_reader :comment, :instance_actor
 
   def should_announce?
+    Rails.logger.info "  Checking should_announce?"
+
     # Only announce federated comments (not local ones)
-    return false unless comment.federated_url.present?
-    return false unless comment.federated_url.include?("mastodon") ||
-                        comment.federated_url.match?(/https?:\/\/[^\/]+\/@/)
+    unless comment.federated_url.present?
+      Rails.logger.info "    No federated_url present"
+      return false
+    end
+
+    unless comment.federated_url.include?("mastodon") || comment.federated_url.match?(/https?:\/\/[^\/]+\/@/)
+      Rails.logger.info "    federated_url doesn't match mastodon pattern: #{comment.federated_url}"
+      return false
+    end
 
     # Only announce if we have followers
-    return false unless instance_actor&.followers&.any?
+    unless instance_actor&.followers&.any?
+      Rails.logger.info "    InstanceActor has no followers"
+      return false
+    end
+
+    Rails.logger.info "    InstanceActor has #{instance_actor.followers.count} followers"
 
     # Only announce comments on OUR federated content
     article = find_root_article
-    return false unless article&.federated_url.present?
+    Rails.logger.info "    Found root article: #{article&.class&.name}##{article&.id}"
+
+    unless article&.federated_url.present?
+      Rails.logger.info "    Article has no federated_url"
+      return false
+    end
+
+    Rails.logger.info "    Article federated_url: #{article.federated_url}"
 
     # Verify article federated_url is from our instance
     our_host = Rails.application.config.action_mailer.default_url_options[:host]
-    article.federated_url.include?(our_host)
+    Rails.logger.info "    Our host: #{our_host}"
+
+    result = article.federated_url.include?(our_host)
+    Rails.logger.info "    Host match result: #{result}"
+
+    result
   end
 
   def find_root_article
