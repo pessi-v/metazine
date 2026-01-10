@@ -82,11 +82,9 @@ class ActivityPub::AnnounceCommentService
     Rails.logger.info "    Article federated_url: #{article.federated_url}"
 
     # Verify article federated_url is from our instance
-    our_host = Rails.application.config.action_mailer.default_url_options[:host]
-    Rails.logger.info "    Our host: #{our_host}"
-
-    result = article.federated_url.include?(our_host)
-    Rails.logger.info "    Host match result: #{result}"
+    # Articles we federate always have this path pattern
+    result = article.federated_url.include?("/federation/published/articles/")
+    Rails.logger.info "    Is from our instance (contains /federation/published/articles/): #{result}"
 
     result
   end
