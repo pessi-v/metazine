@@ -52,14 +52,49 @@ class CommentsController < ApplicationController
     end
 
     begin
-      # Update locally and let Federails handle federation
-      if @comment.update(content: comment_params[:content])
-        Rails.logger.info "Updated comment #{@comment.id}, federating Update activity"
-        redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
+      new_content = comment_params[:content]
+
+      # If comment is federated (created on remote Mastodon instance),
+      # update it in the remote actor's outbox via Mastodon API
+      if @comment.federated? && @comment.mastodon_status_id.present?
+        Rails.logger.info "=== Updating federated comment #{@comment.id} on remote Mastodon instance ==="
+        Rails.logger.info "  Federated URL: #{@comment.federated_url}"
+        Rails.logger.info "  Status ID: #{@comment.mastodon_status_id}"
+
+        # Initialize Mastodon API client with user's access token
+        mastodon_client = MastodonApiClient.new(current_user)
+
+        # Update the status on the remote Mastodon instance
+        result = mastodon_client.update_comment(
+          status_id: @comment.mastodon_status_id,
+          content: new_content
+        )
+
+        Rails.logger.info "  Successfully updated remote status"
+        Rails.logger.info "  Result: #{result.inspect}"
+
+        # Update the local comment to reflect the change
+        # Skip Federails callbacks since we've already handled the remote update
+        @comment.skip_federails_callbacks = true
+        if @comment.update(content: new_content)
+          redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully on Mastodon."
+        else
+          Rails.logger.error "Failed to update local comment: #{@comment.errors.full_messages.join(', ')}"
+          redirect_back fallback_location: frontpage_path, alert: "Remote update succeeded but local sync failed: #{@comment.errors.full_messages.join(', ')}"
+        end
       else
-        Rails.logger.error "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
-        redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
+        # Local comment or ActivityPub federated comment - update locally and let Federails handle federation
+        if @comment.update(content: new_content)
+          Rails.logger.info "Updated comment #{@comment.id}, federating Update activity"
+          redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
+        else
+          Rails.logger.error "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
+          redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
+        end
       end
+    rescue MastodonApiClient::Error => e
+      Rails.logger.error "Mastodon API error updating comment: #{e.message}"
+      redirect_back fallback_location: frontpage_path, alert: "Failed to update comment on Mastodon: #{e.message}"
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error "Failed to update comment: #{e.message}"
       redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{e.message}"
