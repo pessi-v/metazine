@@ -1,6 +1,6 @@
 class ActivityPub::AnnounceCommentService
   def self.call(comment)
-    new(comment).announce
+    new(comment).forward_comment
   end
 
   def initialize(comment)
@@ -8,33 +8,35 @@ class ActivityPub::AnnounceCommentService
     @instance_actor = InstanceActor.first&.federails_actor
   end
 
-  def announce
-    Rails.logger.info "=== AnnounceCommentService called for Comment##{comment.id} ==="
+  def forward_comment
+    Rails.logger.info "=== ForwardCommentService called for Comment##{comment.id} ==="
 
-    unless should_announce?
-      Rails.logger.info "  Skipping announce: should_announce? returned false"
+    unless should_forward?
+      Rails.logger.info "  Skipping forward: should_forward? returned false"
       return
     end
 
     unless instance_actor
-      Rails.logger.info "  Skipping announce: no instance_actor found"
+      Rails.logger.info "  Skipping forward: no instance_actor found"
       return
     end
 
-    if already_announced?
-      Rails.logger.info "  Skipping announce: already announced"
+    if already_forwarded?
+      Rails.logger.info "  Skipping forward: already forwarded"
       return
     end
 
+    # Create a custom "forwarded Create" activity
+    # The actor is the original comment author, but we sign and send it
     activity = Federails::Activity.create!(
       actor: instance_actor,
       entity: comment,
-      action: 'Announce'
+      action: 'Forward'  # Custom action type to distinguish from normal Create
     )
 
     remote_url = comment.read_attribute(:federated_url)
-    Rails.logger.info "=== Created Announce activity for Comment##{comment.id} ==="
-    Rails.logger.info "  Remote URL: #{remote_url}"
+    Rails.logger.info "=== Created Forward activity for Comment##{comment.id} ==="
+    Rails.logger.info "  Comment URL: #{remote_url}"
     Rails.logger.info "  InstanceActor followers: #{instance_actor.followers.count}"
 
     Federails::NotifyInboxJob.perform_later(activity)
@@ -44,14 +46,14 @@ class ActivityPub::AnnounceCommentService
 
   attr_reader :comment, :instance_actor
 
-  def should_announce?
-    Rails.logger.info "  Checking should_announce?"
+  def should_forward?
+    Rails.logger.info "  Checking should_forward?"
 
     # Access the raw federated_url column (federails overrides the method)
     remote_url = comment.read_attribute(:federated_url)
     Rails.logger.info "    Remote federated_url: #{remote_url}"
 
-    # Only announce federated comments (not local ones)
+    # Only forward federated comments (not local ones)
     unless remote_url.present?
       Rails.logger.info "    No remote federated_url present"
       return false
@@ -62,7 +64,7 @@ class ActivityPub::AnnounceCommentService
       return false
     end
 
-    # Only announce if we have followers
+    # Only forward if we have followers
     unless instance_actor&.followers&.any?
       Rails.logger.info "    InstanceActor has no followers"
       return false
@@ -70,7 +72,7 @@ class ActivityPub::AnnounceCommentService
 
     Rails.logger.info "    InstanceActor has #{instance_actor.followers.count} followers"
 
-    # Only announce comments on OUR federated content
+    # Only forward comments on OUR federated content
     article = find_root_article
     Rails.logger.info "    Found root article: #{article&.class&.name}##{article&.id}"
 
@@ -98,11 +100,11 @@ class ActivityPub::AnnounceCommentService
     nil
   end
 
-  def already_announced?
+  def already_forwarded?
     Federails::Activity.exists?(
       actor: instance_actor,
       entity: comment,
-      action: 'Announce'
+      action: 'Forward'
     )
   end
 end
