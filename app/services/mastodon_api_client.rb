@@ -208,12 +208,26 @@ class MastodonApiClient
         end
       end
     elsif parent.is_a?(Article)
-      # For articles, we'll include the article URL in the content
-      # and add it as sensitive if needed
       Rails.logger.info "  Commenting on article: #{parent.title}"
-      # Note: We could potentially search for the article in user's timeline
-      # and use that as in_reply_to_id, but that's complex. For now, just
-      # post as top-level and rely on ActivityPub inReplyTo for federation
+
+      # If article has a federated_url, try to find it on the user's Mastodon instance
+      if parent.federated_url.present?
+        Rails.logger.info "  Article federated URL: #{parent.federated_url}"
+
+        # Search for the article on the user's Mastodon instance
+        local_id = search_status(parent.federated_url)
+
+        if local_id
+          params[:in_reply_to_id] = local_id
+          Rails.logger.info "  Replying to article (local ID): #{local_id}"
+        else
+          Rails.logger.warn "  Article not found on user's instance - posting as top-level"
+          Rails.logger.warn "  Tip: The article needs to be visible on #{user.domain} for threading to work"
+        end
+      else
+        Rails.logger.warn "  Article has no federated_url - posting as top-level"
+        Rails.logger.warn "  Article URL: #{parent.url}" if parent.respond_to?(:url)
+      end
     end
 
     params
