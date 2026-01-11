@@ -109,12 +109,40 @@ class CommentsController < ApplicationController
     end
 
     begin
-      # Use destroy to trigger Federails Delete activity, which then soft deletes
-      # via the before_destroy callback
-      @comment.destroy
+      # If comment is federated (created on remote Mastodon instance),
+      # delete it from the remote actor's outbox via Mastodon API
+      if @comment.federated? && @comment.mastodon_status_id.present?
+        Rails.logger.info "=== Deleting federated comment #{@comment.id} from remote Mastodon instance ==="
+        Rails.logger.info "  Federated URL: #{@comment.federated_url}"
+        Rails.logger.info "  Status ID: #{@comment.mastodon_status_id}"
 
-      Rails.logger.info "Deleted comment #{@comment.id}, federating Delete activity"
-      redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully."
+        # Initialize Mastodon API client with user's access token
+        mastodon_client = MastodonApiClient.new(current_user)
+
+        # Delete the status on the remote Mastodon instance
+        mastodon_client.delete_comment(status_id: @comment.mastodon_status_id)
+
+        Rails.logger.info "  Successfully deleted remote status"
+
+        # Soft delete the local comment
+        # Skip Federails callbacks since we've already handled the remote deletion
+        @comment.update_columns(
+          deleted_at: Time.current,
+          content: "[deleted]",
+          user_id: nil
+        )
+
+        redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully from Mastodon."
+      else
+        # Local comment or ActivityPub federated comment - use destroy to trigger Federails Delete activity
+        @comment.destroy
+
+        Rails.logger.info "Deleted comment #{@comment.id}, federating Delete activity"
+        redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully."
+      end
+    rescue MastodonApiClient::Error => e
+      Rails.logger.error "Mastodon API error deleting comment: #{e.message}"
+      redirect_back fallback_location: frontpage_path, alert: "Failed to delete comment on Mastodon: #{e.message}"
     rescue => e
       Rails.logger.error "Failed to delete comment: #{e.message}"
       redirect_back fallback_location: frontpage_path, alert: "Failed to delete comment: #{e.message}"
