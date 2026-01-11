@@ -30,10 +30,36 @@ class CommentsController < ApplicationController
         Rails.logger.info "  User: #{current_user.full_username}"
         Rails.logger.info "  Parent: #{@parent.class.name}##{@parent.id}"
 
+        # If parent is an Article that hasn't been federated yet, federate it NOW
+        # This ensures the comment can reply to the article properly
+        if @parent.is_a?(Article) && @parent.federated_url.blank?
+          Rails.logger.info "  Article not yet federated - federating now before posting comment"
+
+          # Generate the federated_url for the Article
+          host = Rails.application.routes.default_url_options[:host] || ENV["APP_HOST"] || "localhost:3000"
+          article_url = "https://#{host}/federation/published/articles/#{@parent.id}"
+
+          # Set the federated_url on the Article
+          @parent.update_column(:federated_url, article_url)
+          Rails.logger.info "  Set Article federated_url: #{article_url}"
+
+          # Create a Federails Activity for the Article
+          article_activity = Federails::Activity.create!(
+            actor: @parent.federails_actor,
+            entity: @parent,
+            action: 'Create'
+          )
+
+          # Enqueue the federation job
+          Federails::NotifyInboxJob.perform_later(article_activity)
+
+          Rails.logger.info "  Article federation Activity##{article_activity.id} created and enqueued"
+        end
+
         # Initialize Mastodon API client
         mastodon_client = MastodonApiClient.new(current_user)
 
-        # Post to Mastodon outbox
+        # Post to Mastodon outbox (now the article has federated_url if needed)
         result = mastodon_client.create_comment(
           content: content,
           parent: @parent
@@ -57,6 +83,11 @@ class CommentsController < ApplicationController
 
         if comment.save
           Rails.logger.info "  Saved comment #{comment.id} locally with federated_url"
+
+          # Announce the comment to followers of the instance actor
+          # This ensures followers on other instances see the comment
+          ActivityPub::AnnounceCommentService.call(comment)
+
           redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully to Mastodon!"
         else
           Rails.logger.error "  Failed to save comment locally: #{comment.errors.full_messages.join(', ')}"
@@ -124,6 +155,8 @@ class CommentsController < ApplicationController
         # Skip Federails callbacks since we've already handled the remote update
         @comment.skip_federails_callbacks = true
         if @comment.update(content: new_content)
+          # Note: No need to re-announce - the existing Announce points to the comment URL,
+          # and when fetched, it will show the updated content automatically
           redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully on Mastodon."
         else
           Rails.logger.error "Failed to update local comment: #{@comment.errors.full_messages.join(', ')}"
