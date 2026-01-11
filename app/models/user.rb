@@ -215,21 +215,145 @@ class User < ApplicationRecord
     "@#{username}@#{domain}"
   end
 
+  # Fix user's domain and re-link to the correct remote actor
+  # This is useful for users who logged in before domain extraction was fixed
+  def fix_domain_and_relink!
+    Rails.logger.info "=== Fixing domain for User##{id} ==="
+
+    # If domain is already set, check if it's correct
+    if domain.present?
+      Rails.logger.info "  Domain already set: #{domain}"
+
+      # Check if linked actor matches the domain
+      if federails_actor&.federated_url.present?
+        actor_domain = URI.parse(federails_actor.federated_url).host rescue nil
+        if actor_domain && actor_domain != domain
+          Rails.logger.warn "  ⚠️  Actor domain (#{actor_domain}) doesn't match user domain (#{domain})"
+          Rails.logger.warn "  Proceeding with re-linking..."
+        else
+          Rails.logger.info "  Domain and actor match, no fix needed"
+          return
+        end
+      end
+    end
+
+    # Try to extract domain from existing federails_actor
+    if federails_actor&.federated_url.present? && federails_actor.distant?
+      extracted_domain = URI.parse(federails_actor.federated_url).host rescue nil
+      if extracted_domain
+        Rails.logger.info "  Extracted domain from actor URL: #{extracted_domain}"
+
+        # Also try to extract username from actor URL
+        # Format: https://domain/users/username
+        if federails_actor.federated_url =~ %r{https?://[^/]+/users/([^/]+)}
+          extracted_username = $1
+          Rails.logger.info "  Extracted username from actor URL: #{extracted_username}"
+
+          update!(domain: extracted_domain, username: extracted_username)
+          Rails.logger.info "  ✓ Updated domain and username"
+          return
+        end
+      end
+    end
+
+    # If we still don't have domain, try to infer from comments
+    if domain.blank?
+      # Find comments authored by this user's actor
+      comment_with_url = Comment.where(federails_actor: federails_actor)
+                                .where.not(federated_url: nil)
+                                .first
+
+      if comment_with_url&.federated_url.present?
+        Rails.logger.info "  Found comment with federated_url: #{comment_with_url.federated_url}"
+
+        # Extract domain and username from comment URL
+        # Format: https://domain/users/username/statuses/123
+        if comment_with_url.federated_url =~ %r{https?://([^/]+)/users/([^/]+)/statuses}
+          inferred_domain = $1
+          inferred_username = $2
+
+          Rails.logger.info "  Inferred domain: #{inferred_domain}"
+          Rails.logger.info "  Inferred username: #{inferred_username}"
+
+          update!(domain: inferred_domain, username: inferred_username)
+
+          # Now unlink from current (wrong) actor and re-link to correct one
+          if federails_actor&.local?
+            Rails.logger.info "  Unlinking from local actor (incorrect)"
+            federails_actor.update!(entity_type: nil, entity_id: nil)
+          end
+
+          # Re-link to remote actor
+          link_to_federated_actor!
+
+          Rails.logger.info "  ✓ Fixed domain and re-linked to remote actor"
+          return
+        end
+      end
+    end
+
+    Rails.logger.error "  ❌ Could not fix domain - no data available"
+  end
+
   private
 
   def self.extract_domain(auth)
     # For Mastodon, the domain is in the auth hash
     # Try multiple sources in order of preference:
-    # 1. info.urls.domain (direct domain field)
-    # 2. info.urls["profile"] (lowercase key)
-    # 3. extra.raw_info.url (user's profile URL)
-    # 4. extra.raw_info.instance (instance domain)
-    domain = auth.info.urls&.domain&.match(/https?:\/\/([^\/]+)/)&.[](1) ||
-             auth.info.urls&.[]("profile")&.match(/https?:\/\/([^\/]+)/)&.[](1) ||
-             auth.extra&.raw_info&.url&.match(/https?:\/\/([^\/]+)/)&.[](1) ||
-             auth.extra&.raw_info&.instance
+    Rails.logger.info "  Extracting domain from auth hash..."
+    Rails.logger.info "    auth.info.urls: #{auth.info.urls.inspect}"
+    Rails.logger.info "    auth.extra.raw_info keys: #{auth.extra&.raw_info&.to_h&.keys&.inspect}"
 
-    Rails.logger.info "  extract_domain result: #{domain.inspect}"
+    # Try various extraction methods
+    domain = nil
+
+    # 1. From raw_info.url (user's profile URL) - most reliable
+    if auth.extra&.raw_info&.url.present?
+      domain = auth.extra.raw_info.url.match(/https?:\/\/([^\/]+)/)&.[](1)
+      Rails.logger.info "    Extracted from raw_info.url: #{domain}" if domain
+    end
+
+    # 2. From info.urls (various formats)
+    unless domain
+      if auth.info.urls.is_a?(Hash)
+        # Try each URL in the hash
+        auth.info.urls.each do |key, value|
+          if value.is_a?(String) && value.match?(/https?:\/\//)
+            domain = value.match(/https?:\/\/([^\/]+)/)&.[](1)
+            Rails.logger.info "    Extracted from info.urls.#{key}: #{domain}" if domain
+            break if domain
+          end
+        end
+      elsif auth.info.urls.respond_to?(:profile)
+        domain = auth.info.urls.profile&.match(/https?:\/\/([^\/]+)/)&.[](1)
+        Rails.logger.info "    Extracted from info.urls.profile: #{domain}" if domain
+      end
+    end
+
+    # 3. From extra.raw_info.instance (direct instance field)
+    unless domain
+      if auth.extra&.raw_info&.instance.present?
+        domain = auth.extra.raw_info.instance
+        Rails.logger.info "    Extracted from raw_info.instance: #{domain}"
+      end
+    end
+
+    # 4. From provider-specific domain (omniauth-mastodon stores this)
+    unless domain
+      if auth.info.respond_to?(:domain) && auth.info.domain.present?
+        domain = auth.info.domain
+        Rails.logger.info "    Extracted from info.domain: #{domain}"
+      end
+    end
+
+    Rails.logger.info "  Final extract_domain result: #{domain.inspect}"
+
+    unless domain
+      Rails.logger.error "  ❌ FAILED TO EXTRACT DOMAIN!"
+      Rails.logger.error "  Full auth.info: #{auth.info.to_h.inspect}"
+      Rails.logger.error "  Full auth.extra.raw_info: #{auth.extra&.raw_info&.to_h&.inspect}"
+    end
+
     domain
   end
 end

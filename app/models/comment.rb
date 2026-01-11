@@ -366,13 +366,25 @@ class Comment < ApplicationRecord
   def owned_by?(user)
     return false unless user
 
+    Rails.logger.debug "=== Comment##{id} owned_by? check ==="
+    Rails.logger.debug "  comment.user_id: #{user_id}"
+    Rails.logger.debug "  user.id: #{user.id}"
+    Rails.logger.debug "  comment.federails_actor_id: #{federails_actor_id}"
+    Rails.logger.debug "  user.federails_actor_id: #{user.federails_actor&.id}"
+
     # Direct ownership via user_id
-    return true if user_id == user.id
+    if user_id == user.id
+      Rails.logger.debug "  ✓ Match via user_id"
+      return true
+    end
 
     # Federated ownership: same federails_actor
-    return true if federails_actor && user.federails_actor &&
-                   federails_actor.id == user.federails_actor.id
+    if federails_actor && user.federails_actor && federails_actor.id == user.federails_actor.id
+      Rails.logger.debug "  ✓ Match via federails_actor"
+      return true
+    end
 
+    Rails.logger.debug "  ✗ No match"
     false
   end
 
