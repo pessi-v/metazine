@@ -22,21 +22,68 @@ class CommentsController < ApplicationController
         Rails.logger.info "Successfully linked user to federails_actor #{current_user.federails_actor.id}"
       end
 
-      # Create comment locally and let Federails handle federation
-      comment = Comment.new(
-        parent: @parent,
-        content: comment_params[:content],
-        user_id: current_user.id,
-        federails_actor: current_user.federails_actor
-      )
+      content = comment_params[:content]
 
-      if comment.save
-        Rails.logger.info "Created comment #{comment.id}, federating via ActivityPub"
-        redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!"
+      # If user is logged in via Mastodon (has access_token), post to their Mastodon outbox
+      if current_user.access_token.present? && current_user.domain.present?
+        Rails.logger.info "=== Creating comment in user's Mastodon outbox ==="
+        Rails.logger.info "  User: #{current_user.full_username}"
+        Rails.logger.info "  Parent: #{@parent.class.name}##{@parent.id}"
+
+        # Initialize Mastodon API client
+        mastodon_client = MastodonApiClient.new(current_user)
+
+        # Post to Mastodon outbox
+        result = mastodon_client.create_comment(
+          content: content,
+          parent: @parent
+        )
+
+        Rails.logger.info "  Successfully posted to Mastodon"
+        Rails.logger.info "  Status URL: #{result[:url]}"
+        Rails.logger.info "  Status URI: #{result[:uri]}"
+
+        # Create comment locally with federated_url from Mastodon
+        comment = Comment.new(
+          parent: @parent,
+          content: content,
+          user_id: current_user.id,
+          federails_actor: current_user.federails_actor,
+          federated_url: result[:uri] || result[:url] # Use URI (ActivityPub ID) or fallback to URL
+        )
+
+        # Skip Federails callbacks since we already posted to Mastodon
+        comment.skip_federails_callbacks = true
+
+        if comment.save
+          Rails.logger.info "  Saved comment #{comment.id} locally with federated_url"
+          redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully to Mastodon!"
+        else
+          Rails.logger.error "  Failed to save comment locally: #{comment.errors.full_messages.join(', ')}"
+          redirect_back fallback_location: frontpage_path, alert: "Posted to Mastodon but failed to save locally: #{comment.errors.full_messages.join(', ')}"
+        end
       else
-        Rails.logger.error "Failed to save comment: #{comment.errors.full_messages.join(', ')}"
-        redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{comment.errors.full_messages.join(', ')}"
+        # User doesn't have Mastodon credentials - fall back to local-only comment
+        Rails.logger.info "Creating local-only comment (user has no Mastodon credentials)"
+
+        comment = Comment.new(
+          parent: @parent,
+          content: content,
+          user_id: current_user.id,
+          federails_actor: current_user.federails_actor
+        )
+
+        if comment.save
+          Rails.logger.info "Created comment #{comment.id}, federating via ActivityPub"
+          redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!"
+        else
+          Rails.logger.error "Failed to save comment: #{comment.errors.full_messages.join(', ')}"
+          redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{comment.errors.full_messages.join(', ')}"
+        end
       end
+    rescue MastodonApiClient::Error => e
+      Rails.logger.error "Mastodon API error creating comment: #{e.message}"
+      redirect_back fallback_location: frontpage_path, alert: "Failed to post comment to Mastodon: #{e.message}"
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error "Failed to save comment: #{e.message}"
       Rails.logger.error e.backtrace.first(10).join("\n")
