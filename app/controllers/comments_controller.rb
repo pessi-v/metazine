@@ -88,10 +88,16 @@ class CommentsController < ApplicationController
           # This ensures followers on other instances see the comment
           ActivityPub::AnnounceCommentService.call(comment)
 
-          redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully to Mastodon!"
+          respond_to do |format|
+            format.turbo_stream { @comment = comment }
+            format.html { redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully to Mastodon!" }
+          end
         else
           Rails.logger.error "  Failed to save comment locally: #{comment.errors.full_messages.join(', ')}"
-          redirect_back fallback_location: frontpage_path, alert: "Posted to Mastodon but failed to save locally: #{comment.errors.full_messages.join(', ')}"
+          respond_to do |format|
+            format.turbo_stream { render turbo_stream: turbo_stream.replace("new_comment_form", partial: "comments/comment_form", locals: { parent: @parent, comment: comment }), status: :unprocessable_entity }
+            format.html { redirect_back fallback_location: frontpage_path, alert: "Posted to Mastodon but failed to save locally: #{comment.errors.full_messages.join(', ')}" }
+          end
         end
       else
         # User doesn't have Mastodon credentials - fall back to local-only comment
@@ -106,26 +112,41 @@ class CommentsController < ApplicationController
 
         if comment.save
           Rails.logger.info "Created comment #{comment.id}, federating via ActivityPub"
-          redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!"
+          respond_to do |format|
+            format.turbo_stream { @comment = comment }
+            format.html { redirect_back fallback_location: frontpage_path, notice: "Comment posted successfully!" }
+          end
         else
           Rails.logger.error "Failed to save comment: #{comment.errors.full_messages.join(', ')}"
-          redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{comment.errors.full_messages.join(', ')}"
+          respond_to do |format|
+            format.turbo_stream { render turbo_stream: turbo_stream.replace("new_comment_form", partial: "comments/comment_form", locals: { parent: @parent, comment: comment }), status: :unprocessable_entity }
+            format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{comment.errors.full_messages.join(', ')}" }
+          end
         end
       end
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Mastodon API error creating comment: #{e.message}"
-      redirect_back fallback_location: frontpage_path, alert: "Failed to post comment to Mastodon: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("new_comment_form", partial: "comments/comment_form", locals: { parent: @parent, comment: Comment.new(content: content) }), status: :unprocessable_entity }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to post comment to Mastodon: #{e.message}" }
+      end
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error "Failed to save comment: #{e.message}"
       Rails.logger.error e.backtrace.first(10).join("\n")
-      redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("new_comment_form", partial: "comments/comment_form", locals: { parent: @parent, comment: Comment.new(content: content) }), status: :unprocessable_entity }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to save comment: #{e.message}" }
+      end
     end
   end
 
   # PATCH /comments/:id
   def update
     unless @comment.owned_by?(current_user)
-      redirect_back fallback_location: frontpage_path, alert: "You can only edit your own comments."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :forbidden }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "You can only edit your own comments." }
+      end
       return
     end
 
@@ -157,34 +178,55 @@ class CommentsController < ApplicationController
         if @comment.update(content: new_content)
           # Note: No need to re-announce - the existing Announce points to the comment URL,
           # and when fetched, it will show the updated content automatically
-          redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully on Mastodon."
+          respond_to do |format|
+            format.turbo_stream
+            format.html { redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully on Mastodon." }
+          end
         else
           Rails.logger.error "Failed to update local comment: #{@comment.errors.full_messages.join(', ')}"
-          redirect_back fallback_location: frontpage_path, alert: "Remote update succeeded but local sync failed: #{@comment.errors.full_messages.join(', ')}"
+          respond_to do |format|
+            format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :unprocessable_entity }
+            format.html { redirect_back fallback_location: frontpage_path, alert: "Remote update succeeded but local sync failed: #{@comment.errors.full_messages.join(', ')}" }
+          end
         end
       else
         # Local comment or ActivityPub federated comment - update locally and let Federails handle federation
         if @comment.update(content: new_content)
           Rails.logger.info "Updated comment #{@comment.id}, federating Update activity"
-          redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully."
+          respond_to do |format|
+            format.turbo_stream
+            format.html { redirect_back fallback_location: frontpage_path, notice: "Comment updated successfully." }
+          end
         else
           Rails.logger.error "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
-          redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{@comment.errors.full_messages.join(', ')}"
+          respond_to do |format|
+            format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :unprocessable_entity }
+            format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{@comment.errors.full_messages.join(', ')}" }
+          end
         end
       end
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Mastodon API error updating comment: #{e.message}"
-      redirect_back fallback_location: frontpage_path, alert: "Failed to update comment on Mastodon: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :unprocessable_entity }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to update comment on Mastodon: #{e.message}" }
+      end
     rescue ActiveRecord::RecordInvalid => e
       Rails.logger.error "Failed to update comment: #{e.message}"
-      redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :unprocessable_entity }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to update comment: #{e.message}" }
+      end
     end
   end
 
   # DELETE /comments/:id
   def destroy
     unless @comment.owned_by?(current_user)
-      redirect_back fallback_location: frontpage_path, alert: "You can only delete your own comments."
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :forbidden }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "You can only delete your own comments." }
+      end
       return
     end
 
@@ -212,20 +254,32 @@ class CommentsController < ApplicationController
           user_id: nil
         )
 
-        redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully from Mastodon."
+        respond_to do |format|
+          format.turbo_stream
+          format.html { redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully from Mastodon." }
+        end
       else
         # Local comment or ActivityPub federated comment - use destroy to trigger Federails Delete activity
         @comment.destroy
 
         Rails.logger.info "Deleted comment #{@comment.id}, federating Delete activity"
-        redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully."
+        respond_to do |format|
+          format.turbo_stream
+          format.html { redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully." }
+        end
       end
     rescue MastodonApiClient::Error => e
       Rails.logger.error "Mastodon API error deleting comment: #{e.message}"
-      redirect_back fallback_location: frontpage_path, alert: "Failed to delete comment on Mastodon: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :unprocessable_entity }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to delete comment on Mastodon: #{e.message}" }
+      end
     rescue => e
       Rails.logger.error "Failed to delete comment: #{e.message}"
-      redirect_back fallback_location: frontpage_path, alert: "Failed to delete comment: #{e.message}"
+      respond_to do |format|
+        format.turbo_stream { render turbo_stream: turbo_stream.replace("comment_#{@comment.id}", partial: "comments/reader_comment", locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }), status: :unprocessable_entity }
+        format.html { redirect_back fallback_location: frontpage_path, alert: "Failed to delete comment: #{e.message}" }
+      end
     end
   end
 

@@ -1,4 +1,4 @@
-.comment-form
+.comment-form id="new_comment_form"
 
   = form_with(model: comment, url: article_comments_path(parent), method: :post, class: "flex-row gap-m new-comment-form") do |f|
     .flex-column

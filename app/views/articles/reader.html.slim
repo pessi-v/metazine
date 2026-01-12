@@ -85,12 +85,12 @@
   - if logged_in?
     = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
 
-  .comments-list
+  .comments-list id="comments"
     - if @article.comments.any?
       - @article.comments.where(parent_type: 'Article').each do |comment|
         = render partial: 'comments/reader_comment', locals: { comment: comment, depth: 0 }
     - else
-      p.no-comments No comments yet. Be the first to comment!
+      p.no-comments id="no-comments" No comments yet. Be the first to comment!
 
 .navigate-back    
   = link_to(frontpage_path, class: 'back-link')
