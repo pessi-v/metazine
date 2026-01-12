@@ -3,14 +3,17 @@ addressing = true unless addressing == false
 set_json_ld_context(json) if context
 
 json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
+
+# Standard activity rendering
 json.type activity.action
 json.actor activity.actor.federated_url
+
 if addressing
   json.to ['https://www.w3.org/ns/activitystreams#Public']
   json.cc [activity.actor.followers_url]
 end
 
-# Special handling for Announce activities - use federated_url as object (not full object)
+# Standard object handling
 if activity.action == 'Announce' && activity.entity.respond_to?(:federated_url)
   json.object activity.entity.federated_url
 elsif activity.entity.is_a? Federails::Activity

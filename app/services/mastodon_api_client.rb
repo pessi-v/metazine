@@ -74,19 +74,50 @@ class MastodonApiClient
     Rails.logger.info "  New content: #{content[0..50]}..."
 
     begin
-      # Mastodon API v1/statuses/:id endpoint with PUT method for editing
-      status = client.update_status(status_id, content)
+      # The mastodon-api gem doesn't have update_status method (gem is from 2019, editing was added in 2022)
+      # Make direct HTTP request to Mastodon API: PUT /api/v1/statuses/:id
+      require 'net/http'
+      require 'json'
 
-      Rails.logger.info "  Success! Updated status #{status.id}"
+      uri = URI("https://#{user.domain}/api/v1/statuses/#{status_id}")
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
 
-      {
-        id: status.id,
-        url: status.url,
-        uri: status.uri,
-        created_at: status.created_at
-      }
+      request = Net::HTTP::Put.new(uri.path)
+      request['Authorization'] = "Bearer #{user.access_token}"
+      request['Content-Type'] = 'application/json'
+      request.body = { status: content }.to_json
+
+      Rails.logger.info "  Making PUT request to #{uri}"
+
+      response = http.request(request)
+
+      if response.is_a?(Net::HTTPSuccess)
+        status_data = JSON.parse(response.body)
+        Rails.logger.info "  Success! Updated status #{status_data['id']}"
+
+        {
+          id: status_data['id'],
+          url: status_data['url'],
+          uri: status_data['uri'],
+          created_at: status_data['created_at']
+        }
+      else
+        error_message = "HTTP #{response.code}: #{response.message}"
+        begin
+          error_data = JSON.parse(response.body)
+          error_message += " - #{error_data['error']}" if error_data['error']
+        rescue JSON::ParserError
+          # Ignore if response body isn't JSON
+        end
+
+        Rails.logger.error "  Failed to update status: #{error_message}"
+        Rails.logger.error "  Response body: #{response.body}"
+        raise ApiError, "Failed to update status on Mastodon: #{error_message}"
+      end
     rescue StandardError => e
       Rails.logger.error "  Failed to update status: #{e.class} - #{e.message}"
+      Rails.logger.error "  Backtrace: #{e.backtrace.first(3).join("\n  ")}"
       raise ApiError, "Failed to update status on Mastodon: #{e.message}"
     end
   end
@@ -177,12 +208,26 @@ class MastodonApiClient
         end
       end
     elsif parent.is_a?(Article)
-      # For articles, we'll include the article URL in the content
-      # and add it as sensitive if needed
       Rails.logger.info "  Commenting on article: #{parent.title}"
-      # Note: We could potentially search for the article in user's timeline
-      # and use that as in_reply_to_id, but that's complex. For now, just
-      # post as top-level and rely on ActivityPub inReplyTo for federation
+
+      # If article has a federated_url, try to find it on the user's Mastodon instance
+      if parent.federated_url.present?
+        Rails.logger.info "  Article federated URL: #{parent.federated_url}"
+
+        # Search for the article on the user's Mastodon instance
+        local_id = search_status(parent.federated_url)
+
+        if local_id
+          params[:in_reply_to_id] = local_id
+          Rails.logger.info "  Replying to article (local ID): #{local_id}"
+        else
+          Rails.logger.warn "  Article not found on user's instance - posting as top-level"
+          Rails.logger.warn "  Tip: The article needs to be visible on #{user.domain} for threading to work"
+        end
+      else
+        Rails.logger.warn "  Article has no federated_url - posting as top-level"
+        Rails.logger.warn "  Article URL: #{parent.url}" if parent.respond_to?(:url)
+      end
     end
 
     params

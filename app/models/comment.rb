@@ -376,6 +376,25 @@ class Comment < ApplicationRecord
     false
   end
 
+  # Extract the Mastodon status ID from the federated_url
+  # Examples:
+  #   https://mastodon.social/@user/123456789 -> "123456789"
+  #   https://mastodon.social/users/user/statuses/123456789 -> "123456789"
+  #   https://mastodon.social/ap/users/115452228256174584/statuses/115453395430281063 -> "115453395430281063"
+  def mastodon_status_id
+    return nil unless federated_url.present?
+
+    # Try to match common Mastodon URL patterns
+    if federated_url =~ %r{/statuses/(\d+)}
+      $1
+    elsif federated_url =~ %r{/@[^/]+/(\d+)}
+      $1
+    else
+      Rails.logger.warn "Could not extract status ID from: #{federated_url}"
+      nil
+    end
+  end
+
   private
 
   # Links this comment to a user if the federails_actor is associated with a user
