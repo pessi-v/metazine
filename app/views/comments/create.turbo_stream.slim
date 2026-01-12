@@ -17,10 +17,11 @@
     = render partial: 'comments/reader_comment', locals: { comment: @comment, depth: 1 }
 
   / Reset and hide the reply form
-  = turbo_stream.update "reply_form_#{@comment.parent.id}" do
-    = form_with(model: Comment.new, url: comment_comments_path(@comment.parent), method: :post, class: "flex-column gap-s new-reply-form") do |f|
-      .form-group
-        = f.text_area :content, rows: 4, class: "form-textarea", placeholder: "Reply to #{@comment.parent.author_name}:", required: true
-      .form-actions.flex-row.gap-s
-        = f.submit "Post Reply", class: "button"
-        button.btn-cancel type="button" data-action="click->comment#cancelReply" Cancel
+  = turbo_stream.update "reply_form_#{@comment.parent.id}", action: "replace" do
+    .comment-reply-form id="reply_form_#{@comment.parent.id}" style="display: none;" data-comment-target="replyForm"
+      = form_with(model: Comment.new, url: comment_comments_path(@comment.parent), method: :post, class: "flex-column gap-s new-reply-form") do |f|
+        .form-group
+          = f.text_area :content, rows: 4, class: "form-textarea", placeholder: "Reply to #{@comment.parent.author_name}:", required: true
+        .form-actions.flex-row.gap-s
+          = f.submit "Post Reply", class: "button"
+          button.btn-cancel type="button" data-action="click->comment#cancelReply" Cancel

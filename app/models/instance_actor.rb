@@ -24,7 +24,7 @@ class InstanceActor < ApplicationRecord
     scheme = Rails.application.config.force_ssl ? "https" : "http"
     host = Rails.application.default_url_options[:host]
     port = Rails.application.default_url_options[:port]
-    site_host = "#{scheme}://#{host}#{port ? ":#{port}" : ""}"
+    site_host = "#{scheme}://#{host}#{":#{port}" if port}"
 
     {
       "@context": {
@@ -34,10 +34,11 @@ class InstanceActor < ApplicationRecord
           "@type": "@id"
         }
       },
+      summary: "We recommend to hide Boosts from us",
       icon: {
         type: "Image",
-        mediaType: "image/jpg",
-        url: "#{site_host}#{ActionController::Base.helpers.asset_path("instance-logo.jpeg")}"
+        mediaType: "image/png",
+        url: "#{site_host}#{ActionController::Base.helpers.asset_path("instance-logo.png")}"
       },
       image: {
         type: "Image",
