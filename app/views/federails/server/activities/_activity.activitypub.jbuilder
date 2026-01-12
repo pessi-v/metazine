@@ -6,13 +6,14 @@ json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.
 json.type activity.action == 'Forward' ? 'Announce' : activity.action
 json.actor activity.actor.federated_url
 
-# Special addressing for Forward (quieter Announce)
-# Send to followers only, not to Public, to reduce noise
+# Special addressing for Forward (Quiet Public Announce)
+# Use "unlisted" visibility pattern to reduce timeline noise
 if activity.action == 'Forward'
   if addressing
-    # Only send to followers, not Public - reduces timeline noise
+    # Quiet Public pattern: to = followers, cc = Public
+    # This makes it publicly accessible but doesn't show in public timelines
     json.to [activity.actor.followers_url]
-    # No CC field - keeps it quieter
+    json.cc ['https://www.w3.org/ns/activitystreams#Public']
   end
 
   # Announce the comment URL
