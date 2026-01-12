@@ -9,33 +9,32 @@ class ActivityPub::AnnounceCommentService
   end
 
   def forward_comment
-    Rails.logger.info "=== ForwardCommentService called for Comment##{comment.id} ==="
+    Rails.logger.info "=== AnnounceCommentService called for Comment##{comment.id} ==="
 
     unless should_forward?
-      Rails.logger.info "  Skipping forward: should_forward? returned false"
+      Rails.logger.info "  Skipping announce: should_forward? returned false"
       return
     end
 
     unless instance_actor
-      Rails.logger.info "  Skipping forward: no instance_actor found"
+      Rails.logger.info "  Skipping announce: no instance_actor found"
       return
     end
 
     if already_forwarded?
-      Rails.logger.info "  Skipping forward: already forwarded"
+      Rails.logger.info "  Skipping announce: already announced"
       return
     end
 
-    # Create a custom "forwarded Create" activity
-    # The actor is the original comment author, but we sign and send it
+    # Create an Announce activity to boost the comment to our followers
     activity = Federails::Activity.create!(
       actor: instance_actor,
       entity: comment,
-      action: 'Forward'  # Custom action type to distinguish from normal Create
+      action: 'Announce'
     )
 
     remote_url = comment.read_attribute(:federated_url)
-    Rails.logger.info "=== Created Forward activity for Comment##{comment.id} ==="
+    Rails.logger.info "=== Created Announce activity for Comment##{comment.id} ==="
     Rails.logger.info "  Comment URL: #{remote_url}"
     Rails.logger.info "  InstanceActor followers: #{instance_actor.followers.count}"
 
@@ -104,7 +103,7 @@ class ActivityPub::AnnounceCommentService
     Federails::Activity.exists?(
       actor: instance_actor,
       entity: comment,
-      action: 'Forward'
+      action: 'Announce'
     )
   end
 end
