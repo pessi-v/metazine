@@ -35,8 +35,8 @@ class InstanceActor < ApplicationRecord
         }
       },
       type: "Application",
-      url: "https://#{ENV['APP_HOST']}",
-      summary: "We recommend to hide Boosts from us",
+      url: "https://#{ENV["APP_HOST"]}",
+      summary: "We recommend hiding Boosts from us",
       icon: {
         type: "Image",
         mediaType: "image/png",

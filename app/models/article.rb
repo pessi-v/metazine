@@ -55,10 +55,31 @@ class Article < ApplicationRecord
   end
 
   def to_activitypub_object
+    article_url = reader_url(self)
+
+    # Build content with title and source name (no standalone URL)
+    content_html = %(<p><strong>#{title}</strong></p><p>#{source_name}</p><p><a href="#{article_url}">Read more</a></p>)
+
+    # Build attachment array with image if available
+    attachments = []
+    if image_url.present?
+      attachments << {
+        type: "Document",
+        mediaType: "image/jpeg",
+        url: image_url,
+        name: title
+      }
+    end
+
     Federails::DataTransformer::Note.to_federation(
       self,
       name: title,
-      content: "<a href=\"#{reader_url(self)}\">#{reader_url(self)}</a>"
+      content: content_html,
+      custom: {
+        "contentMap" => { "en" => content_html },
+        "attachment" => attachments,
+        "summary" => source_name
+      }
     )
   end
 
