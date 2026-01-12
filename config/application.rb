@@ -44,6 +44,9 @@ module Metazine
       g.fixture_replacement :minitest
     end
 
+    # Use SQL format for schema to support custom PostgreSQL functions
+    config.active_record.schema_format = :sql
+
     # Application configuration
     config.app_name = ENV.fetch("APP_NAME", "Metazine")
 

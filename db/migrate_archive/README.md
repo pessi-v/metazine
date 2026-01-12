@@ -23,12 +23,17 @@ rails db:setup
 
 # Test
 RAILS_ENV=test rails db:setup
+
+# Or use db:reset to drop, create, and reload
+rails db:reset
 ```
 
 This will:
 1. Create the database
-2. Load the schema from `db/schema.rb`
+2. Load the schema from `db/structure.sql` (changed from schema.rb on 2026-01-12)
 3. Seed the database
+
+**Note**: The project now uses `structure.sql` instead of `schema.rb` because the `f_unaccent` PostgreSQL function cannot be represented in the Ruby schema format. This function is now automatically created when loading the structure.
 
 ## Production
 

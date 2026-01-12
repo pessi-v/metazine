@@ -54,3 +54,6 @@ Dockerfile_*
 mise.toml
 
 config/atproto_private_key.pem
+
+# Use structure.sql instead of schema.rb
+/db/schema.rb
