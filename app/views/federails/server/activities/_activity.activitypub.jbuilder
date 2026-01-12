@@ -2,32 +2,31 @@ context = true unless context == false
 addressing = true unless addressing == false
 set_json_ld_context(json) if context
 
-# Special handling for Forward activities - transform into Create with original author
-if activity.action == 'Forward' && activity.entity.is_a?(Comment)
-  comment = activity.entity
+json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
+json.type activity.action == 'Forward' ? 'Announce' : activity.action
+json.actor activity.actor.federated_url
 
-  json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
-  json.type 'Create'  # Forward becomes Create in the JSON output
-  json.actor comment.federails_actor.federated_url  # Original comment author
-
+# Special addressing for Forward (quieter Announce)
+# Send to followers only, not to Public, to reduce noise
+if activity.action == 'Forward'
   if addressing
-    json.to ['https://www.w3.org/ns/activitystreams#Public']
-    json.cc [activity.actor.followers_url]  # Instance actor's followers
+    # Only send to followers, not Public - reduces timeline noise
+    json.to [activity.actor.followers_url]
+    # No CC field - keeps it quieter
   end
 
-  # Include full comment object
-  json.object comment.to_activitypub_object
+  # Announce the comment URL
+  if activity.entity.respond_to?(:federated_url)
+    json.object activity.entity.federated_url
+  end
 else
-  # Standard activity rendering
-  json.id Federails::Engine.routes.url_helpers.server_actor_activity_url activity.actor, activity
-  json.type activity.action
-  json.actor activity.actor.federated_url
+  # Standard addressing
   if addressing
     json.to ['https://www.w3.org/ns/activitystreams#Public']
     json.cc [activity.actor.followers_url]
   end
 
-  # Special handling for Announce activities - use federated_url as object (not full object)
+  # Standard object handling
   if activity.action == 'Announce' && activity.entity.respond_to?(:federated_url)
     json.object activity.entity.federated_url
   elsif activity.entity.is_a? Federails::Activity
