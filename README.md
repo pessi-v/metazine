@@ -11,11 +11,21 @@ Features already in:
 - In-browser text-to-speech service for articles
 - Login with ActivityPub to post comments to articles
 
-Features I'll add when I have time:
+Planned Features:
 
 - Article translations
 - Article summaries
 - Article tags
+
+## ActivityPub/Mastodon integration
+
+Metazine offers login through Mastodon OAuth. Logged in users can participate in discussions under articles. Comments are posted to the Mastodon Actor's outbox, making it possible to add, edit & delete Comments from both Metazine and Mastodon with the same Mastodon account.
+
+The Instance Actor for the demo app can be found in Mastodon with the handle @press@metazine.pessi.info. Metazine federates Articles that have at least one Comment. Followers of the Instance Actor receive the posted articles and all the comments for all threads. Unfortunately, Announcing each comment will create some noise on your Mastodon feed, so it is recommended to mute Boosts from the Instance Actor!
+
+## Text-to-speech (TTS)
+
+On Desktop, articles can be listened to with a TTS service that runs in the browser. The TTS Model is different for Firefox and Chrome/Chromium. The audio quality on the Chrome model seems a bit better, but has the occasional glitch.
 
 ## Demo App
 

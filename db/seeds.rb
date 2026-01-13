@@ -8,7 +8,7 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-InstanceActor.create(name: "Editor")
+InstanceActor.create(name: "press")
 
 Source.create(name: "Le Monde Diplomatique", url: "https://mondediplo.com/backend")
 Source.create(name: "The Ecologist", url: "https://theecologist.org/whats_new/feed")
