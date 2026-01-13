@@ -1,0 +1,3 @@
+/ Replace the deleted comment with its soft-deleted version
+= turbo_stream.replace "comment_#{@comment.id}" do
+  = render partial: 'comments/reader_comment', locals: { comment: @comment, depth: @comment.parent.is_a?(Article) ? 0 : 1 }

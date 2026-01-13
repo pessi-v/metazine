@@ -12,7 +12,7 @@ html
     
     meta property="og:title" content="#{yield(:og_title).presence || ENV['OGP_TITLE']}"
     meta property="og:description" content="#{yield(:og_description).presence || ENV['OGP_DESCRIPTION']}"
-    meta property="og:image" content="#{yield(:og_image).presence || asset_url('instance-logo.jpeg')}"
+    meta property="og:image" content="#{yield(:og_image).presence || asset_url('instance-logo.png')}"
     meta property="og:url" content="#{request.original_url}"
     meta property="og:type" content="#{yield(:og_type).presence || 'website'}"
     meta property="og:site_name" content="#{ENV['INSTANCE_NAME']}"

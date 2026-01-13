@@ -93,9 +93,11 @@ module Sources
     def decode_response(response)
       return response unless response.headers["Content-Encoding"]
 
-      decoded_body = case response.headers["Content-Encoding"].downcase
-      when "gzip"
-        Zlib::GzipReader.new(StringIO.new(response.body)).read
+      # Skip gzip - it's handled by Faraday::Gzip middleware
+      encoding = response.headers["Content-Encoding"].downcase
+      return response if encoding == "gzip"
+
+      decoded_body = case encoding
       when "deflate"
         Zlib::Inflate.inflate(response.body)
       when "br"
@@ -113,7 +115,7 @@ module Sources
       env.response_body = decoded_body
       Faraday::Response.new(env)
     rescue => e
-      Rails.logger.error "Failed to decode response body: #{e.message}"
+      Rails.logger.error "Failed to decode response body (#{encoding}): #{e.message}"
       response
     end
 

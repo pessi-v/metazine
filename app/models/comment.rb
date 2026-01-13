@@ -1,4 +1,4 @@
-require 'federails/data_transformer/note'
+require "federails/data_transformer/note"
 
 class Comment < ApplicationRecord
   include Federails::DataEntity
@@ -101,7 +101,7 @@ class Comment < ApplicationRecord
         activity = Federails::Activity.create!(
           actor: federails_actor,
           entity: self,
-          action: 'Delete'
+          action: "Delete"
         )
 
         Federails::NotifyInboxJob.perform_later(activity)
@@ -182,7 +182,7 @@ class Comment < ApplicationRecord
     end
 
     # Add public addressing if needed (makes it visible to everyone)
-    to_addresses << 'https://www.w3.org/ns/activitystreams#Public'
+    to_addresses << "https://www.w3.org/ns/activitystreams#Public"
 
     # Add followers to cc
     if federails_actor&.local? && federails_actor.followers_url
@@ -197,15 +197,15 @@ class Comment < ApplicationRecord
       Rails.logger.info "  Added InstanceActor followers_url to CC"
     end
 
-    Rails.logger.info "  To addresses: #{to_addresses.uniq.compact.join(', ')}"
-    Rails.logger.info "  CC addresses: #{cc_addresses.uniq.compact.join(', ')}"
+    Rails.logger.info "  To addresses: #{to_addresses.uniq.compact.join(", ")}"
+    Rails.logger.info "  CC addresses: #{cc_addresses.uniq.compact.join(", ")}"
 
     Federails::DataTransformer::Note.to_federation self,
       content: content,
       custom: {
-        'inReplyTo' => parent_url,
-        'to' => to_addresses.uniq.compact,
-        'cc' => cc_addresses.uniq.compact
+        "inReplyTo" => parent_url,
+        "to" => to_addresses.uniq.compact,
+        "cc" => cc_addresses.uniq.compact
       }
   end
 
@@ -267,8 +267,8 @@ class Comment < ApplicationRecord
     activity = Fediverse::Request.dereference(activity_hash_or_id)
     object = Fediverse::Request.dereference(activity["object"])
 
-    Rails.logger.info "=== Received #{activity['type']} Note activity for Comment ==="
-    Rails.logger.info "  Note ID: #{object['id']}"
+    Rails.logger.info "=== Received #{activity["type"]} Note activity for Comment ==="
+    Rails.logger.info "  Note ID: #{object["id"]}"
 
     # Find or initialize the entity
     entity = Federails::Utils::Object.find_or_initialize!(object)
@@ -286,17 +286,15 @@ class Comment < ApplicationRecord
         entity.save!(touch: false)
         Rails.logger.info "  Created Comment##{entity.id}"
       end
-    else
+    elsif entity.new_record?
       # For Create and other activities, use normal flow
-      if entity.new_record?
-        entity.save!(touch: false)
-        Rails.logger.info "  Created Comment##{entity.id}"
-      end
+      entity.save!(touch: false)
+      Rails.logger.info "  Created Comment##{entity.id}"
     end
 
     entity
   rescue => e
-    Rails.logger.error "=== Error handling #{activity['type']} Note activity for Comment ==="
+    Rails.logger.error "=== Error handling #{activity["type"]} Note activity for Comment ==="
     Rails.logger.error "  Error: #{e.class}: #{e.message}"
     Rails.logger.error e.backtrace.first(10).join("\n")
     raise
@@ -309,7 +307,7 @@ class Comment < ApplicationRecord
 
     # Use read_attribute to avoid any potential infinite loops from Federails
     url = read_attribute(:federated_url)
-    return false if url.present? && url.include?('mastodon')
+    return false if url.present? && url.include?("mastodon")
 
     true
   end
@@ -371,9 +369,27 @@ class Comment < ApplicationRecord
 
     # Federated ownership: same federails_actor
     return true if federails_actor && user.federails_actor &&
-                   federails_actor.id == user.federails_actor.id
+      federails_actor.id == user.federails_actor.id
 
     false
+  end
+
+  # Calculate the depth of this comment in the thread
+  # Returns 0 for top-level comments on articles, 1 for replies to those, etc.
+  def depth
+    return 0 if parent.is_a?(Article)
+
+    depth = 0
+    current = self
+    max_depth = 50 # Prevent infinite loops
+
+    while current.parent.is_a?(Comment) && depth < max_depth
+      depth += 1
+      current = current.parent
+    end
+
+    # binding.break
+    depth
   end
 
   # Extract the Mastodon status ID from the federated_url
@@ -403,7 +419,7 @@ class Comment < ApplicationRecord
     return unless federails_actor
 
     # Check if this actor is associated with a logged-in user
-    if federails_actor.entity_type == 'User' && federails_actor.entity_id
+    if federails_actor.entity_type == "User" && federails_actor.entity_id
       update_column(:user_id, federails_actor.entity_id)
       Rails.logger.info "Linked Comment##{id} to User##{federails_actor.entity_id}"
     end
@@ -433,7 +449,7 @@ class Comment < ApplicationRecord
       activity = Federails::Activity.create!(
         actor: parent.federails_actor,
         entity: parent,
-        action: 'Create'
+        action: "Create"
       )
 
       # Enqueue the federation job

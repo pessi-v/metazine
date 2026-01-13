@@ -132,11 +132,11 @@ class SessionsController < ApplicationController
       user.display_name = display_name
       user.domain = domain
       user.avatar_url = 'https://mastodon.social/avatars/original/missing.png'
-      user.access_token = 'dev_token'
+      # No access_token - dev user should create local-only comments
     end
 
-    # Update username/display_name if they changed
-    @user.update!(username: username, display_name: display_name, domain: domain)
+    # Update username/display_name if they changed, and ensure no access_token
+    @user.update!(username: username, display_name: display_name, domain: domain, access_token: nil)
 
     # Create or find a local Federails::Actor for this dev user
     actor = Federails::Actor.find_or_create_by!(

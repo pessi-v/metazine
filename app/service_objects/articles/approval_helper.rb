@@ -10,7 +10,8 @@ module Articles
       " existing or imagined, are discussed, as well as the transformative urges behind their establishment.",
       "This article can be read by subscribers",
       "Full article",
-      "Sorry, but this article is available to subscribers only"
+      "Sorry, but this article is available to subscribers only",
+      "For just $19.95 a year"
     ].freeze
 
     def initialize(article, original_page_body: nil)

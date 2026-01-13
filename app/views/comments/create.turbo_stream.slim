@@ -1,0 +1,27 @@
+/ Remove "no comments" message if present
+= turbo_stream.remove "no-comments"
+
+/ Append new comment to the appropriate list
+- if @comment.parent.is_a?(Article)
+  / Top-level comment on article - append to main comments list
+  = turbo_stream.append "comments" do
+    = render partial: 'comments/reader_comment', locals: { comment: @comment, depth: 0 }
+
+  / Reset the main comment form
+  = turbo_stream.replace "new_comment_form" do
+    = render partial: 'comments/comment_form', locals: { parent: @comment.parent, comment: Comment.new }
+
+- elsif @comment.parent.is_a?(Comment)
+  / Reply to another comment - append to that comment's replies
+  = turbo_stream.append "comment_#{@comment.parent.id}_replies" do
+    = render partial: 'comments/reader_comment', locals: { comment: @comment, depth: 1 }
+
+  / Reset and hide the reply form
+  = turbo_stream.update "reply_form_#{@comment.parent.id}", action: "replace" do
+    .comment-reply-form id="reply_form_#{@comment.parent.id}" style="display: none;" data-comment-target="replyForm"
+      = form_with(model: Comment.new, url: comment_comments_path(@comment.parent), method: :post, class: "flex-column gap-s new-reply-form") do |f|
+        .form-group
+          = f.text_area :content, rows: 4, class: "form-textarea", placeholder: "Reply to #{@comment.parent.author_name}:", required: true
+        .form-actions.flex-row.gap-s
+          = f.submit "Post Reply", class: "button"
+          button.btn-cancel type="button" data-action="click->comment#cancelReply" Cancel

@@ -6,6 +6,7 @@ module Articles
       @instance_actor = Federails::Actor.where(entity_type: "InstanceActor").first
       @source = source
       @entry = entry
+      @entry_url = normalize_url(@entry.url)
       @cloudflare_blocked = false
       @original_page = fetch_original_page
       @description = make_description
@@ -36,8 +37,26 @@ module Articles
 
     private
 
+    def normalize_url(url)
+      return url if url.nil?
+
+      # If URL is already absolute, return it
+      uri = URI.parse(url)
+      return url if uri.absolute?
+
+      # If URL is relative, combine with source's base URL
+      source_uri = URI.parse(@source.url)
+      base_url = "#{source_uri.scheme}://#{source_uri.host}"
+      base_url += ":#{source_uri.port}" if source_uri.port && ![80, 443].include?(source_uri.port)
+
+      URI.join(base_url, url).to_s
+    rescue URI::InvalidURIError => e
+      Rails.logger.error("Failed to normalize URL #{url}: #{e.message}")
+      url
+    end
+
     def article_exists?
-      Article.where("articles.title = ? OR articles.url = ?", @clean_title, @entry.url).exists?
+      Article.where("articles.title = ? OR articles.url = ?", @clean_title, @entry_url).exists?
     end
 
     def english?
@@ -46,6 +65,8 @@ module Articles
     end
 
     def allowed_media_type?
+      return true if @entry.categories.nil?
+
       audio_categories = %w[Podcast Audio]
       return false if @entry.categories.include?("Video") && !@source.allow_video
       return false if (@entry.categories & audio_categories).any? && !@source.allow_audio
@@ -61,7 +82,7 @@ module Articles
         description: @description,
         # summary: summary, # TODO: drop summary column from table
         description_length: @description.length,
-        url: @entry.url,
+        url: @entry_url,
         source_name: @source.name,
         source_id: @source.id,
         published_at: determine_published_at,
@@ -108,7 +129,7 @@ module Articles
           conn.options.open_timeout = 10
         end
 
-        response = connection.get(@entry.url) do |req|
+        response = connection.get(@entry_url) do |req|
           # Mimic a modern browser
           req.headers["User-Agent"] =
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
@@ -125,25 +146,25 @@ module Articles
 
         if CloudflareDetector.is_cloudflare_challenge?(response)
           # Handle the challenge case
-          Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+          Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry_url}"
           @cloudflare_blocked = true
           return false
         end
 
         return response if response.status == 200
       rescue Faraday::TimeoutError, Faraday::ConnectionFailed => e
-        Rails.logger.info("Failed to fetch with full headers for #{@entry.url}: #{e.message}. Trying simplified approach.")
+        Rails.logger.info("Failed to fetch with full headers for #{@entry_url}: #{e.message}. Trying simplified approach.")
       end
 
       # Fallback to a simpler request if the first attempt fails
       connection = Faraday.new do |conn|
         conn.response :follow_redirects, limit: 5
       end
-      response = connection.get(@entry.url)
+      response = connection.get(@entry_url)
 
       if CloudflareDetector.is_cloudflare_challenge?(response)
         # Handle the challenge case
-        Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry.url}"
+        Rails.logger.warn "Cloudflare challenge detected when accessing #{@entry_url}"
         @cloudflare_blocked = true
         return false
       end

@@ -1,4 +1,4 @@
-.flex-column.comment.flex-column.gap-s style="padding-left: #{depth * 20}px;" data-controller="comment" data-comment-id=comment.id
+.flex-column.comment.flex-column.gap-s id="comment_#{comment.id}" style="padding-left: #{depth * 20}px;" data-controller="comment" data-comment-id=comment.id
 
   / DELETED COMMENT
   - if comment.deleted?
@@ -46,7 +46,7 @@
 
 
     - if logged_in?
-      .comment-reply-form style="display: none;" data-comment-target="replyForm"
+      .comment-reply-form id="reply_form_#{comment.id}" style="display: none;" data-comment-target="replyForm"
         = form_with(model: Comment.new, url: comment_comments_path(comment), method: :post, class: "flex-column gap-s new-reply-form") do |f|
           .form-group
             / = f.label :content, "Reply to #{comment.author_name}:", class: "form-label"
@@ -55,6 +55,6 @@
             = f.submit "Post Reply", class: "button"
             button.btn-cancel type="button" data-action="click->comment#cancelReply" Cancel
 
-  .comment-replies
+  .comment-replies id="comment_#{comment.id}_replies"
     - comment.comments.each do |child_comment|
-      = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: depth + 1 }
+      = render partial: 'comments/reader_comment', locals: { comment: child_comment, depth: 1}
