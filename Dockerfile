@@ -46,7 +46,8 @@ RUN apt-get update -qq && \
 # Install application gems
 COPY Gemfile Gemfile.lock ./
 RUN bundle config set --local path "${BUNDLE_PATH}"
-RUN bundle install && \
+RUN --mount=type=cache,id=metazine-gems,target=/usr/local/bundle \
+    bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
@@ -55,7 +56,8 @@ COPY . .
 
 # Create a directory for node_modules and install npm packages locally
 RUN mkdir -p /rails/node_modules
-RUN npm install --prefix /rails jsdom @mozilla/readability
+RUN --mount=type=cache,id=metazine-npm,target=/root/.npm \
+    npm install --prefix /rails jsdom @mozilla/readability
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
