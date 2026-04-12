@@ -18,7 +18,8 @@ module Articles
         return nil unless description
 
         cleaned_description_text = clean(description)
-        clean_parentheses(cleaned_description_text)
+        shortened_description = truncate_description(cleaned_description_text)
+        clean_parentheses(shortened_description)
       end
 
       def clean(text)
@@ -35,10 +36,15 @@ module Articles
           .strip
       end
 
-      def truncate_description(text, length: 350)
+      def truncate_description(text, length: 450)
         return text if text.length <= length
 
-        "#{text[0..length]}…"
+        truncated = text[0...length]
+        last_punctuation_index = truncated.rindex(/[.!?]/)
+
+        return "#{truncated}…" if last_punctuation_index.nil?
+
+        truncated[0..last_punctuation_index]
       end
 
       private

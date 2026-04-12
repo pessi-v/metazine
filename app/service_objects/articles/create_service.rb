@@ -18,12 +18,28 @@ module Articles
     end
 
     def create_article
-      return nil if !@original_page
+      if !@original_page
+        Rails.logger.info("[Article Rejected] '#{@clean_title}' - Failed to fetch original page (cloudflare_blocked: #{@cloudflare_blocked})")
+        return nil
+      end
 
-      return if article_exists? || !english? || !allowed_media_type?
+      if article_exists?
+        Rails.logger.info("[Article Rejected] '#{@clean_title}' - Article already exists (by title or URL)")
+        return
+      end
+
+      if !english?
+        Rails.logger.info("[Article Rejected] '#{@clean_title}' - Non-English content detected")
+        return
+      end
+
+      if !allowed_media_type?
+        Rails.logger.info("[Article Rejected] '#{@clean_title}' - Disallowed media type (categories: #{@entry.categories})")
+        return
+      end
 
       article = Article.new(article_attributes)
-      return unless ApprovalHelper.new(article, original_page_body: @original_page.body).approve?
+      return unless ApprovalHelper.new(article, original_page_body: @original_page.body).approve?(@clean_title)
 
       # clean up duplicate image, in case headline image is also in the text body
       article = ImageHelper.compare_and_update_article_images(article)
@@ -31,8 +47,12 @@ module Articles
       # remove small images that would be hidden by CSS anyway
       article = ImageHelper.remove_small_images(article)
 
-      article.save
-      article
+      if article.save
+        article
+      else
+        Rails.logger.info("[Article Rejected] '#{@clean_title}' - Validation failed: #{article.errors.full_messages.join(", ")}")
+        nil
+      end
     end
 
     private
@@ -80,7 +100,6 @@ module Articles
       {
         title: @clean_title,
         description: @description,
-        # summary: summary, # TODO: drop summary column from table
         description_length: @description.length,
         url: @entry_url,
         source_name: @source.name,

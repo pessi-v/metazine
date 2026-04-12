@@ -25,8 +25,12 @@ class Source < ApplicationRecord
 
   def reset_articles
     articles.destroy_all
-    update(last_modified: nil, etag: nil, last_built: nil)
+    reset_cache
     consume_feed
+  end
+
+  def reset_cache
+    update(last_modified: nil, etag: nil, last_built: nil)
   end
 
   private

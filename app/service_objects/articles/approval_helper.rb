@@ -11,7 +11,8 @@ module Articles
       "This article can be read by subscribers",
       "Full article",
       "Sorry, but this article is available to subscribers only",
-      "For just $19.95 a year"
+      "For just $19.95 a year",
+      "It only takes 2 minutes to subscribe"
     ].freeze
 
     def initialize(article, original_page_body: nil)
@@ -19,19 +20,37 @@ module Articles
       @original_page_body = original_page_body
     end
 
-    def approve?
-      return false if @article.readability_output_jsonb.blank?
+    def approve?(title = nil)
+      @title = title || @article.title
+
+      if @article.readability_output_jsonb.blank?
+        log_rejection("Readability output is blank")
+        return false
+      end
+
       html_string = @article.readability_output_jsonb["content"]
-      return false if html_string.blank?
+      if html_string.blank?
+        log_rejection("Readability content is blank")
+        return false
+      end
 
       # Skip paywalled articles
-      return false if paywalled?
+      if paywalled?
+        log_rejection("Paywall detected")
+        return false
+      end
 
       # filters some cases where no article is shown without Javascript or cookies,
       # and some cases of actually Video/Podcast content
-      if @article.readability_output_jsonb["length"] && @article.readability_output_jsonb["length"] < 1900
+      content_length = @article.readability_output_jsonb["length"]
+      if content_length && content_length < 1900
+        log_rejection("Content too short (#{content_length} chars, minimum: 1900)")
         return false
-      elsif FORBIDDEN_STRINGS.any? { |string| html_string.include?(string) }
+      end
+
+      matched_string = FORBIDDEN_STRINGS.find { |string| html_string.include?(string) }
+      if matched_string
+        log_rejection("Contains forbidden string: '#{matched_string.truncate(50)}'")
         return false
       end
 
@@ -39,6 +58,10 @@ module Articles
     end
 
     private
+
+    def log_rejection(reason)
+      Rails.logger.info("[Article Rejected] '#{@title}' - #{reason}")
+    end
 
     def paywalled?
       return false unless @original_page_body
