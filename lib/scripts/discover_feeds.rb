@@ -133,18 +133,18 @@ end
 
 # ---------------------------------------------------------------------------
 
-existing_urls  = Source.pluck(:url).to_set
-existing_names = Source.pluck(:name).to_set
+existing_urls         = Source.pluck(:url).to_set
+existing_names        = Source.pluck(:name).to_set
 
-# Group orphaned articles by source_name (those whose source no longer exists)
+# Articles are "orphaned" if their source_name doesn't match any existing source.
 orphaned_source_names = Article
   .where.not(source_name: [nil, ""])
-  .where(source_id: nil)
+  .where.not(source_name: existing_names.to_a)
   .distinct
   .pluck(:source_name)
 
 if orphaned_source_names.empty?
-  puts "No orphaned articles found (all articles have a source_id). Nothing to do."
+  puts "No orphaned articles found — all source names match existing sources."
   exit
 end
 
