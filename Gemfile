@@ -123,6 +123,8 @@ gem "mastodon-api", require: "mastodon", git: "https://github.com/daverooneyca/m
 # gem "omniauth-atproto", git: "https://github.com/lasercatspro/omniauth-atproto" # AT Protocol OAuth
 # gem "bskyrb" # Bluesky/AT Protocol API client
 
+gem "csv"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[mri windows], require: "debug/prelude"
