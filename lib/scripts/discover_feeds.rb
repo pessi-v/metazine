@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 #
 # Feed discovery script — recovers Source feed URLs from orphaned articles.
 #
@@ -39,8 +40,8 @@ COMMON_FEED_PATHS = %w[
   /?feed=atom
 ].freeze
 
-REQUEST_TIMEOUT    = 10
-OPEN_TIMEOUT       = 5
+REQUEST_TIMEOUT = 10
+OPEN_TIMEOUT = 5
 DELAY_BETWEEN_SITES = 0.5 # seconds, to be polite
 
 # ---------------------------------------------------------------------------
@@ -49,15 +50,15 @@ def build_connection(url)
   Faraday.new(url: url) do |f|
     f.use Faraday::FollowRedirects::Middleware, limit: 5
     f.adapter Faraday.default_adapter
-    f.options.timeout    = REQUEST_TIMEOUT
+    f.options.timeout = REQUEST_TIMEOUT
     f.options.open_timeout = OPEN_TIMEOUT
     f.headers["User-Agent"] = "Mozilla/5.0 (compatible; MetazineFeedDiscovery/1.0)"
   end
 end
 
 def fetch(url)
-  uri    = URI.parse(url)
-  origin = "#{uri.scheme}://#{uri.host}#{uri.port != uri.default_port ? ":#{uri.port}" : ""}"
+  uri = URI.parse(url)
+  origin = "#{uri.scheme}://#{uri.host}#{":#{uri.port}" if uri.port != uri.default_port}"
   build_connection(origin).get(uri.request_uri)
 rescue => e
   nil
@@ -103,7 +104,7 @@ def discover_feeds_for(source_name, sample_url)
 
   # 1. Common feed paths
   COMMON_FEED_PATHS.each do |path|
-    url      = "#{base}#{path}"
+    url = "#{base}#{path}"
     response = fetch(url)
     candidates << url if response&.success? && valid_feed?(response.body)
   end
@@ -133,8 +134,8 @@ end
 
 # ---------------------------------------------------------------------------
 
-existing_urls         = Source.pluck(:url).to_set
-existing_names        = Source.pluck(:name).to_set
+existing_urls = Source.pluck(:url).to_set
+existing_names = Source.pluck(:name).to_set
 
 # Articles are "orphaned" if their source_name doesn't match any existing source.
 orphaned_source_names = Article
@@ -154,7 +155,7 @@ results = []
 
 orphaned_source_names.each_with_index do |source_name, i|
   sample_url = Article
-    .where(source_name: source_name, source_id: nil)
+    .where(source_name: source_name)
     .where.not(url: [nil, ""])
     .order(published_at: :desc)
     .limit(1)
@@ -172,12 +173,12 @@ orphaned_source_names.each_with_index do |source_name, i|
 
   if feeds.empty?
     puts "no feed found"
-    results << { source_name: source_name, sample_url: sample_url, feed_url: nil, status: "not_found" }
+    results << {source_name: source_name, sample_url: sample_url, feed_url: nil, status: "not_found"}
   else
     puts "found #{feeds.size}: #{feeds.join(", ")}"
     feeds.each do |feed_url|
       status = existing_urls.include?(feed_url) ? "already_exists" : "new"
-      results << { source_name: source_name, sample_url: sample_url, feed_url: feed_url, status: status }
+      results << {source_name: source_name, sample_url: sample_url, feed_url: feed_url, status: status}
     end
   end
 
