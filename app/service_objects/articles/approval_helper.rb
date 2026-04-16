@@ -12,7 +12,8 @@ module Articles
       "Full article",
       "Sorry, but this article is available to subscribers only",
       "For just $19.95 a year",
-      "It only takes 2 minutes to subscribe"
+      "It only takes 2 minutes to subscribe",
+      "Become a member to continue"
     ].freeze
 
     def initialize(article, original_page_body: nil)
