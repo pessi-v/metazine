@@ -46,12 +46,20 @@ export async function keyPairsDispatcher(
   if (identifier !== "instance") return [];
 
   const actor = await fetchInstanceActor();
-  if (!actor?.private_key || !actor?.public_key) return [];
+  if (!actor?.private_key || !actor?.public_key) {
+    console.error("[keys] No keys in DB for instance actor");
+    return [];
+  }
 
-  const [privateKey, publicKey] = await Promise.all([
-    importPrivateKeyPem(actor.private_key),
-    importPublicKeyPem(actor.public_key),
-  ]);
-
-  return [{ privateKey, publicKey }];
+  try {
+    const [privateKey, publicKey] = await Promise.all([
+      importPrivateKeyPem(actor.private_key),
+      importPublicKeyPem(actor.public_key),
+    ]);
+    console.log("[keys] Key pair loaded successfully");
+    return [{ privateKey, publicKey }];
+  } catch (e) {
+    console.error("[keys] Key import failed:", e);
+    return [];
+  }
 }
