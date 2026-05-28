@@ -7,6 +7,6 @@ set -e
 [ "$KAMAL_DESTINATION" = "fedify" ] || exit 0
 
 echo "==> Building Fedify sidecar image (pessiv/metazine-fedify)..."
-docker build -t pessiv/metazine-fedify ./fedify
+docker buildx build --platform linux/amd64 -t pessiv/metazine-fedify ./fedify
 docker push pessiv/metazine-fedify
 echo "==> Fedify sidecar image pushed"

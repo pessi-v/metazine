@@ -8,7 +8,12 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-InstanceActor.create(name: "press")
+rsa = OpenSSL::PKey::RSA.generate(2048)
+InstanceActor.create!(
+  name: ENV.fetch("INSTANCE_NAME", "press"),
+  public_key: rsa.public_key.to_pem,
+  private_key: rsa.to_pem
+)
 
 Source.create(name: "Le Monde Diplomatique", url: "https://mondediplo.com/backend")
 Source.create(name: "The Ecologist", url: "https://theecologist.org/whats_new/feed")
