@@ -67,7 +67,9 @@ export async function onCreateObject(
   ctx: InboxContext<void>,
   create: Create,
 ): Promise<void> {
+  console.log(`[inbox] Create from ${create.actorId?.href}`);
   const object = await create.getObject(ctx);
+  console.log(`[inbox] Create object type: ${object?.constructor?.name}, id: ${object?.id?.href}`);
   await notifyRails({
     type: "Create",
     actorUrl: await actorHref(ctx, create),
@@ -75,6 +77,7 @@ export async function onCreateObject(
     object: object ? await (object as any).toJsonLd() : null,
     raw: await create.toJsonLd(),
   });
+  console.log("[inbox] Create forwarded to Rails");
 }
 
 export async function onUpdateNote(

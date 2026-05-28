@@ -18,6 +18,7 @@ const server = Bun.serve({
   port,
   async fetch(req) {
     const url = new URL(req.url);
+    console.log(`[${new Date().toISOString()}] ${req.method} ${url.pathname}`);
 
     // Internal API paths are handled locally — no https rewrite needed
     if (url.pathname.startsWith("/internal/")) {
@@ -25,11 +26,15 @@ const server = Bun.serve({
       if (res) return res;
     }
 
-    return federation.fetch(toHttps(req), {
+    const res = await federation.fetch(toHttps(req), {
       contextData: undefined,
       onNotFound: () => new Response("Not Found", { status: 404 }),
       onNotAcceptable: () => new Response("Not Acceptable", { status: 406 }),
     });
+    if (res.status >= 400) {
+      console.log(`[${new Date().toISOString()}] -> ${res.status} ${url.pathname}`);
+    }
+    return res;
   },
 });
 
