@@ -26,7 +26,7 @@ export async function actorDispatcher(
   return new Application({
     id: ctx.getActorUri(identifier),
     name: actor.name,
-    preferredUsername: actor.name,
+    preferredUsername: identifier,
     summary: "We recommend hiding Boosts from us",
     url: new URL(`https://${appHost}`),
     inbox: ctx.getInboxUri(identifier),
