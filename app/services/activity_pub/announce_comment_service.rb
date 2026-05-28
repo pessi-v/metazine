@@ -5,7 +5,6 @@ class ActivityPub::AnnounceCommentService
 
   def initialize(comment)
     @comment = comment
-    @instance_actor = InstanceActor.first&.federails_actor
   end
 
   def forward_comment
@@ -16,43 +15,28 @@ class ActivityPub::AnnounceCommentService
       return
     end
 
-    unless instance_actor
-      Rails.logger.info "  Skipping announce: no instance_actor found"
-      return
-    end
-
     if already_forwarded?
       Rails.logger.info "  Skipping announce: already announced"
       return
     end
 
-    # Create an Announce activity to boost the comment to our followers
-    activity = Federails::Activity.create!(
-      actor: instance_actor,
-      entity: comment,
-      action: 'Announce'
-    )
-
     remote_url = comment.read_attribute(:federated_url)
-    Rails.logger.info "=== Created Announce activity for Comment##{comment.id} ==="
+    Rails.logger.info "=== Announcing Comment##{comment.id} via Fedify ==="
     Rails.logger.info "  Comment URL: #{remote_url}"
-    Rails.logger.info "  InstanceActor followers: #{instance_actor.followers.count}"
 
-    Federails::NotifyInboxJob.perform_later(activity)
+    ActivityPub::FedifyClient.announce_comment(comment_id: comment.id, object_url: remote_url)
   end
 
   private
 
-  attr_reader :comment, :instance_actor
+  attr_reader :comment
 
   def should_forward?
     Rails.logger.info "  Checking should_forward?"
 
-    # Access the raw federated_url column (federails overrides the method)
     remote_url = comment.read_attribute(:federated_url)
     Rails.logger.info "    Remote federated_url: #{remote_url}"
 
-    # Only forward federated comments (not local ones)
     unless remote_url.present?
       Rails.logger.info "    No remote federated_url present"
       return false
@@ -63,13 +47,11 @@ class ActivityPub::AnnounceCommentService
       return false
     end
 
-    # Only forward if we have followers
-    unless instance_actor&.followers&.any?
+    # Only forward if we have followers in the new ap_follows table
+    unless ApFollow.accepted.any?
       Rails.logger.info "    InstanceActor has no followers"
       return false
     end
-
-    Rails.logger.info "    InstanceActor has #{instance_actor.followers.count} followers"
 
     # Only forward comments on OUR federated content
     article = find_root_article
@@ -82,11 +64,10 @@ class ActivityPub::AnnounceCommentService
 
     Rails.logger.info "    Article federated_url: #{article.federated_url}"
 
-    # Verify article federated_url is from our instance
-    # Articles we federate always have this path pattern
-    result = article.federated_url.include?("/federation/published/articles/")
-    Rails.logger.info "    Is from our instance (contains /federation/published/articles/): #{result}"
+    app_host = ENV["APP_HOST"].presence || Rails.application.routes.default_url_options[:host].to_s
+    result = app_host.present? && article.federated_url.include?(app_host)
 
+    Rails.logger.info "    Is from our instance: #{result}"
     result
   end
 
@@ -100,10 +81,11 @@ class ActivityPub::AnnounceCommentService
   end
 
   def already_forwarded?
-    Federails::Activity.exists?(
-      actor: instance_actor,
-      entity: comment,
-      action: 'Announce'
-    )
+    # Check in both old Federails activities and new ap_follows-based tracking
+    # For now, use Federails as the source of truth during the transition
+    instance_actor = InstanceActor.first&.federails_actor
+    return false unless instance_actor
+
+    Federails::Activity.exists?(actor: instance_actor, entity: comment, action: "Announce")
   end
 end

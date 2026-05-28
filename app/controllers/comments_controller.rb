@@ -35,25 +35,14 @@ class CommentsController < ApplicationController
         if @parent.is_a?(Article) && @parent.federated_url.blank?
           Rails.logger.info "  Article not yet federated - federating now before posting comment"
 
-          # Generate the federated_url for the Article
-          host = Rails.application.routes.default_url_options[:host] || ENV["APP_HOST"] || "localhost:3000"
-          article_url = "https://#{host}/federation/published/articles/#{@parent.id}"
+          host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
+          article_url = "https://#{host}/ap/articles/#{@parent.id}"
 
-          # Set the federated_url on the Article
           @parent.update_column(:federated_url, article_url)
           Rails.logger.info "  Set Article federated_url: #{article_url}"
 
-          # Create a Federails Activity for the Article
-          article_activity = Federails::Activity.create!(
-            actor: @parent.federails_actor,
-            entity: @parent,
-            action: 'Create'
-          )
-
-          # Enqueue the federation job
-          Federails::NotifyInboxJob.perform_later(article_activity)
-
-          Rails.logger.info "  Article federation Activity##{article_activity.id} created and enqueued"
+          ActivityPub::FedifyClient.create_article(@parent.id)
+          Rails.logger.info "  Article federation queued via Fedify"
         end
 
         # Initialize Mastodon API client

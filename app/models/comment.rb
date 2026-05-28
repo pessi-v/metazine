@@ -98,16 +98,10 @@ class Comment < ApplicationRecord
     # Create Delete activity first if we should federate
     if federate?
       begin
-        activity = Federails::Activity.create!(
-          actor: federails_actor,
-          entity: self,
-          action: "Delete"
-        )
-
-        Federails::NotifyInboxJob.perform_later(activity)
-        Rails.logger.info "Created Delete activity for Comment##{id}, Activity##{activity.id}"
+        ActivityPub::FedifyClient.delete_comment(id)
+        Rails.logger.info "Queued Delete activity for Comment##{id} via Fedify"
       rescue => e
-        Rails.logger.error "Error creating Delete activity for Comment##{id}: #{e.message}"
+        Rails.logger.error "Error queuing Delete activity for Comment##{id}: #{e.message}"
       end
     end
 
@@ -430,37 +424,22 @@ class Comment < ApplicationRecord
     return unless parent.is_a?(Article)
     return if parent.federated_url.present? # Already federated
 
-    # Check if this is the first comment (should be, since we just created it)
     comment_count = parent.comments.count
     if comment_count == 1
       Rails.logger.info "=== First comment on Article##{parent.id}, triggering Article federation ==="
 
-      # Generate the federated_url for the Article
-      # This must be set BEFORE creating the Activity so the published endpoint allows access
-      host = Rails.application.routes.default_url_options[:host] || ENV["APP_HOST"] || "localhost:3000"
-      article_url = "https://#{host}/federation/published/articles/#{parent.id}"
+      host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
+      article_url = "https://#{host}/ap/articles/#{parent.id}"
 
-      # Set the federated_url on the Article
       parent.update_column(:federated_url, article_url)
       Rails.logger.info "  Set Article federated_url: #{article_url}"
 
-      # Manually trigger federation of the Article
-      # Create a Federails Activity for the Article
-      activity = Federails::Activity.create!(
-        actor: parent.federails_actor,
-        entity: parent,
-        action: "Create"
-      )
-
-      # Enqueue the federation job
-      Federails::NotifyInboxJob.perform_later(activity)
-
-      Rails.logger.info "  Article federation Activity##{activity.id} created and enqueued"
+      ActivityPub::FedifyClient.create_article(parent.id)
+      Rails.logger.info "  Article federation queued via Fedify"
     end
   rescue => e
-    Rails.logger.error "=== Error federating parent Article ==="
-    Rails.logger.error "  Error: #{e.class}: #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-    # Don't raise - allow comment creation to proceed even if Article federation fails
+    Rails.logger.error "=== Error federating parent Article: #{e.class}: #{e.message} ==="
+    Rails.logger.error e.backtrace.first(5).join("\n")
+    # Don't raise — allow comment creation to proceed even if federation fails
   end
 end

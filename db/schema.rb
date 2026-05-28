@@ -10,23 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_09_171753) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_28_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
   enable_extension "unaccent"
 
-  # Create IMMUTABLE wrapper function for unaccent to use in indexes
-  execute <<-SQL
-    CREATE OR REPLACE FUNCTION public.f_unaccent(input_text text)
-    RETURNS text
-    LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE STRICT AS
-    $$
-    BEGIN
-      RETURN public.unaccent(input_text);
-    END
-    $$;
-  SQL
+  create_table "ap_follows", force: :cascade do |t|
+    t.text "follower_url", null: false
+    t.text "follower_inbox_url", null: false
+    t.integer "status", default: 0, null: false
+    t.text "follow_activity_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["follower_url"], name: "index_ap_follows_on_follower_url", unique: true
+  end
 
   create_table "articles", force: :cascade do |t|
     t.string "title"
@@ -135,6 +133,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_09_171753) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
+    t.text "public_key"
+    t.text "private_key"
   end
 
   create_table "job_runs", force: :cascade do |t|
