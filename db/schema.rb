@@ -16,6 +16,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000002) do
   enable_extension "pg_stat_statements"
   enable_extension "unaccent"
 
+  execute <<~SQL
+    CREATE OR REPLACE FUNCTION public.f_unaccent(input_text text)
+    RETURNS text
+    LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE STRICT AS
+    $func$
+    BEGIN
+      RETURN public.unaccent(input_text);
+    END
+    $func$;
+  SQL
+
   create_table "ap_follows", force: :cascade do |t|
     t.text "follower_url", null: false
     t.text "follower_inbox_url", null: false

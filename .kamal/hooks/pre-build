@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+# Build and push the Fedify sidecar image when deploying the fedify destination.
+# This runs locally before the main Rails image build, so both images are
+# up-to-date before Kamal starts deploying to the server.
+[ "$KAMAL_DESTINATION" = "fedify" ] || exit 0
+
+echo "==> Building Fedify sidecar image (pessiv/metazine-fedify)..."
+docker build -t pessiv/metazine-fedify ./fedify
+docker push pessiv/metazine-fedify
+echo "==> Fedify sidecar image pushed"
