@@ -1,6 +1,7 @@
 GIT
   remote: https://github.com/daverooneyca/mastodon-api
   revision: 5828529e8f550ad5cb1b17006586733eab5e0b3f
+  ref: 5828529e8f550ad5cb1b17006586733eab5e0b3f
   specs:
     mastodon-api (2.0.1)
       addressable (~> 2.6)
@@ -11,6 +12,7 @@ GIT
 GIT
   remote: https://github.com/trakt/omniauth-mastodon
   revision: 71bf194948cf00ad97611579bc98c941189a5927
+  ref: 71bf194948cf00ad97611579bc98c941189a5927
   specs:
     omniauth-mastodon (0.9.3)
       i18n
