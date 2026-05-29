@@ -21,6 +21,7 @@ export async function actorDispatcher(
   const actor = await fetchInstanceActor();
   if (!actor) return null;
 
+  const keyPairs = await ctx.getActorKeyPairs(identifier);
   const appHost = process.env.APP_HOST ?? "";
 
   return new Application({
@@ -32,6 +33,8 @@ export async function actorDispatcher(
     inbox: ctx.getInboxUri(identifier),
     followers: ctx.getFollowersUri(identifier),
     endpoints: new Endpoints({ sharedInbox: ctx.getInboxUri() }),
+    publicKey: keyPairs[0]?.cryptographicKey,
+    assertionMethods: keyPairs.map((kp) => kp.multikey),
     icon: new Image({
       mediaType: "image/png",
       url: new URL(`https://${appHost}/assets/instance-logo.png`),
