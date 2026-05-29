@@ -19,7 +19,7 @@ export async function importPrivateKeyPem(pem: string): Promise<CryptoKey> {
     "pkcs8",
     ab,
     { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
+    true,
     ["sign"],
   );
 }
