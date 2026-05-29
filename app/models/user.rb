@@ -1,11 +1,6 @@
 class User < ApplicationRecord
-  include Federails::ActorEntity
-
-  acts_as_federails_actor(
-    username_field: :username,
-    name_field: :display_name,
-    auto_create_actors: false  # Don't auto-create, we'll link to remote actor manually
-  )
+  has_one :federails_actor, -> { where(entity_type: "User") },
+    foreign_key: :entity_id, class_name: "Federails::Actor", dependent: :nullify
 
   has_many :sessions, dependent: :destroy
   has_many :comments, dependent: :nullify

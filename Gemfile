@@ -80,9 +80,7 @@ gem "dotenv"
 
 # gem 'rufus-scheduler'
 
-# ActivityPub
-# gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
-gem "federails", git: "https://gitlab.com/experimentslabs/federails/"
+# ActivityPub handled by Fedify sidecar (see fedify/)
 
 # pagination
 gem "pagy", "~> 9.1"

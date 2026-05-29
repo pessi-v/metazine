@@ -3,7 +3,7 @@ module Articles
     require "faraday/gzip"
 
     def initialize(source, entry)
-      @instance_actor = Federails::Actor.where(entity_type: "InstanceActor").first
+      @instance_actor = Federails::Actor.find_by(entity_type: "InstanceActor")
       @source = source
       @entry = entry
       @entry_url = normalize_url(@entry.url)

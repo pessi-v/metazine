@@ -45,8 +45,6 @@ Rails.application.routes.draw do
     post "ap/activity", to: "ap#create"
   end
 
-  mount Federails::Engine => "/"
-
   mount PgHero::Engine, at: "pghero"
 
   mount MissionControl::Jobs::Engine, at: "/jobs"

@@ -81,11 +81,6 @@ class ActivityPub::AnnounceCommentService
   end
 
   def already_forwarded?
-    # Check in both old Federails activities and new ap_follows-based tracking
-    # For now, use Federails as the source of truth during the transition
-    instance_actor = InstanceActor.first&.federails_actor
-    return false unless instance_actor
-
-    Federails::Activity.exists?(actor: instance_actor, entity: comment, action: "Announce")
+    false
   end
 end
