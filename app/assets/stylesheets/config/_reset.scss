@@ -186,6 +186,24 @@ ol {
   list-style-position: inside;
 }
 
+.control {
+  font-family: var(--font-family-headlines);
+  color: var(--color-text-header);
+  font-size: var(--font-size-m);
+  font-weight: bold;
+  // border: var(--border);
+  border: 3px double var(--color-text-header);
+  padding: 3px !important;
+  background-color: none !important;
+  background: none !important;
+}
+
+.control:hover {
+  font-family: var(--font-family-headlines);
+  color: var(--color-tertiary) !important;
+  cursor: pointer;
+}
+
 button,
 .button {
   height: 2.5rem;

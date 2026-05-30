@@ -6,7 +6,7 @@ module Articles
       @instance_actor = ApActor.find_by(entity_type: "InstanceActor")
       @source = source
       @entry = entry
-      @entry_url = normalize_url(@entry.url)
+      @entry_url = normalize_url(@entry.url.presence || @entry.entry_id)
       @cloudflare_blocked = false
       @original_page = fetch_original_page
       @description = make_description

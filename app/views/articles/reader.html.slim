@@ -60,7 +60,7 @@
           p
             | Logged in as
             strong<> = current_user.full_username
-          = button_to "Logout", logout_path, method: :delete, class: "btn-logout"
+          = link_to "Logout", logout_path, method: :delete, class: "control"
 
         / = render partial: 'comments/comment_form', locals: { parent: @article, comment: Comment.new }
       
