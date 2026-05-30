@@ -120,26 +120,28 @@ class User < ApplicationRecord
 
     unless remote_actor
       Rails.logger.info "  No existing actor found, creating from OAuth data..."
-      remote_actor = ApActor.create!(
-        federated_url: expected_actor_url,
-        username: username,
-        name: display_name.presence || username,
-        server: domain,
-        local: false,
-        actor_type: "Person",
-        entity_type: "User",
-        entity_id: id,
-        inbox_url: "https://#{domain}/users/#{username}/inbox"
-      )
-      Rails.logger.info "  Created Actor##{remote_actor.id}"
-      update_actor_attributes(remote_actor)
-      claimed_count = Comment.where(remote_actor_url: expected_actor_url, user_id: nil).update_all(user_id: id)
-      Rails.logger.info "  Claimed #{claimed_count} comments via remote_actor_url"
-      return
-    rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.warn "  Actor creation failed: #{e.message}"
-      remote_actor = ApActor.find_by(federated_url: expected_actor_url)
-      return unless remote_actor
+      begin
+        remote_actor = ApActor.create!(
+          federated_url: expected_actor_url,
+          username: username,
+          name: display_name.presence || username,
+          server: domain,
+          local: false,
+          actor_type: "Person",
+          entity_type: "User",
+          entity_id: id,
+          inbox_url: "https://#{domain}/users/#{username}/inbox"
+        )
+        Rails.logger.info "  Created Actor##{remote_actor.id}"
+        update_actor_attributes(remote_actor)
+        claimed_count = Comment.where(remote_actor_url: expected_actor_url, user_id: nil).update_all(user_id: id)
+        Rails.logger.info "  Claimed #{claimed_count} comments via remote_actor_url"
+        return
+      rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.warn "  Actor creation failed: #{e.message}"
+        remote_actor = ApActor.find_by(federated_url: expected_actor_url)
+        return unless remote_actor
+      end
     end
 
     Rails.logger.info "  Found Actor##{remote_actor.id}"
