@@ -70,14 +70,16 @@ export async function onCreateObject(
   console.log(`[inbox] Create from ${create.actorId?.href}`);
   const object = await create.getObject(ctx);
   console.log(`[inbox] Create object type: ${object?.constructor?.name}, id: ${object?.id?.href}`);
+  console.log("[inbox] Serializing Create payload...");
+  const actorUrl = await actorHref(ctx, create);
+  console.log(`[inbox] actorUrl resolved: ${actorUrl}`);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const objectJson = object ? await (object as any).toJsonLd() : null;
+  console.log("[inbox] object serialized");
+  const rawJson = await create.toJsonLd();
+  console.log("[inbox] raw serialized, calling notifyRails...");
   try {
-    await notifyRails({
-      type: "Create",
-      actorUrl: await actorHref(ctx, create),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      object: object ? await (object as any).toJsonLd() : null,
-      raw: await create.toJsonLd(),
-    });
+    await notifyRails({ type: "Create", actorUrl, object: objectJson, raw: rawJson });
     console.log("[inbox] Create forwarded to Rails");
   } catch (e) {
     console.error(`[inbox] Failed to forward Create to Rails: ${e}`);
