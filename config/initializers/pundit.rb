@@ -1,5 +1,4 @@
 # Configure Pundit to gracefully handle missing current_user
-# This is needed for federails controllers which don't have sessions
 
 module Pundit
   module Authorization

@@ -10,22 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_28_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_30_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
   enable_extension "unaccent"
-
-  execute <<~SQL
-    CREATE OR REPLACE FUNCTION public.f_unaccent(input_text text)
-    RETURNS text
-    LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE STRICT AS
-    $func$
-    BEGIN
-      RETURN public.unaccent(input_text);
-    END
-    $func$;
-  SQL
 
   create_table "ap_follows", force: :cascade do |t|
     t.text "follower_url", null: false
@@ -70,23 +59,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000002) do
     t.bigint "federails_actor_id"
     t.datetime "deleted_at"
     t.bigint "user_id"
+    t.text "remote_actor_url"
     t.index ["deleted_at"], name: "index_comments_on_deleted_at"
     t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
     t.index ["parent_type", "parent_id"], name: "index_poly_comments_on_parent"
     t.index ["user_id"], name: "index_comments_on_user_id"
-  end
-
-  create_table "federails_activities", force: :cascade do |t|
-    t.string "entity_type", null: false
-    t.bigint "entity_id", null: false
-    t.string "action", null: false
-    t.bigint "actor_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uuid"
-    t.index ["actor_id"], name: "index_federails_activities_on_actor_id"
-    t.index ["entity_type", "entity_id"], name: "index_federails_activities_on_entity"
-    t.index ["uuid"], name: "index_federails_activities_on_uuid", unique: true
   end
 
   create_table "federails_actors", force: :cascade do |t|
@@ -113,31 +90,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000002) do
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
     t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
     t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
-  end
-
-  create_table "federails_followings", force: :cascade do |t|
-    t.bigint "actor_id", null: false
-    t.bigint "target_actor_id", null: false
-    t.integer "status", default: 0
-    t.string "federated_url"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uuid"
-    t.index ["actor_id", "target_actor_id"], name: "index_federails_followings_on_actor_id_and_target_actor_id", unique: true
-    t.index ["target_actor_id"], name: "index_federails_followings_on_target_actor_id"
-    t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
-  end
-
-  create_table "federails_hosts", force: :cascade do |t|
-    t.string "domain", null: false
-    t.string "nodeinfo_url"
-    t.string "software_name"
-    t.string "software_version"
-    t.jsonb "protocols", default: []
-    t.jsonb "services", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["domain"], name: "index_federails_hosts_on_domain", unique: true
   end
 
   create_table "instance_actors", force: :cascade do |t|
@@ -231,8 +183,5 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_28_000002) do
   add_foreign_key "articles", "federails_actors"
   add_foreign_key "comments", "federails_actors"
   add_foreign_key "comments", "users"
-  add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
-  add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
-  add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
   add_foreign_key "sessions", "users"
 end
