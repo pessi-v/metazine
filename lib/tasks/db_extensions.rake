@@ -1,6 +1,5 @@
 namespace :db do
-  task :create_f_unaccent do
-    ActiveRecord::Base.establish_connection(ActiveRecord::Base.configurations.find_db_config(Rails.env))
+  task create_f_unaccent: :environment do
     conn = ActiveRecord::Base.connection
     conn.execute("CREATE EXTENSION IF NOT EXISTS unaccent SCHEMA public;")
     conn.execute(<<~SQL)
@@ -12,5 +11,3 @@ namespace :db do
     warn "db:create_f_unaccent skipped: #{e.message}"
   end
 end
-
-Rake::Task["db:schema:load"].enhance(["db:create_f_unaccent"])
