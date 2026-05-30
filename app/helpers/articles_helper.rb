@@ -4,7 +4,7 @@ module ArticlesHelper
       @articles.sort_by do |article|
         article.description_length
       end.reverse
-    index = @articles.index(&:image_url)
+    index = @articles.index(&:image_url) || 0
     @articles.delete_at(index)
   end
 

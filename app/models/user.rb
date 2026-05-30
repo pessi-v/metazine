@@ -115,43 +115,34 @@ class User < ApplicationRecord
     Rails.logger.info "=== Linking User##{id} to actor ==="
     Rails.logger.info "  Expected URL: #{expected_actor_url}"
 
-    # First, try to find existing actor by federated_url
+    # Find existing actor by federated_url, or create one from OAuth login data
     remote_actor = ApActor.find_by(federated_url: expected_actor_url)
 
-    # If not found, try to fetch from remote server
     unless remote_actor
-      remote_actor = ApActor.find_by_federation_url(expected_actor_url)
-    end
-
-    unless remote_actor
-      Rails.logger.warn "  Could not find or fetch actor from #{expected_actor_url}"
+      Rails.logger.info "  No existing actor found, creating from OAuth data..."
+      remote_actor = ApActor.create!(
+        federated_url: expected_actor_url,
+        username: username,
+        name: display_name.presence || username,
+        server: domain,
+        local: false,
+        actor_type: "Person",
+        entity_type: "User",
+        entity_id: id,
+        inbox_url: "https://#{domain}/users/#{username}/inbox"
+      )
+      Rails.logger.info "  Created Actor##{remote_actor.id}"
+      update_actor_attributes(remote_actor)
+      claimed_count = Comment.where(remote_actor_url: expected_actor_url, user_id: nil).update_all(user_id: id)
+      Rails.logger.info "  Claimed #{claimed_count} comments via remote_actor_url"
       return
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.warn "  Actor creation failed: #{e.message}"
+      remote_actor = ApActor.find_by(federated_url: expected_actor_url)
+      return unless remote_actor
     end
 
-    Rails.logger.info "  Found/fetched Actor##{remote_actor.id}"
-    Rails.logger.info "    server: #{remote_actor.server}"
-    Rails.logger.info "    local: #{remote_actor.local}"
-    Rails.logger.info "    persisted: #{remote_actor.persisted?}"
-
-    # Ensure the actor is saved and marked as remote (not local)
-    unless remote_actor.persisted?
-      remote_actor.local = false
-      begin
-        remote_actor.save!
-      rescue ActiveRecord::RecordInvalid => e
-        # If save fails due to duplicate, try to find the existing one
-        if e.message.include?("Federated url has already been taken")
-          Rails.logger.warn "  Actor save failed (duplicate), finding existing actor..."
-          remote_actor = ApActor.find_by(federated_url: expected_actor_url)
-          unless remote_actor
-            Rails.logger.error "  Could not find existing actor after duplicate error"
-            return
-          end
-        else
-          raise
-        end
-      end
-    end
+    Rails.logger.info "  Found Actor##{remote_actor.id}"
 
     # If actor is already linked to this user, update attributes and we're done
     if remote_actor.entity_id == id && remote_actor.entity_type == 'User'
