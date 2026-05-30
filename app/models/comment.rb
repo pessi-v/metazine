@@ -145,11 +145,26 @@ class Comment < ApplicationRecord
 
   def link_to_user_if_exists
     return if user_id.present?
-    return unless ap_actor
 
-    if ap_actor.entity_type == "User" && ap_actor.entity_id
+    if ap_actor&.entity_type == "User" && ap_actor&.entity_id
       update_column(:user_id, ap_actor.entity_id)
+      return
     end
+
+    if remote_actor_url.present?
+      user = user_for_actor_url(remote_actor_url)
+      update_column(:user_id, user.id) if user
+    end
+  end
+
+  def user_for_actor_url(url)
+    uri = URI.parse(url)
+    parts = uri.path.split('/').reject(&:empty?)
+    username = parts.last
+    domain = uri.host
+    User.find_by(username: username, domain: domain)
+  rescue URI::InvalidURIError
+    nil
   end
 
   def federate_parent_article_on_first_comment

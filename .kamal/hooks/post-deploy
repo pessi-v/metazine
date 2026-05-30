@@ -1,0 +1,10 @@
+#!/bin/sh
+set -e
+
+# Reboot the Fedify sidecar accessory after deploying to the fedify destination,
+# so the freshly-pushed image is picked up without a manual pull/restart.
+[ "$KAMAL_DESTINATION" = "fedify" ] || exit 0
+
+echo "==> Rebooting Fedify accessory..."
+kamal accessory reboot fedify -d fedify
+echo "==> Fedify accessory rebooted"
