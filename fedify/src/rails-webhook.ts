@@ -22,7 +22,7 @@ export async function notifyRails(payload: InboxPayload): Promise<void> {
   if (!res.ok) {
     const body = await res.text();
     throw new Error(
-      `Rails webhook returned ${res.status}: ${body.slice(0, 200)}`,
+      `Rails webhook returned ${res.status} for ${RAILS_INTERNAL_URL}/internal/ap/activity: ${body.slice(0, 500)}`,
     );
   }
 }

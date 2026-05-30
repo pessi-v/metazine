@@ -70,14 +70,18 @@ export async function onCreateObject(
   console.log(`[inbox] Create from ${create.actorId?.href}`);
   const object = await create.getObject(ctx);
   console.log(`[inbox] Create object type: ${object?.constructor?.name}, id: ${object?.id?.href}`);
-  await notifyRails({
-    type: "Create",
-    actorUrl: await actorHref(ctx, create),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    object: object ? await (object as any).toJsonLd() : null,
-    raw: await create.toJsonLd(),
-  });
-  console.log("[inbox] Create forwarded to Rails");
+  try {
+    await notifyRails({
+      type: "Create",
+      actorUrl: await actorHref(ctx, create),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      object: object ? await (object as any).toJsonLd() : null,
+      raw: await create.toJsonLd(),
+    });
+    console.log("[inbox] Create forwarded to Rails");
+  } catch (e) {
+    console.error(`[inbox] Failed to forward Create to Rails: ${e}`);
+  }
 }
 
 export async function onUpdateNote(
@@ -85,13 +89,17 @@ export async function onUpdateNote(
   update: Update,
 ): Promise<void> {
   const object = await update.getObject(ctx);
-  await notifyRails({
-    type: "Update",
-    actorUrl: await actorHref(ctx, update),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    object: object ? await (object as any).toJsonLd() : null,
-    raw: await update.toJsonLd(),
-  });
+  try {
+    await notifyRails({
+      type: "Update",
+      actorUrl: await actorHref(ctx, update),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      object: object ? await (object as any).toJsonLd() : null,
+      raw: await update.toJsonLd(),
+    });
+  } catch (e) {
+    console.error(`[inbox] Failed to forward Update to Rails: ${e}`);
+  }
 }
 
 export async function onDeleteNote(
@@ -102,22 +110,30 @@ export async function onDeleteNote(
     delete_.objectId?.href ??
     (await delete_.getObject(ctx))?.id?.href;
 
-  await notifyRails({
-    type: "Delete",
-    actorUrl: await actorHref(ctx, delete_),
-    object: { id: objectId },
-    raw: await delete_.toJsonLd(),
-  });
+  try {
+    await notifyRails({
+      type: "Delete",
+      actorUrl: await actorHref(ctx, delete_),
+      object: { id: objectId },
+      raw: await delete_.toJsonLd(),
+    });
+  } catch (e) {
+    console.error(`[inbox] Failed to forward Delete to Rails: ${e}`);
+  }
 }
 
 export async function onAnnounce(
   ctx: InboxContext<void>,
   announce: Announce,
 ): Promise<void> {
-  await notifyRails({
-    type: "Announce",
-    actorUrl: await actorHref(ctx, announce),
-    object: announce.objectId?.href ?? null,
-    raw: await announce.toJsonLd(),
-  });
+  try {
+    await notifyRails({
+      type: "Announce",
+      actorUrl: await actorHref(ctx, announce),
+      object: announce.objectId?.href ?? null,
+      raw: await announce.toJsonLd(),
+    });
+  } catch (e) {
+    console.error(`[inbox] Failed to forward Announce to Rails: ${e}`);
+  }
 }
