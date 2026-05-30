@@ -12,7 +12,7 @@ class Source < ApplicationRecord
   scope :active, -> { where(active: true) }
 
   has_many :articles, dependent: :destroy
-  before_create :add_description_and_image
+  after_create_commit :enqueue_description_and_image
   after_update :update_articles_source_name, if: :saved_change_to_name?
 
   def consume_feed
@@ -34,6 +34,10 @@ class Source < ApplicationRecord
   end
 
   private
+
+  def enqueue_description_and_image
+    SourceMetadataJob.perform_later(id)
+  end
 
   def add_description_and_image
     uri = URI(url)
