@@ -16,18 +16,20 @@ export async function actorDispatcher(
   ctx: Context<void>,
   identifier: string,
 ): Promise<Application | null> {
-  if (identifier !== "instance") return null;
-
   const actor = await fetchInstanceActor();
   if (!actor) return null;
 
-  const keyPairs = await ctx.getActorKeyPairs(identifier);
+  // Accept both "instance" (canonical internal identifier) and the actor's
+  // actual name so WebFinger lookups for acct:press@host resolve correctly.
+  if (identifier !== "instance" && identifier !== actor.name) return null;
+
+  const keyPairs = await ctx.getActorKeyPairs("instance");
   const appHost = process.env.APP_HOST ?? "";
 
   return new Application({
-    id: ctx.getActorUri(identifier),
+    id: ctx.getActorUri("instance"),
     name: actor.name,
-    preferredUsername: identifier,
+    preferredUsername: actor.name,
     summary: "We recommend hiding Boosts from us",
     url: new URL(`https://${appHost}`),
     inbox: ctx.getInboxUri(identifier),
@@ -46,10 +48,11 @@ export async function keyPairsDispatcher(
   _ctx: Context<void>,
   identifier: string,
 ): Promise<CryptoKeyPair[]> {
-  if (identifier !== "instance") return [];
-
   const actor = await fetchInstanceActor();
-  if (!actor?.private_key || !actor?.public_key) {
+  if (!actor) return [];
+  if (identifier !== "instance" && identifier !== actor.name) return [];
+
+  if (!actor.private_key || !actor.public_key) {
     console.error("[keys] No keys in DB for instance actor");
     return [];
   }
