@@ -14,4 +14,9 @@ case "$KAMAL_DESTINATION" in
     kamal accessory reboot fedify -d pessi
     echo "==> Done"
     ;;
+  newfuture)
+    echo "==> Rebooting Fedify accessory (newfuture)..."
+    kamal accessory reboot fedify -d newfuture
+    echo "==> Done"
+    ;;
 esac

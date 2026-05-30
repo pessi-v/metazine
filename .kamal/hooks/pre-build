@@ -3,7 +3,7 @@ set -e
 
 # Build and push the Fedify sidecar image for any destination that uses it.
 case "$KAMAL_DESTINATION" in
-  fedify|pessi)
+  fedify|pessi|newfuture)
     echo "==> Building Fedify sidecar image (pessiv/metazine-fedify)..."
     docker buildx build --platform linux/amd64 --push -t pessiv/metazine-fedify ./fedify
     echo "==> Fedify sidecar image pushed"
