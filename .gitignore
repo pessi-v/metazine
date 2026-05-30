@@ -54,3 +54,4 @@ Dockerfile_*
 mise.toml
 
 config/atproto_private_key.pem
+backups/
