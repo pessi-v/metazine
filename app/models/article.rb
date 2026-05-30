@@ -8,7 +8,7 @@ class Article < ApplicationRecord
   include Rails.application.routes.url_helpers
 
   belongs_to :source, counter_cache: true
-  belongs_to :federails_actor, optional: true, class_name: "Federails::Actor"
+  belongs_to :ap_actor, optional: true, class_name: "ApActor"
 
   has_many :comments, dependent: :delete_all, as: :parent
 

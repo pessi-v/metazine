@@ -138,8 +138,7 @@ class SessionsController < ApplicationController
     # Update username/display_name if they changed, and ensure no access_token
     @user.update!(username: username, display_name: display_name, domain: domain, access_token: nil)
 
-    # Create or find a local Federails::Actor for this dev user
-    actor = Federails::Actor.find_or_create_by!(
+    actor = ApActor.find_or_create_by!(
       entity_type: 'User',
       entity_id: @user.id
     ) do |a|

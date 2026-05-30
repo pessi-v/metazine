@@ -1,5 +1,5 @@
 FactoryBot.define do
-  factory :federails_actor, class: 'Federails::Actor' do
+  factory :ap_actor, class: 'ApActor' do
     sequence(:username) { |n| "user#{n}" }
     sequence(:name) { |n| "User #{n}" }
     sequence(:federated_url) { |n| "https://mastodon.social/users/user#{n}" }

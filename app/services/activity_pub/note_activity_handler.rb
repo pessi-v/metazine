@@ -30,7 +30,7 @@ class ActivityPub::NoteActivityHandler
       remote_actor_url: actor_url,
       created_at: published || Time.current
     )
-    comment.skip_federails_callbacks = true
+    comment.skip_ap_callbacks = true
 
     if comment.save
       Rails.logger.info "  Created Comment##{comment.id}"
@@ -59,7 +59,7 @@ class ActivityPub::NoteActivityHandler
       return
     end
 
-    comment.skip_federails_callbacks = true
+    comment.skip_ap_callbacks = true
     comment.content = content if content.present?
     comment.updated_at = parse_time(object["updated"]) || Time.current
     comment.save!(touch: false)

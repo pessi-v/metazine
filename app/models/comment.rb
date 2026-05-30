@@ -1,13 +1,13 @@
 class Comment < ApplicationRecord
   belongs_to :parent, polymorphic: true
   belongs_to :user, optional: true
-  belongs_to :federails_actor, optional: true, class_name: "Federails::Actor"
+  belongs_to :ap_actor, optional: true, class_name: "ApActor"
   has_many :comments, dependent: :destroy, as: :parent
 
   validates :content, presence: true, allow_blank: false
   validates :parent_type, :parent_id, presence: true, allow_blank: false
 
-  attr_accessor :skip_federails_callbacks
+  attr_accessor :skip_ap_callbacks
 
   after_create :link_to_user_if_exists
   after_create :federate_parent_article_on_first_comment
@@ -84,7 +84,7 @@ class Comment < ApplicationRecord
   end
 
   def federate?
-    return false if skip_federails_callbacks
+    return false if skip_ap_callbacks
     url = read_attribute(:federated_url)
     return false if url.present? && url.include?("mastodon")
     true
@@ -92,14 +92,14 @@ class Comment < ApplicationRecord
 
   def author_name
     return user.name if user.present?
-    return federails_actor.name if federails_actor&.name.present?
+    return ap_actor.name if ap_actor&.name.present?
     remote_actor_username || "Anonymous"
   end
 
   def author_username
     return user.full_username if user.present?
-    if federails_actor&.username.present? && federails_actor&.server.present?
-      return "@#{federails_actor.username}@#{federails_actor.server}"
+    if ap_actor&.username.present? && ap_actor&.server.present?
+      return "@#{ap_actor.username}@#{ap_actor.server}"
     end
     remote_actor_url.present? ? remote_actor_url : "unknown"
   end
@@ -107,8 +107,8 @@ class Comment < ApplicationRecord
   def owned_by?(user)
     return false unless user
     return true if user_id == user.id
-    return true if federails_actor && user.federails_actor &&
-      federails_actor.id == user.federails_actor.id
+    return true if ap_actor && user.ap_actor &&
+      ap_actor.id == user.ap_actor.id
     false
   end
 
@@ -145,10 +145,10 @@ class Comment < ApplicationRecord
 
   def link_to_user_if_exists
     return if user_id.present?
-    return unless federails_actor
+    return unless ap_actor
 
-    if federails_actor.entity_type == "User" && federails_actor.entity_id
-      update_column(:user_id, federails_actor.entity_id)
+    if ap_actor.entity_type == "User" && ap_actor.entity_id
+      update_column(:user_id, ap_actor.entity_id)
     end
   end
 

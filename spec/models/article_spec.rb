@@ -7,9 +7,9 @@ RSpec.describe Article, type: :model do
       expect(article).to respond_to(:source)
     end
 
-    it 'belongs to federails_actor' do
+    it 'belongs to ap_actor' do
       article = build(:article)
-      expect(article).to respond_to(:federails_actor)
+      expect(article).to respond_to(:ap_actor)
     end
 
     it { is_expected.to have_many(:comments).dependent(:delete_all) }

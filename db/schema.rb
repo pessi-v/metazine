@@ -10,11 +10,37 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_30_000001) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_30_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
   enable_extension "unaccent"
+
+  create_table "ap_actors", force: :cascade do |t|
+    t.string "name"
+    t.string "federated_url"
+    t.string "username"
+    t.string "server"
+    t.string "inbox_url"
+    t.string "outbox_url"
+    t.string "followers_url"
+    t.string "followings_url"
+    t.string "profile_url"
+    t.boolean "local"
+    t.integer "entity_id"
+    t.string "entity_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "uuid"
+    t.text "public_key"
+    t.text "private_key"
+    t.datetime "tombstoned_at"
+    t.string "actor_type"
+    t.json "extensions"
+    t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
+    t.index ["federated_url"], name: "index_ap_actors_on_federated_url", unique: true
+    t.index ["uuid"], name: "index_ap_actors_on_uuid", unique: true
+  end
 
   create_table "ap_follows", force: :cascade do |t|
     t.text "follower_url", null: false
@@ -41,10 +67,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_000001) do
     t.jsonb "readability_output_jsonb", default: "{}", null: false
     t.jsonb "tags"
     t.string "federated_url"
-    t.bigint "federails_actor_id"
+    t.bigint "ap_actor_id"
     t.text "searchable_content"
     t.index "(((to_tsvector('simple'::regconfig, f_unaccent(COALESCE((title)::text, ''::text))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE((source_name)::text, ''::text)))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE(searchable_content, ''::text)))))", name: "index_articles_on_searchable_fields", using: :gin
-    t.index ["federails_actor_id"], name: "index_articles_on_federails_actor_id"
+    t.index ["ap_actor_id"], name: "index_articles_on_ap_actor_id"
     t.index ["published_at"], name: "index_articles_on_published_at"
     t.index ["url", "title"], name: "index_articles_on_url_and_title", unique: true
   end
@@ -56,40 +82,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "federated_url"
-    t.bigint "federails_actor_id"
+    t.bigint "ap_actor_id"
     t.datetime "deleted_at"
     t.bigint "user_id"
     t.text "remote_actor_url"
+    t.index ["ap_actor_id"], name: "index_comments_on_ap_actor_id"
     t.index ["deleted_at"], name: "index_comments_on_deleted_at"
-    t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
     t.index ["parent_type", "parent_id"], name: "index_poly_comments_on_parent"
     t.index ["user_id"], name: "index_comments_on_user_id"
-  end
-
-  create_table "federails_actors", force: :cascade do |t|
-    t.string "name"
-    t.string "federated_url"
-    t.string "username"
-    t.string "server"
-    t.string "inbox_url"
-    t.string "outbox_url"
-    t.string "followers_url"
-    t.string "followings_url"
-    t.string "profile_url"
-    t.boolean "local"
-    t.integer "entity_id"
-    t.string "entity_type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uuid"
-    t.text "public_key"
-    t.text "private_key"
-    t.datetime "tombstoned_at"
-    t.string "actor_type"
-    t.json "extensions"
-    t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
-    t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
-    t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
   end
 
   create_table "instance_actors", force: :cascade do |t|
@@ -180,8 +180,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_000001) do
     t.index ["username"], name: "index_users_on_username"
   end
 
-  add_foreign_key "articles", "federails_actors"
-  add_foreign_key "comments", "federails_actors"
+  add_foreign_key "articles", "ap_actors"
+  add_foreign_key "comments", "ap_actors"
   add_foreign_key "comments", "users"
   add_foreign_key "sessions", "users"
 end

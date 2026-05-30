@@ -1,6 +1,6 @@
 import { createPrivateKey } from "node:crypto";
 
-// Federails stores private keys as PKCS#1 PEM ("-----BEGIN RSA PRIVATE KEY-----")
+// Private keys are stored as PKCS#1 PEM ("-----BEGIN RSA PRIVATE KEY-----")
 // and public keys as SPKI PEM ("-----BEGIN PUBLIC KEY-----").
 // Web Crypto only accepts PKCS#8 for private keys, so we convert via node:crypto.
 

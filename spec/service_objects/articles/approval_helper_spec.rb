@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Articles::ApprovalHelper do
   let(:source) { create(:source) }
-  let!(:instance_actor) { create(:federails_actor, entity_type: "InstanceActor") }
+  let!(:instance_actor) { create(:ap_actor, entity_type: "InstanceActor") }
 
   describe "#approve?" do
     context "when readability_output_jsonb is blank" do

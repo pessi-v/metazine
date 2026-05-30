@@ -39,7 +39,7 @@ RSpec.describe User, type: :model do
     before do
       # Stub the federation actor lookup to avoid network calls
       # The method returns nil when actor is not found
-      allow(Federails::Actor).to receive(:find_by_federation_url).and_return(nil)
+      allow(ApActor).to receive(:find_by_federation_url).and_return(nil)
     end
 
     context 'when user does not exist' do
@@ -138,7 +138,7 @@ RSpec.describe User, type: :model do
 
     context 'when user is already linked to an actor' do
       let!(:existing_actor) do
-        create(:federails_actor,
+        create(:ap_actor,
           entity_type: 'User',
           entity_id: user.id,
           federated_url: expected_url
@@ -148,7 +148,7 @@ RSpec.describe User, type: :model do
       it 'does not create a new link' do
         expect {
           user.link_to_federated_actor!
-        }.not_to change(Federails::Actor, :count)
+        }.not_to change(ApActor, :count)
       end
 
       it 'returns early without error' do
@@ -158,7 +158,7 @@ RSpec.describe User, type: :model do
 
     context 'when actor exists remotely but user is not linked' do
       let!(:remote_actor) do
-        create(:federails_actor,
+        create(:ap_actor,
           federated_url: expected_url,
           username: 'testuser',
           server: 'mastodon.social',
@@ -178,7 +178,7 @@ RSpec.describe User, type: :model do
       end
 
       it 'claims comments from the actor' do
-        comment = create(:comment, federails_actor: remote_actor, user_id: nil)
+        comment = create(:comment, ap_actor: remote_actor, user_id: nil)
 
         user.link_to_federated_actor!
         comment.reload
@@ -189,7 +189,7 @@ RSpec.describe User, type: :model do
 
     context 'when actor is linked to a different entity' do
       let!(:remote_actor) do
-        create(:federails_actor,
+        create(:ap_actor,
           federated_url: expected_url,
           entity_type: 'User',
           entity_id: 999  # Different user
@@ -213,13 +213,13 @@ RSpec.describe User, type: :model do
     context 'when actor does not exist' do
       before do
         # Stub the federation fetch to return nil
-        allow(Federails::Actor).to receive(:find_by_federation_url).and_return(nil)
+        allow(ApActor).to receive(:find_by_federation_url).and_return(nil)
       end
 
       it 'does not create a link' do
         expect {
           user.link_to_federated_actor!
-        }.not_to change(Federails::Actor, :count)
+        }.not_to change(ApActor, :count)
       end
 
       it 'logs a warning' do

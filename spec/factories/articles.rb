@@ -8,7 +8,7 @@ FactoryBot.define do
     image_url { "https://example.com/article-image.jpg" }
 
     association :source
-    association :federails_actor
+    association :ap_actor
 
     trait :with_readability do
       readability_output_jsonb do

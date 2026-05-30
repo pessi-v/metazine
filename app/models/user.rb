@@ -1,6 +1,6 @@
 class User < ApplicationRecord
-  has_one :federails_actor, -> { where(entity_type: "User") },
-    foreign_key: :entity_id, class_name: "Federails::Actor", dependent: :nullify
+  has_one :ap_actor, -> { where(entity_type: "User") },
+    foreign_key: :entity_id, class_name: "ApActor", dependent: :nullify
 
   has_many :sessions, dependent: :destroy
   has_many :comments, dependent: :nullify
@@ -102,7 +102,7 @@ class User < ApplicationRecord
     return unless domain.present? && username.present?
 
     # If user is already linked to an actor, skip linking (prevents double-login errors)
-    existing_link = Federails::Actor.find_by(entity_type: 'User', entity_id: id)
+    existing_link = ApActor.find_by(entity_type: 'User', entity_id: id)
     if existing_link
       Rails.logger.info "=== User##{id} already linked to Actor##{existing_link.id}, skipping ==="
       return
@@ -116,11 +116,11 @@ class User < ApplicationRecord
     Rails.logger.info "  Expected URL: #{expected_actor_url}"
 
     # First, try to find existing actor by federated_url
-    remote_actor = Federails::Actor.find_by(federated_url: expected_actor_url)
+    remote_actor = ApActor.find_by(federated_url: expected_actor_url)
 
     # If not found, try to fetch from remote server
     unless remote_actor
-      remote_actor = Federails::Actor.find_by_federation_url(expected_actor_url)
+      remote_actor = ApActor.find_by_federation_url(expected_actor_url)
     end
 
     unless remote_actor
@@ -142,7 +142,7 @@ class User < ApplicationRecord
         # If save fails due to duplicate, try to find the existing one
         if e.message.include?("Federated url has already been taken")
           Rails.logger.warn "  Actor save failed (duplicate), finding existing actor..."
-          remote_actor = Federails::Actor.find_by(federated_url: expected_actor_url)
+          remote_actor = ApActor.find_by(federated_url: expected_actor_url)
           unless remote_actor
             Rails.logger.error "  Could not find existing actor after duplicate error"
             return
@@ -171,7 +171,7 @@ class User < ApplicationRecord
     update_actor_attributes(remote_actor)
 
     # Claim any comments from this actor
-    claimed_count = Comment.where(federails_actor: remote_actor, user_id: nil).update_all(user_id: id)
+    claimed_count = Comment.where(ap_actor: remote_actor, user_id: nil).update_all(user_id: id)
 
     Rails.logger.info "  Successfully linked! Claimed #{claimed_count} comments"
   end
@@ -220,8 +220,8 @@ class User < ApplicationRecord
       Rails.logger.info "  Domain already set: #{domain}"
 
       # Check if linked actor matches the domain
-      if federails_actor&.federated_url.present?
-        actor_domain = URI.parse(federails_actor.federated_url).host rescue nil
+      if ap_actor&.federated_url.present?
+        actor_domain = URI.parse(ap_actor.federated_url).host rescue nil
         if actor_domain && actor_domain != domain
           Rails.logger.warn "  ⚠️  Actor domain (#{actor_domain}) doesn't match user domain (#{domain})"
           Rails.logger.warn "  Proceeding with re-linking..."
@@ -232,15 +232,15 @@ class User < ApplicationRecord
       end
     end
 
-    # Try to extract domain from existing federails_actor
-    if federails_actor&.federated_url.present? && federails_actor.distant?
-      extracted_domain = URI.parse(federails_actor.federated_url).host rescue nil
+    # Try to extract domain from existing ap_actor
+    if ap_actor&.federated_url.present? && ap_actor.distant?
+      extracted_domain = URI.parse(ap_actor.federated_url).host rescue nil
       if extracted_domain
         Rails.logger.info "  Extracted domain from actor URL: #{extracted_domain}"
 
         # Also try to extract username from actor URL
         # Format: https://domain/users/username
-        if federails_actor.federated_url =~ %r{https?://[^/]+/users/([^/]+)}
+        if ap_actor.federated_url =~ %r{https?://[^/]+/users/([^/]+)}
           extracted_username = $1
           Rails.logger.info "  Extracted username from actor URL: #{extracted_username}"
 
@@ -254,7 +254,7 @@ class User < ApplicationRecord
     # If we still don't have domain, try to infer from comments
     if domain.blank?
       # Find comments authored by this user's actor
-      comment_with_url = Comment.where(federails_actor: federails_actor)
+      comment_with_url = Comment.where(ap_actor: ap_actor)
                                 .where.not(federated_url: nil)
                                 .first
 
@@ -273,9 +273,9 @@ class User < ApplicationRecord
           update!(domain: inferred_domain, username: inferred_username)
 
           # Now unlink from current (wrong) actor and re-link to correct one
-          if federails_actor&.local?
+          if ap_actor&.local?
             Rails.logger.info "  Unlinking from local actor (incorrect)"
-            federails_actor.update!(entity_type: nil, entity_id: nil)
+            ap_actor.update!(entity_type: nil, entity_id: nil)
           end
 
           # Re-link to remote actor
