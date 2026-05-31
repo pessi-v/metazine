@@ -1,16 +1,14 @@
 .comment-form id="new_comment_form"
 
-  = form_with(model: comment, url: article_comments_path(parent), method: :post, class: "flex-row gap-m new-comment-form") do |f|
-    .flex-column
-      / h4 Add a comment
-      = f.submit "Add Comment", class: "control"
-      
-      
-    .form-group
+  = form_with(model: comment, url: article_comments_path(parent), method: :post, class: "flex-row justify-space-between align-end gap-m new-comment-form") do |f| 
+    .form-group.w-full
       / = f.label :content, "Your comment:", class: "form-label"
       = f.text_area :content,
         rows: 4,
-        class: "form-textarea",
+        class: "w-full",
         placeholder: "Your comment",
         required: true
 
+    .flex-column
+      / h4 Add a comment
+      = f.submit "Add Comment", class: "control"
