@@ -16,3 +16,15 @@ Disallow: /
 
 User-agent: Barkrowler
 Disallow: /
+
+User-agent: Amzn-SearchBot
+Disallow: /
+
+User-agent: HubSpot Crawler
+Disallow: /
+
+User-agent: HubSpot Links Crawler
+Disallow: /
+
+User-agent: SeznamBot
+Disallow: /

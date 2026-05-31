@@ -49,10 +49,12 @@ css:
                 = source.name
           p.line-clamp
             = source.description
-          p
-            strong
-              'Url:
-            = source.url
+          
+          = link_to(source.url)
+            p
+              strong
+                'Url:
+              = source.url
           = link_to(articles_by_source_path(source.name), data: {turbo: false})
             p
               strong
