@@ -8,19 +8,22 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-InstanceActor.create(name: "press")
+rsa = OpenSSL::PKey::RSA.generate(2048)
+InstanceActor.create!(
+  name: ENV.fetch("INSTANCE_NAME", "press"),
+  public_key: rsa.public_key.to_pem,
+  private_key: rsa.to_pem
+)
 
-Source.create(name: "Le Monde Diplomatique", url: "https://mondediplo.com/backend")
-Source.create(name: "The Ecologist", url: "https://theecologist.org/whats_new/feed")
-Source.create(name: "Grist", url: "https://grist.org/feed")
-Source.create(name: "e360", url: "https://e360.yale.edu/feed.xml")
-Source.create(name: "London Review of Books", url: "https://www.lrb.co.uk/feeds/rss")
-Source.create(name: "Social Europe", url: "https://www.socialeurope.eu/feed")
-Source.create(name: "n + 1", url: "https://www.nplusonemag.com/feed/")
-Source.create(name: "The Baffler", url: "https://thebaffler.com/homepage/feed")
-Source.create(name: "The Intercept", url: "https://theintercept.com//feed")
-Source.create(name: "Harper's Magazine", url: "https://harpers.org/feed")
-Source.create(name: "Orion", url: "https://orionmagazine.org/article/feed")
-Source.create(name: "The New York Review of Books", url: "https://feeds.feedburner.com/nybooks")
-
-Source.consume_all
+Source.find_or_create_by!(name: "Le Monde Diplomatique") { |s| s.url = "https://mondediplo.com/backend" }
+Source.find_or_create_by!(name: "The Ecologist") { |s| s.url = "https://theecologist.org/whats_new/feed" }
+Source.find_or_create_by!(name: "Grist") { |s| s.url = "https://grist.org/feed" }
+Source.find_or_create_by!(name: "e360") { |s| s.url = "https://e360.yale.edu/feed.xml" }
+Source.find_or_create_by!(name: "London Review of Books") { |s| s.url = "https://www.lrb.co.uk/feeds/rss" }
+Source.find_or_create_by!(name: "Social Europe") { |s| s.url = "https://www.socialeurope.eu/feed" }
+Source.find_or_create_by!(name: "n + 1") { |s| s.url = "https://www.nplusonemag.com/feed/" }
+Source.find_or_create_by!(name: "The Baffler") { |s| s.url = "https://thebaffler.com/homepage/feed" }
+Source.find_or_create_by!(name: "The Intercept") { |s| s.url = "https://theintercept.com//feed" }
+Source.find_or_create_by!(name: "Harper's Magazine") { |s| s.url = "https://harpers.org/feed" }
+Source.find_or_create_by!(name: "Orion") { |s| s.url = "https://orionmagazine.org/article/feed" }
+Source.find_or_create_by!(name: "The New York Review of Books") { |s| s.url = "https://feeds.feedburner.com/nybooks" }

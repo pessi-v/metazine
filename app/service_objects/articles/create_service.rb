@@ -3,10 +3,10 @@ module Articles
     require "faraday/gzip"
 
     def initialize(source, entry)
-      @instance_actor = Federails::Actor.where(entity_type: "InstanceActor").first
+      @instance_actor = ApActor.find_by(entity_type: "InstanceActor")
       @source = source
       @entry = entry
-      @entry_url = normalize_url(@entry.url)
+      @entry_url = normalize_url(@entry.url.presence || @entry.entry_id)
       @cloudflare_blocked = false
       @original_page = fetch_original_page
       @description = make_description
@@ -108,7 +108,7 @@ module Articles
         image_url: find_image_url,
         readability_output_jsonb: readability_output,
         # tags: readability_output["tags"],
-        federails_actor: @instance_actor
+        ap_actor: @instance_actor
       }
     end
 

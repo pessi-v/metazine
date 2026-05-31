@@ -80,9 +80,7 @@ gem "dotenv"
 
 # gem 'rufus-scheduler'
 
-# ActivityPub
-# gem "federails", git: "https://gitlab.com/pessi-v/federails", branch: "federails-cursor"
-gem "federails", git: "https://gitlab.com/experimentslabs/federails/"
+# ActivityPub handled by Fedify sidecar (see fedify/)
 
 # pagination
 gem "pagy", "~> 9.1"
@@ -118,8 +116,8 @@ gem "fastimage"
 # Authentication with omniauth
 gem "omniauth"
 gem "omniauth-rails_csrf_protection"
-gem "omniauth-mastodon", git: "https://github.com/trakt/omniauth-mastodon" # this fork works with omniauth gem version 2
-gem "mastodon-api", require: "mastodon", git: "https://github.com/daverooneyca/mastodon-api" # this fork works with at least ruby 3.3.4
+gem "omniauth-mastodon", git: "https://github.com/trakt/omniauth-mastodon", ref: "71bf194948cf00ad97611579bc98c941189a5927" # omniauth v2 compat fork
+gem "mastodon-api", require: "mastodon", git: "https://github.com/daverooneyca/mastodon-api", ref: "5828529e8f550ad5cb1b17006586733eab5e0b3f" # ruby 3.3+ compat fork
 # gem "omniauth-atproto", git: "https://github.com/lasercatspro/omniauth-atproto" # AT Protocol OAuth
 # gem "bskyrb" # Bluesky/AT Protocol API client
 

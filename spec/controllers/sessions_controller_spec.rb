@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe SessionsController, type: :controller do
   before do
     # Stub federation actor lookup to avoid network calls in all tests
-    allow(Federails::Actor).to receive(:find_by_federation_url).and_return(nil)
+    allow(ApActor).to receive(:find_by_federation_url).and_return(nil)
   end
 
   describe 'POST #mastodon' do

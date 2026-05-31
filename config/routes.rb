@@ -40,7 +40,10 @@ Rails.application.routes.draw do
   # DISABLED: ATProto/Bluesky integration temporarily disabled
   # get "oauth/client-metadata.json", to: "oauth#client_metadata"
 
-  mount Federails::Engine => "/"
+  # Internal webhook called by the Fedify sidecar after verifying incoming AP activities
+  namespace :internal do
+    post "ap/activity", to: "ap#create"
+  end
 
   mount PgHero::Engine, at: "pghero"
 

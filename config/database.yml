@@ -199,13 +199,13 @@ production:
     port: 5432
   cache:
     <<: *primary_production
-    database: metazine_production_cache
+    database: <%= "#{ENV["DATABASE_NAME"]}_cache" %>
     migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
-    database: metazine_production_queue
+    database: <%= "#{ENV["DATABASE_NAME"]}_queue" %>
     migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
-    database: metazine_production_cable
+    database: <%= "#{ENV["DATABASE_NAME"]}_cable" %>
     migrations_paths: db/cable_migrate

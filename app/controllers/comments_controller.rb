@@ -6,20 +6,20 @@ class CommentsController < ApplicationController
   # POST /articles/:article_id/comments
   def create
     begin
-      # Check if user has federails_actor - try to link if missing
-      unless current_user.federails_actor
-        Rails.logger.warn "User #{current_user.id} (#{current_user.username}@#{current_user.domain}) has no federails_actor, attempting to link..."
+      # Check if user has ap_actor - try to link if missing
+      unless current_user.ap_actor
+        Rails.logger.warn "User #{current_user.id} (#{current_user.username}@#{current_user.domain}) has no ap_actor, attempting to link..."
         current_user.link_to_federated_actor!
         current_user.reload
 
-        unless current_user.federails_actor
-          Rails.logger.error "Failed to link user to federails_actor"
+        unless current_user.ap_actor
+          Rails.logger.error "Failed to link user to ap_actor"
           flash[:alert] = "Your account is not properly linked. Please log out and log back in to enable commenting."
           redirect_back fallback_location: frontpage_path
           return
         end
 
-        Rails.logger.info "Successfully linked user to federails_actor #{current_user.federails_actor.id}"
+        Rails.logger.info "Successfully linked user to ap_actor #{current_user.ap_actor.id}"
       end
 
       content = comment_params[:content]
@@ -35,25 +35,14 @@ class CommentsController < ApplicationController
         if @parent.is_a?(Article) && @parent.federated_url.blank?
           Rails.logger.info "  Article not yet federated - federating now before posting comment"
 
-          # Generate the federated_url for the Article
-          host = Rails.application.routes.default_url_options[:host] || ENV["APP_HOST"] || "localhost:3000"
-          article_url = "https://#{host}/federation/published/articles/#{@parent.id}"
+          host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
+          article_url = "https://#{host}/ap/articles/#{@parent.id}"
 
-          # Set the federated_url on the Article
           @parent.update_column(:federated_url, article_url)
           Rails.logger.info "  Set Article federated_url: #{article_url}"
 
-          # Create a Federails Activity for the Article
-          article_activity = Federails::Activity.create!(
-            actor: @parent.federails_actor,
-            entity: @parent,
-            action: 'Create'
-          )
-
-          # Enqueue the federation job
-          Federails::NotifyInboxJob.perform_later(article_activity)
-
-          Rails.logger.info "  Article federation Activity##{article_activity.id} created and enqueued"
+          ActivityPub::FedifyClient.create_article(@parent.id)
+          Rails.logger.info "  Article federation queued via Fedify"
         end
 
         # Initialize Mastodon API client
@@ -74,12 +63,12 @@ class CommentsController < ApplicationController
           parent: @parent,
           content: content,
           user_id: current_user.id,
-          federails_actor: current_user.federails_actor,
+          ap_actor: current_user.ap_actor,
           federated_url: result[:uri] || result[:url] # Use URI (ActivityPub ID) or fallback to URL
         )
 
-        # Skip Federails callbacks since we already posted to Mastodon
-        comment.skip_federails_callbacks = true
+        # Skip AP callbacks since we already posted to Mastodon
+        comment.skip_ap_callbacks = true
 
         if comment.save
           Rails.logger.info "  Saved comment #{comment.id} locally with federated_url"
@@ -107,7 +96,7 @@ class CommentsController < ApplicationController
           parent: @parent,
           content: content,
           user_id: current_user.id,
-          federails_actor: current_user.federails_actor
+          ap_actor: current_user.ap_actor
         )
 
         if comment.save
@@ -173,8 +162,8 @@ class CommentsController < ApplicationController
         Rails.logger.info "  Result: #{result.inspect}"
 
         # Update the local comment to reflect the change
-        # Skip Federails callbacks since we've already handled the remote update
-        @comment.skip_federails_callbacks = true
+        # Skip AP callbacks since we've already handled the remote update
+        @comment.skip_ap_callbacks = true
         if @comment.update(content: new_content)
           # Note: No need to re-announce - the existing Announce points to the comment URL,
           # and when fetched, it will show the updated content automatically
@@ -190,7 +179,7 @@ class CommentsController < ApplicationController
           end
         end
       else
-        # Local comment or ActivityPub federated comment - update locally and let Federails handle federation
+        # Local comment or ActivityPub federated comment - update locally
         if @comment.update(content: new_content)
           Rails.logger.info "Updated comment #{@comment.id}, federating Update activity"
           respond_to do |format|
@@ -247,7 +236,7 @@ class CommentsController < ApplicationController
         Rails.logger.info "  Successfully deleted remote status"
 
         # Soft delete the local comment
-        # Skip Federails callbacks since we've already handled the remote deletion
+        # Skip AP callbacks since we've already handled the remote deletion
         @comment.update_columns(
           deleted_at: Time.current,
           content: "[deleted]",
@@ -259,7 +248,7 @@ class CommentsController < ApplicationController
           format.html { redirect_back fallback_location: frontpage_path, notice: "Comment deleted successfully from Mastodon." }
         end
       else
-        # Local comment or ActivityPub federated comment - use destroy to trigger Federails Delete activity
+        # Local comment or ActivityPub federated comment
         @comment.destroy
 
         Rails.logger.info "Deleted comment #{@comment.id}, federating Delete activity"

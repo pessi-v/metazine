@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe Articles::CreateService do
   let(:source) { create(:source, name: "Test Source", show_images: true, allow_video: true, allow_audio: true) }
-  let!(:instance_actor) { create(:federails_actor, entity_type: "InstanceActor") }
+  let!(:instance_actor) { create(:ap_actor, entity_type: "InstanceActor") }
 
   let(:entry) do
     double(
@@ -239,7 +239,7 @@ RSpec.describe Articles::CreateService do
           expect(article.url).to eq(entry.url)
           expect(article.source_name).to eq(source.name)
           expect(article.source_id).to eq(source.id)
-          expect(article.federails_actor).to eq(instance_actor)
+          expect(article.ap_actor).to eq(instance_actor)
           article
         end
         allow(Articles::ImageHelper).to receive(:remove_small_images) do |article|

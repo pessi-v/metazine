@@ -10,77 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_01_09_171753) do
+ActiveRecord::Schema[8.0].define(version: 2026_05_30_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
   enable_extension "unaccent"
 
-  # Create IMMUTABLE wrapper function for unaccent to use in indexes
-  execute <<-SQL
-    CREATE OR REPLACE FUNCTION public.f_unaccent(input_text text)
-    RETURNS text
-    LANGUAGE plpgsql IMMUTABLE PARALLEL SAFE STRICT AS
-    $$
-    BEGIN
-      RETURN public.unaccent(input_text);
-    END
-    $$;
-  SQL
-
-  create_table "articles", force: :cascade do |t|
-    t.string "title"
-    t.string "image_url"
-    t.string "url"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "description"
-    t.string "source_name"
-    t.datetime "published_at"
-    t.integer "source_id"
-    t.boolean "paywalled", default: false
-    t.integer "description_length"
-    t.jsonb "readability_output_jsonb", default: "{}", null: false
-    t.jsonb "tags"
-    t.string "federated_url"
-    t.bigint "federails_actor_id"
-    t.text "searchable_content"
-    t.index "(((to_tsvector('simple'::regconfig, f_unaccent(COALESCE((title)::text, ''::text))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE((source_name)::text, ''::text)))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE(searchable_content, ''::text)))))", name: "index_articles_on_searchable_fields", using: :gin
-    t.index ["federails_actor_id"], name: "index_articles_on_federails_actor_id"
-    t.index ["published_at"], name: "index_articles_on_published_at"
-    t.index ["url", "title"], name: "index_articles_on_url_and_title", unique: true
-  end
-
-  create_table "comments", force: :cascade do |t|
-    t.text "content", null: false
-    t.string "parent_type", null: false
-    t.integer "parent_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "federated_url"
-    t.bigint "federails_actor_id"
-    t.datetime "deleted_at"
-    t.bigint "user_id"
-    t.index ["deleted_at"], name: "index_comments_on_deleted_at"
-    t.index ["federails_actor_id"], name: "index_comments_on_federails_actor_id"
-    t.index ["parent_type", "parent_id"], name: "index_poly_comments_on_parent"
-    t.index ["user_id"], name: "index_comments_on_user_id"
-  end
-
-  create_table "federails_activities", force: :cascade do |t|
-    t.string "entity_type", null: false
-    t.bigint "entity_id", null: false
-    t.string "action", null: false
-    t.bigint "actor_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uuid"
-    t.index ["actor_id"], name: "index_federails_activities_on_actor_id"
-    t.index ["entity_type", "entity_id"], name: "index_federails_activities_on_entity"
-    t.index ["uuid"], name: "index_federails_activities_on_uuid", unique: true
-  end
-
-  create_table "federails_actors", force: :cascade do |t|
+  create_table "ap_actors", force: :cascade do |t|
     t.string "name"
     t.string "federated_url"
     t.string "username"
@@ -102,39 +38,66 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_09_171753) do
     t.string "actor_type"
     t.json "extensions"
     t.index ["entity_type", "entity_id"], name: "index_federails_actors_on_entity", unique: true
-    t.index ["federated_url"], name: "index_federails_actors_on_federated_url", unique: true
-    t.index ["uuid"], name: "index_federails_actors_on_uuid", unique: true
+    t.index ["federated_url"], name: "index_ap_actors_on_federated_url", unique: true
+    t.index ["uuid"], name: "index_ap_actors_on_uuid", unique: true
   end
 
-  create_table "federails_followings", force: :cascade do |t|
-    t.bigint "actor_id", null: false
-    t.bigint "target_actor_id", null: false
-    t.integer "status", default: 0
+  create_table "ap_follows", force: :cascade do |t|
+    t.text "follower_url", null: false
+    t.text "follower_inbox_url", null: false
+    t.integer "status", default: 0, null: false
+    t.text "follow_activity_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["follower_url"], name: "index_ap_follows_on_follower_url", unique: true
+  end
+
+  create_table "articles", force: :cascade do |t|
+    t.string "title"
+    t.string "image_url"
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "description"
+    t.string "source_name"
+    t.datetime "published_at"
+    t.integer "source_id"
+    t.boolean "paywalled", default: false
+    t.integer "description_length"
+    t.jsonb "readability_output_jsonb", default: "{}", null: false
+    t.jsonb "tags"
     t.string "federated_url"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "uuid"
-    t.index ["actor_id", "target_actor_id"], name: "index_federails_followings_on_actor_id_and_target_actor_id", unique: true
-    t.index ["target_actor_id"], name: "index_federails_followings_on_target_actor_id"
-    t.index ["uuid"], name: "index_federails_followings_on_uuid", unique: true
+    t.bigint "ap_actor_id"
+    t.text "searchable_content"
+    t.index "(((to_tsvector('simple'::regconfig, f_unaccent(COALESCE((title)::text, ''::text))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE((source_name)::text, ''::text)))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE(searchable_content, ''::text)))))", name: "index_articles_on_searchable_fields", using: :gin
+    t.index ["ap_actor_id"], name: "index_articles_on_ap_actor_id"
+    t.index ["published_at"], name: "index_articles_on_published_at"
+    t.index ["url", "title"], name: "index_articles_on_url_and_title", unique: true
   end
 
-  create_table "federails_hosts", force: :cascade do |t|
-    t.string "domain", null: false
-    t.string "nodeinfo_url"
-    t.string "software_name"
-    t.string "software_version"
-    t.jsonb "protocols", default: []
-    t.jsonb "services", default: {}
+  create_table "comments", force: :cascade do |t|
+    t.text "content", null: false
+    t.string "parent_type", null: false
+    t.integer "parent_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["domain"], name: "index_federails_hosts_on_domain", unique: true
+    t.string "federated_url"
+    t.bigint "ap_actor_id"
+    t.datetime "deleted_at"
+    t.bigint "user_id"
+    t.text "remote_actor_url"
+    t.index ["ap_actor_id"], name: "index_comments_on_ap_actor_id"
+    t.index ["deleted_at"], name: "index_comments_on_deleted_at"
+    t.index ["parent_type", "parent_id"], name: "index_poly_comments_on_parent"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
   create_table "instance_actors", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
+    t.text "public_key"
+    t.text "private_key"
   end
 
   create_table "job_runs", force: :cascade do |t|
@@ -217,11 +180,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_01_09_171753) do
     t.index ["username"], name: "index_users_on_username"
   end
 
-  add_foreign_key "articles", "federails_actors"
-  add_foreign_key "comments", "federails_actors"
+  add_foreign_key "articles", "ap_actors"
+  add_foreign_key "comments", "ap_actors"
   add_foreign_key "comments", "users"
-  add_foreign_key "federails_activities", "federails_actors", column: "actor_id"
-  add_foreign_key "federails_followings", "federails_actors", column: "actor_id"
-  add_foreign_key "federails_followings", "federails_actors", column: "target_actor_id"
   add_foreign_key "sessions", "users"
 end

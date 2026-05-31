@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :comment do
     content { "This is a comment" }
     association :parent, factory: :article
-    association :federails_actor
+    association :ap_actor
 
     trait :deleted do
       deleted_at { Time.current }

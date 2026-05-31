@@ -1,32 +1,35 @@
 = render 'layouts/page_header', pagy: @pagy
 
-.frontpage
-  .item-a
-    = render 'article_image_headline_summary_3_rows', article: next_article_with_image(@articles)
-  
-  .item-b style="border-top: var(--border); grid-area: B;"
-    = render 'many_articles_headline',
-      articles: three_short_titles
-      / articles: [next_article_with_short_title(@articles),
-      /           next_article_with_short_title(@articles),
-      /           next_article_with_short_title(@articles)]
-   
-  .item-d
-    .article.without_image
-      = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    .article.without_image
-      = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    .article.with_image
-      = render 'article_image_headline_summary', article: next_article_with_image(@articles)
-    .article.with_image
-      = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+- if @articles.empty?
+  p.font-muted style="padding: var(--space-m)" No articles yet. Sources will be fetched shortly.
+- else
+  .frontpage
+    .item-a
+      = render 'article_image_headline_summary_3_rows', article: next_article_with_image(@articles)
 
-  .item-c
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    = render 'article_headline_summary', article: next_article_with_long_description(@articles)
-    .item-b style="flex-grow: 2; max-height: 45%;"
+    .item-b style="border-top: var(--border); grid-area: B;"
       = render 'many_articles_headline',
-        articles: 4.times.map { extract_shortest_description_article }
+        articles: three_short_titles
+        / articles: [next_article_with_short_title(@articles),
+        /           next_article_with_short_title(@articles),
+        /           next_article_with_short_title(@articles)]
+
+    .item-d
+      .article.without_image
+        = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+      .article.without_image
+        = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+      .article.with_image
+        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+      .article.with_image
+        = render 'article_image_headline_summary', article: next_article_with_image(@articles)
+
+    .item-c
+      = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+      = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+      = render 'article_headline_summary', article: next_article_with_long_description(@articles)
+      .item-b style="flex-grow: 2; max-height: 45%;"
+        = render 'many_articles_headline',
+          articles: 4.times.map { extract_shortest_description_article }
 
 = render 'layouts/footer'

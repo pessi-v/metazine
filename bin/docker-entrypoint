@@ -8,6 +8,8 @@ fi
 
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  ./bin/rails db:create 2>/dev/null || true
+  ./bin/rails db:create_f_unaccent
   ./bin/rails db:prepare
 fi
 

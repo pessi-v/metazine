@@ -35,8 +35,20 @@ css:
   / h3 Login to participate in the discussion
 
   / Mastodon Login
-  h4 Login with Mastodon to participate in the discussion
+  - if @article.comments.any?
+    h5 Login with Mastodon to participate in the discussion
+  - else
+    h5 Login with Mastodon to begin a discussion
   .login-input
+  - if Rails.env.development?
+    .dev-login
+      = form_with url: dev_login_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
+        .form-group
+          .flex-row
+            = f.text_field :username, placeholder: "devuser", class: "form-input"
+            = f.submit "Quick Dev Login", class: "control"
+        = f.hidden_field :return_to, value: request.path
+  - else
     = form_with url: login_mastodon_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
       .form-group
         / = f.label :domain, "Login to participate in the discussion", class: "form-label"
@@ -47,20 +59,20 @@ css:
             required: true,
             autocomplete: "off"
 
-          = f.submit "Login with Mastodon", class: "button"
+          = f.submit "Login with Mastodon", class: "control"
       / .form-help
       /   | Example: mastodon.social, fosstodon.org
 
-  - if Rails.env.development?
-    .dev-login-divider
-      | OR (dev only)
-    .dev-login
-      = form_with url: dev_login_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
-        .form-group
-          .flex-row
-            = f.text_field :username, placeholder: "devuser", class: "form-input"
-            = f.submit "Quick Dev Login", class: "button"
-        = f.hidden_field :return_to, value: request.path
+  / - if Rails.env.development?
+  /   .dev-login-divider
+  /     | OR (dev only)
+  /   .dev-login
+  /     = form_with url: dev_login_path, method: :post, data: {turbo: false}, class: "inline-login-form" do |f|
+  /       .form-group
+  /         .flex-row
+  /           = f.text_field :username, placeholder: "devuser", class: "form-input"
+  /           = f.submit "Quick Dev Login", class: "button"
+  /       = f.hidden_field :return_to, value: request.path
 
   / DISABLED: ATProto/Bluesky integration temporarily disabled
   / .login-divider-small

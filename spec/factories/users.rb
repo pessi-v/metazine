@@ -10,7 +10,7 @@ FactoryBot.define do
 
     trait :with_actor do
       after(:create) do |user|
-        create(:federails_actor,
+        create(:ap_actor,
           entity_type: 'User',
           entity_id: user.id,
           username: user.username,

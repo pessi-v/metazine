@@ -1,0 +1,9 @@
+#!/bin/sh
+set -e
+
+# Ensure the SSH key is loaded into the agent before deploying.
+# Post-deploy hooks spawn a child kamal process with no TTY, so they can't
+# prompt for a passphrase — the key must already be in ssh-agent.
+ssh-add -l 2>/dev/null | grep -q "id_ed25519" || ssh-add ~/.ssh/id_ed25519
+
+exec kamal deploy "$@"
