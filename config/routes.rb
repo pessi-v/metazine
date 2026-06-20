@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   # Comments routes
   resources :articles, only: [] do
     resources :comments, only: [:create]
+    resource :like, only: [:create, :destroy]
   end
   resources :comments, only: [:update, :destroy] do
     resources :comments, only: [:create]

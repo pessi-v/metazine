@@ -11,6 +11,7 @@ class Article < ApplicationRecord
   belongs_to :ap_actor, optional: true, class_name: "ApActor"
 
   has_many :comments, dependent: :delete_all, as: :parent
+  has_many :likes, dependent: :delete_all
 
   validates :title, :source_name, presence: true
   validates :title, uniqueness: true
@@ -29,6 +30,24 @@ class Article < ApplicationRecord
 
   def should_federate?
     read_attribute(:federated_url).present?
+  end
+
+  def liked_by?(user)
+    return false unless user
+    return true if likes.exists?(user_id: user.id)
+    return true if user.ap_actor && likes.exists?(ap_actor_id: user.ap_actor.id)
+    if user.ap_actor&.federated_url.present?
+      return true if likes.exists?(remote_actor_url: user.ap_actor.federated_url)
+    end
+    false
+  end
+
+  def like_for(user)
+    return nil unless user
+    likes.find_by(user_id: user.id) ||
+      (user.ap_actor && likes.find_by(ap_actor_id: user.ap_actor.id)) ||
+      (user.ap_actor&.federated_url.present? && likes.find_by(remote_actor_url: user.ap_actor.federated_url)) ||
+      nil
   end
 
   private

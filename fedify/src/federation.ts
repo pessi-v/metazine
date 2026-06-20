@@ -4,6 +4,7 @@ import {
   createFederation,
   Delete,
   Follow,
+  Like,
   Note,
   Page,
   Undo,
@@ -16,11 +17,12 @@ import { followersDispatcher } from "./collections.ts";
 import { articlePageDispatcher, commentNoteDispatcher } from "./objects.ts";
 import {
   onFollow,
-  onUndoFollow,
+  onUndo,
   onCreateObject,
   onUpdateNote,
   onDeleteNote,
   onAnnounce,
+  onLike,
 } from "./inbox.ts";
 
 export const federation = createFederation<void>({
@@ -40,11 +42,12 @@ federation.setFollowersDispatcher(
 federation
   .setInboxListeners("/ap/actors/{identifier}/inbox", "/ap/inbox")
   .on(Follow, onFollow)
-  .on(Undo, onUndoFollow)
+  .on(Undo, onUndo)
   .on(Create, onCreateObject)
   .on(Update, onUpdateNote)
   .on(Delete, onDeleteNote)
-  .on(Announce, onAnnounce);
+  .on(Announce, onAnnounce)
+  .on(Like, onLike);
 
 // Articles are served as Page (Lemmy-compatible); comments as Note (Mastodon-compatible)
 federation.setObjectDispatcher(Page, "/ap/articles/{id}", articlePageDispatcher);

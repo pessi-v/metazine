@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_05_30_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_20_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -69,6 +69,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_000002) do
     t.string "federated_url"
     t.bigint "ap_actor_id"
     t.text "searchable_content"
+    t.integer "likes_count", default: 0, null: false
     t.index "(((to_tsvector('simple'::regconfig, f_unaccent(COALESCE((title)::text, ''::text))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE((source_name)::text, ''::text)))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE(searchable_content, ''::text)))))", name: "index_articles_on_searchable_fields", using: :gin
     t.index ["ap_actor_id"], name: "index_articles_on_ap_actor_id"
     t.index ["published_at"], name: "index_articles_on_published_at"
@@ -109,6 +110,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_000002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["job_name", "started_at"], name: "index_job_runs_on_job_name_and_started_at"
+  end
+
+  create_table "likes", force: :cascade do |t|
+    t.bigint "article_id", null: false
+    t.bigint "user_id"
+    t.bigint "ap_actor_id"
+    t.string "federated_url"
+    t.text "remote_actor_url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ap_actor_id"], name: "index_likes_on_ap_actor_id"
+    t.index ["article_id", "remote_actor_url"], name: "index_likes_on_article_and_remote_actor", unique: true, where: "(remote_actor_url IS NOT NULL)"
+    t.index ["article_id", "user_id"], name: "index_likes_on_article_and_user", unique: true, where: "(user_id IS NOT NULL)"
+    t.index ["article_id"], name: "index_likes_on_article_id"
+    t.index ["federated_url"], name: "index_likes_on_federated_url"
+    t.index ["user_id"], name: "index_likes_on_user_id"
   end
 
   create_table "mastodon_clients", force: :cascade do |t|
@@ -183,5 +200,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_05_30_000002) do
   add_foreign_key "articles", "ap_actors"
   add_foreign_key "comments", "ap_actors"
   add_foreign_key "comments", "users"
+  add_foreign_key "likes", "articles"
   add_foreign_key "sessions", "users"
 end

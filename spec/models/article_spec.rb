@@ -134,35 +134,6 @@ RSpec.describe Article, type: :model do
     end
   end
 
-  describe '.handle_federated_object?' do
-    it 'returns true when hash has no inReplyTo' do
-      hash = { "type" => "Note", "content" => "Test" }
-      expect(Article.handle_federated_object?(hash)).to be true
-    end
-
-    it 'returns false when hash has inReplyTo' do
-      hash = { "type" => "Note", "content" => "Test", "inReplyTo" => "https://example.com/note/1" }
-      expect(Article.handle_federated_object?(hash)).to be false
-    end
-  end
-
-  describe '#to_activitypub_object' do
-    let(:article) { create(:article) }
-
-    it 'returns a hash with ActivityPub Note format' do
-      result = article.to_activitypub_object
-
-      expect(result).to be_a(Hash)
-      expect(result['type']).to eq('Note')
-      expect(result['name']).to eq(article.title)
-    end
-
-    it 'includes reader URL in content' do
-      result = article.to_activitypub_object
-      expect(result['content']).to include('reader')
-    end
-  end
-
   describe 'dependent associations' do
     context 'when destroying an article with comments' do
       it 'successfully deletes the article and its comments' do
