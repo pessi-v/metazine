@@ -5,16 +5,22 @@ set -e
 #
 # Kamal does NOT build the sidecar image (the `fedify` accessory has no `build:`
 # section — it references the prebuilt image pessiv/metazine-fedify), so we build
-# and push it ourselves, then reboot the accessory to pull the new image.
+# and push it ourselves, then reboot the accessory.
 #
-# Usage: script/deploy-fedify <destination>
-#   e.g. script/deploy-fedify pessi
+# We tag each build with the git SHA and pass it via FEDIFY_TAG, which the deploy
+# configs interpolate into the accessory image. This is required: `kamal accessory
+# reboot` does NOT pull — it just `docker run`s the configured image, so a mutable
+# `:latest` tag would reuse the host's stale local image. An immutable SHA tag the
+# host has never seen forces `docker run` to pull the freshly pushed image.
+#
+# Usage: bin/deploy-fedify <destination>
+#   e.g. bin/deploy-fedify pessi
 #
 # IMPORTANT: Deploy the Rails app first (`bin/deploy -d <destination>`) whenever a
 # migration changes columns the sidecar reads (e.g. articles.federated_content).
 # The new sidecar queries those columns and will error if they don't exist yet.
 
-IMAGE="pessiv/metazine-fedify:latest"
+REPO="pessiv/metazine-fedify"
 PLATFORM="linux/amd64"   # matches builder.arch in config/deploy.yml
 
 # Run from the repo root regardless of where the script is invoked.
@@ -22,7 +28,7 @@ cd "$(dirname "$0")/.."
 
 DEST="$1"
 if [ -z "$DEST" ]; then
-  echo "Usage: script/deploy-fedify <destination>" >&2
+  echo "Usage: bin/deploy-fedify <destination>" >&2
   echo "Available destinations:" >&2
   ls config/deploy.*.yml 2>/dev/null | sed 's#config/deploy\.##; s#\.yml##; s#^#  - #' >&2
   exit 1
@@ -33,16 +39,24 @@ if [ ! -f "config/deploy.$DEST.yml" ]; then
   exit 1
 fi
 
+# Immutable per-build tag (git SHA, suffixed if the tree is dirty).
+TAG="$(git rev-parse --short HEAD)"
+if [ -n "$(git status --porcelain)" ]; then
+  TAG="${TAG}-dirty-$(date +%s)"
+fi
+export FEDIFY_TAG="$TAG"
+
 # Ensure the SSH key is loaded so Kamal can reach the host non-interactively.
 ssh-add -l 2>/dev/null | grep -q "id_ed25519" || ssh-add ~/.ssh/id_ed25519
 
 echo "==> Logging into the container registry"
 bin/kamal registry login -d "$DEST"
 
-echo "==> Building and pushing $IMAGE ($PLATFORM) from ./fedify"
-docker buildx build --platform "$PLATFORM" -t "$IMAGE" --push fedify
+echo "==> Building and pushing $REPO:$TAG (and :latest) [$PLATFORM] from ./fedify"
+docker buildx build --platform "$PLATFORM" \
+  -t "$REPO:$TAG" -t "$REPO:latest" --push fedify
 
-echo "==> Rebooting the fedify accessory on '$DEST'"
+echo "==> Rebooting the fedify accessory on '$DEST' with FEDIFY_TAG=$TAG"
 bin/kamal accessory reboot fedify -d "$DEST"
 
-echo "==> Done. Fedify sidecar redeployed to '$DEST'."
+echo "==> Done. Fedify sidecar redeployed to '$DEST' (image $REPO:$TAG)."
