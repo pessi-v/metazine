@@ -1,7 +1,7 @@
 / HTML embedded in the ActivityPub Page we federate for an Article.
 / Rendered by Article#federate! and stored in articles.federated_content, which the
 / Fedify sidecar serves as the object `content`. Locals: article, host.
-- metazine_url = "https://#{host}/articles/#{article.id}"
+- metazine_url = "https://#{host}/reader/#{article.id}"
 - if article.image_url.present?
   p
     = link_to metazine_url do

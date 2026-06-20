@@ -26,7 +26,7 @@ async function parentFederatedUrl(
 // Fallback content for articles federated before Rails started storing
 // federated_content. Kept in sync with app/views/articles/_federated_content.html.slim.
 function fallbackArticleContent(article: ArticleRow): string {
-  const metazineUrl = `https://${APP_HOST}/articles/${article.id}`;
+  const metazineUrl = `https://${APP_HOST}/reader/${article.id}`;
   const sourceName = article.source_name
     ? article.url
       ? `<p><a href="${article.url}">${article.source_name}</a></p>`
@@ -84,7 +84,7 @@ export async function buildArticlePage(
     content,
     published,
     sensitive: false,
-    url: new URL(`https://${APP_HOST}/articles/${article.id}`),
+    url: new URL(`https://${APP_HOST}/reader/${article.id}`),
     attachments,
   });
 }

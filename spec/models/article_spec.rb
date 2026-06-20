@@ -145,7 +145,7 @@ RSpec.describe Article, type: :model do
       expect(article.federated_url).to match(%r{/ap/articles/#{article.id}\z})
       expect(article.federated_content).to include(article.title)
       expect(article.federated_content).to include("<strong>")
-      expect(article.federated_content).to include("/articles/#{article.id}")
+      expect(article.federated_content).to include("/reader/#{article.id}")
     end
 
     it 'is idempotent for an already-federated article' do
