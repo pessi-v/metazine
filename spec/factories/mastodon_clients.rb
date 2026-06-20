@@ -3,5 +3,6 @@ FactoryBot.define do
     sequence(:domain) { |n| "mastodon#{n}.social" }
     sequence(:client_id) { |n| "client_id_#{n}" }
     sequence(:client_secret) { |n| "client_secret_#{n}" }
+    scopes { MastodonClient::SCOPES }
   end
 end

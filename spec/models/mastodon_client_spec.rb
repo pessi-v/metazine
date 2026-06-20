@@ -100,8 +100,8 @@ RSpec.describe MastodonClient, type: :model do
       end
     end
 
-    context 'when client already exists for domain' do
-      let!(:existing_client) { create(:mastodon_client, domain: domain) }
+    context 'when an up-to-date client already exists for domain' do
+      let!(:existing_client) { create(:mastodon_client, domain: domain, scopes: MastodonClient::SCOPES) }
 
       it 'returns the existing client' do
         client = MastodonClient.register_app(domain)
@@ -119,6 +119,25 @@ RSpec.describe MastodonClient, type: :model do
         expect(Mastodon::REST::Client).not_to receive(:new)
 
         MastodonClient.register_app(domain)
+      end
+    end
+
+    context 'when an existing client was registered with outdated scopes' do
+      let!(:existing_client) { create(:mastodon_client, domain: domain, scopes: 'read write:statuses') }
+
+      it 're-registers the app with the current scopes' do
+        expect(Mastodon::REST::Client).to receive(:new).with(base_url: "https://#{domain}")
+
+        MastodonClient.register_app(domain)
+      end
+
+      it 'updates the existing record in place (no new row)' do
+        expect {
+          MastodonClient.register_app(domain)
+        }.not_to change(MastodonClient, :count)
+
+        expect(existing_client.reload.scopes).to eq(MastodonClient::SCOPES)
+        expect(existing_client.client_id).to eq('test_client_id')
       end
     end
 
@@ -144,7 +163,7 @@ RSpec.describe MastodonClient, type: :model do
 
   describe 'SCOPES constant' do
     it 'defines the required OAuth scopes' do
-      expect(MastodonClient::SCOPES).to eq('read write:statuses write:follows')
+      expect(MastodonClient::SCOPES).to eq('read write:statuses write:follows write:favourites')
     end
   end
 end

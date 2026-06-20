@@ -1,16 +1,21 @@
 class MastodonClient < ApplicationRecord
   # Single source of truth for OAuth scopes
   # Using granular scopes for modern Mastodon compatibility
-  SCOPES = "read write:statuses write:follows"
+  SCOPES = "read write:statuses write:follows write:favourites"
 
   validates :domain, :client_id, :client_secret, presence: true
   validates :domain, uniqueness: true
 
-  # Register a new OAuth application with a Mastodon instance
+  # Register (or re-register) the OAuth application for a Mastodon instance.
+  # Re-registers when no app exists yet, or when the stored scopes no longer match
+  # SCOPES (e.g. after we add a scope like write:favourites), so scope changes are
+  # self-healing. Note: existing users must still log out/in to obtain a token with
+  # the new scopes.
   def self.register_app(domain)
-    return find_by(domain: domain) if exists?(domain: domain)
+    existing = find_by(domain: domain)
+    return existing if existing&.scopes == SCOPES
 
-    puts "Registering new Mastodon app for domain: #{domain}"
+    puts "Registering Mastodon app for domain: #{domain} (scopes: #{SCOPES})"
     puts "Callback URL: #{callback_url}"
     puts "Website URL: #{root_url}"
 
@@ -25,11 +30,18 @@ class MastodonClient < ApplicationRecord
 
     puts "Successfully registered app for #{domain}: client_id=#{app.client_id}"
 
-    create!(
-      domain: domain,
+    attributes = {
       client_id: app.client_id,
-      client_secret: app.client_secret
-    )
+      client_secret: app.client_secret,
+      scopes: SCOPES
+    }
+
+    if existing
+      existing.update!(attributes)
+      existing
+    else
+      create!(attributes.merge(domain: domain))
+    end
   rescue StandardError => e
     Rails.logger.error "ERROR: Failed to register Mastodon app for #{domain}: #{e.class} - #{e.message}"
     Rails.logger.error e.backtrace.first(10).join("\n")
