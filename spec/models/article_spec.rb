@@ -134,6 +134,28 @@ RSpec.describe Article, type: :model do
     end
   end
 
+  describe '#federate!' do
+    it 'assigns a federated_url, stores rendered HTML content, and queues the Create' do
+      article = create(:article)
+      expect(ActivityPub::FedifyClient).to receive(:create_article).with(article.id)
+
+      article.federate!
+      article.reload
+
+      expect(article.federated_url).to match(%r{/ap/articles/#{article.id}\z})
+      expect(article.federated_content).to include(article.title)
+      expect(article.federated_content).to include("<strong>")
+      expect(article.federated_content).to include("/articles/#{article.id}")
+    end
+
+    it 'is idempotent for an already-federated article' do
+      article = create(:article, federated_url: "https://example.test/ap/articles/1")
+      expect(ActivityPub::FedifyClient).not_to receive(:create_article)
+
+      expect { article.federate! }.not_to change { article.reload.federated_url }
+    end
+  end
+
   describe 'dependent associations' do
     context 'when destroying an article with comments' do
       it 'successfully deletes the article and its comments' do

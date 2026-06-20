@@ -32,6 +32,19 @@ class Article < ApplicationRecord
     read_attribute(:federated_url).present?
   end
 
+  # Idempotently federate this article: assign its ActivityPub URL, render and store
+  # the HTML content Fedify will serve, and queue the Create activity. Centralizes the
+  # logic previously duplicated across the comment/like federation call sites.
+  def federate!
+    return if read_attribute(:federated_url).present?
+
+    host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
+    url = "https://#{host}/ap/articles/#{id}"
+    update_columns(federated_url: url, federated_content: render_federated_content(host))
+
+    ActivityPub::FedifyClient.create_article(id)
+  end
+
   def liked_by?(user)
     return false unless user
     return true if likes.exists?(user_id: user.id)
@@ -51,6 +64,16 @@ class Article < ApplicationRecord
   end
 
   private
+
+  def render_federated_content(host)
+    ApplicationController.render(
+      partial: "articles/federated_content",
+      locals: { article: self, host: host }
+    )
+  rescue => e
+    Rails.logger.error "Failed to render federated content for Article##{id}: #{e.class}: #{e.message}"
+    nil
+  end
 
   def extract_searchable_content
     return unless readability_output_jsonb.present? && readability_output_jsonb["content"].present?

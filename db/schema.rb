@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_20_000002) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_20_000003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_stat_statements"
@@ -70,6 +70,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_20_000002) do
     t.bigint "ap_actor_id"
     t.text "searchable_content"
     t.integer "likes_count", default: 0, null: false
+    t.text "federated_content"
     t.index "(((to_tsvector('simple'::regconfig, f_unaccent(COALESCE((title)::text, ''::text))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE((source_name)::text, ''::text)))) || to_tsvector('simple'::regconfig, f_unaccent(COALESCE(searchable_content, ''::text)))))", name: "index_articles_on_searchable_fields", using: :gin
     t.index ["ap_actor_id"], name: "index_articles_on_ap_actor_id"
     t.index ["published_at"], name: "index_articles_on_published_at"

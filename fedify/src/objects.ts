@@ -23,6 +23,28 @@ async function parentFederatedUrl(
   return null;
 }
 
+// Fallback content for articles federated before Rails started storing
+// federated_content. Kept in sync with app/views/articles/_federated_content.html.slim.
+function fallbackArticleContent(article: ArticleRow): string {
+  const metazineUrl = `https://${APP_HOST}/articles/${article.id}`;
+  const sourceName = article.source_name
+    ? article.url
+      ? `<p><a href="${article.url}">${article.source_name}</a></p>`
+      : `<p>${article.source_name}</p>`
+    : "";
+  return [
+    article.image_url
+      ? `<p><a href="${metazineUrl}"><img src="${article.image_url}" alt="${article.title ?? ""}"></a></p>`
+      : "",
+    sourceName,
+    article.title
+      ? `<p><a href="${metazineUrl}"><strong>${article.title}</strong></a></p>`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
 // Articles are served as Page so Lemmy can add them to community feeds.
 // Mastodon also understands Page (treats it like a Note).
 export async function buildArticlePage(
@@ -30,7 +52,7 @@ export async function buildArticlePage(
   articleId: number,
 ): Promise<Page | null> {
   const [article] = await sql<ArticleRow[]>`
-    SELECT id, title, description, url, source_name, image_url, published_at, federated_url
+    SELECT id, title, description, url, source_name, image_url, published_at, federated_url, federated_content
     FROM articles
     WHERE id = ${articleId}
     LIMIT 1
@@ -41,16 +63,9 @@ export async function buildArticlePage(
     ? new URL(article.federated_url)
     : ctx.getObjectUri(Page, { id: String(articleId) });
 
-  const source = article.source_name ? `[${article.source_name}] ` : "";
-  const content = [
-    `<p><strong>${source}${article.title ?? ""}</strong></p>`,
-    article.description ? `<p>${article.description}</p>` : "",
-    article.url
-      ? `<p><a href="https://${APP_HOST}/articles/${article.id}">Read on Metazine</a> · <a href="${article.url}">Original source</a></p>`
-      : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+  // Prefer the HTML rendered and stored by Rails; fall back to the inline builder
+  // for articles federated before federated_content existed.
+  const content = article.federated_content ?? fallbackArticleContent(article);
 
   const attachments: Image[] = article.image_url
     ? [new Image({ mediaType: "image/jpeg", url: new URL(article.image_url) })]

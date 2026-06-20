@@ -42,6 +42,7 @@ export type ArticleRow = {
   image_url: string | null;
   published_at: Date | null;
   federated_url: string | null;
+  federated_content: string | null;
 };
 
 export type CommentRow = {

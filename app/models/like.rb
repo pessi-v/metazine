@@ -65,13 +65,7 @@ class Like < ApplicationRecord
   # first action on an Article (nothing has federated it yet), federate it so the
   # activity has a real ActivityPub object to attach to.
   def federate_article_on_first_like
-    return if article.federated_url.present?
-
-    host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
-    article_url = "https://#{host}/ap/articles/#{article.id}"
-    article.update_column(:federated_url, article_url)
-
-    ActivityPub::FedifyClient.create_article(article.id)
+    article.federate!
   rescue => e
     Rails.logger.error "=== Error federating Article on first like: #{e.class}: #{e.message} ==="
     Rails.logger.error e.backtrace.first(5).join("\n")

@@ -80,9 +80,7 @@ class LikesController < ApplicationController
   def federate_article_if_needed
     return if @article.federated_url.present?
 
-    host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
-    @article.update_column(:federated_url, "https://#{host}/ap/articles/#{@article.id}")
-    ActivityPub::FedifyClient.create_article(@article.id)
+    @article.federate!
     Rails.logger.info "Article##{@article.id} federation queued via Fedify before favouriting"
   end
 

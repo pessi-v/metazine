@@ -34,15 +34,8 @@ class CommentsController < ApplicationController
         # This ensures the comment can reply to the article properly
         if @parent.is_a?(Article) && @parent.federated_url.blank?
           Rails.logger.info "  Article not yet federated - federating now before posting comment"
-
-          host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
-          article_url = "https://#{host}/ap/articles/#{@parent.id}"
-
-          @parent.update_column(:federated_url, article_url)
-          Rails.logger.info "  Set Article federated_url: #{article_url}"
-
-          ActivityPub::FedifyClient.create_article(@parent.id)
-          Rails.logger.info "  Article federation queued via Fedify"
+          @parent.federate!
+          Rails.logger.info "  Article federation queued via Fedify (#{@parent.federated_url})"
         end
 
         # Initialize Mastodon API client
