@@ -32,7 +32,18 @@ export const federation = createFederation<void>({
 
 federation
   .setActorDispatcher("/ap/actors/{identifier}", actorDispatcher)
-  .setKeyPairsDispatcher(keyPairsDispatcher);
+  .setKeyPairsDispatcher(keyPairsDispatcher)
+  // Map the WebFinger handle (e.g. acct:press@host) to the canonical "instance"
+  // identifier so the WebFinger `self` link matches the actor's `id`
+  // (https://host/ap/actors/instance). Without this they diverge (…/press vs
+  // …/instance) and Mastodon refuses to resolve/follow the actor.
+  .mapHandle(async (_ctx, username) => {
+    if (username === "instance") return "instance";
+    const [row] = await sql<[{ name: string }]>`
+      SELECT name FROM instance_actors WHERE public_key IS NOT NULL LIMIT 1
+    `;
+    return row && username === row.name ? "instance" : null;
+  });
 
 federation.setFollowersDispatcher(
   "/ap/actors/{identifier}/followers",

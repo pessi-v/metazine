@@ -19,9 +19,10 @@ export async function actorDispatcher(
   const actor = await fetchInstanceActor();
   if (!actor) return null;
 
-  // Accept both "instance" (canonical internal identifier) and the actor's
-  // actual name so WebFinger lookups for acct:press@host resolve correctly.
-  if (identifier !== "instance" && identifier !== actor.name) return null;
+  // The actor is served only under the canonical "instance" identifier; WebFinger
+  // handles (acct:press@host) are mapped to it via mapHandle in federation.ts, so
+  // the WebFinger `self` link and the actor `id` stay consistent.
+  if (identifier !== "instance") return null;
 
   const keyPairs = await ctx.getActorKeyPairs("instance");
   const appHost = process.env.APP_HOST ?? "";
@@ -50,7 +51,7 @@ export async function keyPairsDispatcher(
 ): Promise<CryptoKeyPair[]> {
   const actor = await fetchInstanceActor();
   if (!actor) return [];
-  if (identifier !== "instance" && identifier !== actor.name) return [];
+  if (identifier !== "instance") return [];
 
   if (!actor.private_key || !actor.public_key) {
     console.error("[keys] No keys in DB for instance actor");

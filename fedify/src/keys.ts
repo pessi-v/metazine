@@ -4,14 +4,23 @@ import { createPrivateKey } from "node:crypto";
 // and public keys as SPKI PEM ("-----BEGIN PUBLIC KEY-----").
 // Web Crypto only accepts PKCS#8 for private keys, so we convert via node:crypto.
 
+// Tolerate keys stored with escaped newlines (literal "\n"/"\r") rather than real
+// line breaks — otherwise the base64 body fails to parse and key import throws,
+// which silently disables all signed federation for the instance actor.
+function normalizePem(pem: string): string {
+  return pem.includes("\\n")
+    ? pem.replace(/\\r/g, "").replace(/\\n/g, "\n")
+    : pem;
+}
+
 function pemBody(pem: string): Uint8Array {
-  const b64 = pem.replace(/-----[^-]+-----/g, "").replace(/\s/g, "");
+  const b64 = normalizePem(pem).replace(/-----[^-]+-----/g, "").replace(/\s/g, "");
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
 }
 
 export async function importPrivateKeyPem(pem: string): Promise<CryptoKey> {
   // node:crypto handles both PKCS#1 and PKCS#8 PEM and exports as PKCS#8 DER
-  const nodeKey = createPrivateKey(pem);
+  const nodeKey = createPrivateKey(normalizePem(pem));
   const der = nodeKey.export({ format: "der", type: "pkcs8" }) as Buffer;
   // Wrap in a plain ArrayBuffer to satisfy Web Crypto's strict typing
   const ab = der.buffer.slice(der.byteOffset, der.byteOffset + der.byteLength) as ArrayBuffer;
