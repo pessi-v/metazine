@@ -4,6 +4,7 @@ import {
   createFederation,
   Delete,
   Follow,
+  Like,
   Note,
   Page,
   Undo,
@@ -16,11 +17,12 @@ import { followersDispatcher } from "./collections.ts";
 import { articlePageDispatcher, commentNoteDispatcher } from "./objects.ts";
 import {
   onFollow,
-  onUndoFollow,
+  onUndo,
   onCreateObject,
   onUpdateNote,
   onDeleteNote,
   onAnnounce,
+  onLike,
 } from "./inbox.ts";
 
 export const federation = createFederation<void>({
@@ -30,7 +32,18 @@ export const federation = createFederation<void>({
 
 federation
   .setActorDispatcher("/ap/actors/{identifier}", actorDispatcher)
-  .setKeyPairsDispatcher(keyPairsDispatcher);
+  .setKeyPairsDispatcher(keyPairsDispatcher)
+  // Map the WebFinger handle (e.g. acct:press@host) to the canonical "instance"
+  // identifier so the WebFinger `self` link matches the actor's `id`
+  // (https://host/ap/actors/instance). Without this they diverge (…/press vs
+  // …/instance) and Mastodon refuses to resolve/follow the actor.
+  .mapHandle(async (_ctx, username) => {
+    if (username === "instance") return "instance";
+    const [row] = await sql<[{ name: string }]>`
+      SELECT name FROM instance_actors WHERE public_key IS NOT NULL LIMIT 1
+    `;
+    return row && username === row.name ? "instance" : null;
+  });
 
 federation.setFollowersDispatcher(
   "/ap/actors/{identifier}/followers",
@@ -40,11 +53,12 @@ federation.setFollowersDispatcher(
 federation
   .setInboxListeners("/ap/actors/{identifier}/inbox", "/ap/inbox")
   .on(Follow, onFollow)
-  .on(Undo, onUndoFollow)
+  .on(Undo, onUndo)
   .on(Create, onCreateObject)
   .on(Update, onUpdateNote)
   .on(Delete, onDeleteNote)
-  .on(Announce, onAnnounce);
+  .on(Announce, onAnnounce)
+  .on(Like, onLike);
 
 // Articles are served as Page (Lemmy-compatible); comments as Note (Mastodon-compatible)
 federation.setObjectDispatcher(Page, "/ap/articles/{id}", articlePageDispatcher);

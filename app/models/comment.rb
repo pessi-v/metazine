@@ -173,11 +173,7 @@ class Comment < ApplicationRecord
 
     return unless parent.comments.count == 1
 
-    host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
-    article_url = "https://#{host}/ap/articles/#{parent.id}"
-    parent.update_column(:federated_url, article_url)
-
-    ActivityPub::FedifyClient.create_article(parent.id)
+    parent.federate!
   rescue => e
     Rails.logger.error "=== Error federating parent Article: #{e.class}: #{e.message} ==="
     Rails.logger.error e.backtrace.first(5).join("\n")

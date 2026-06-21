@@ -140,6 +140,55 @@ class MastodonApiClient
     end
   end
 
+  # Favourite (like) a status on the user's Mastodon instance.
+  # Resolves the remote status URL to a local ID first.
+  #
+  # @param status_url [String] The full ActivityPub URL of the status
+  # @return [Object, nil] The Mastodon status object, or nil if it couldn't be resolved
+  def favourite_status(status_url:)
+    Rails.logger.info "=== MastodonApiClient: Favouriting status ==="
+    Rails.logger.info "  URL: #{status_url}"
+
+    local_id = search_status(status_url)
+    unless local_id
+      Rails.logger.warn "  Could not resolve status to a local ID; skipping favourite"
+      return nil
+    end
+
+    begin
+      status = client.favourite(local_id)
+      Rails.logger.info "  Success! Favourited status #{local_id}"
+      status
+    rescue StandardError => e
+      Rails.logger.error "  Failed to favourite status: #{e.class} - #{e.message}"
+      raise ApiError, "Failed to favourite status on Mastodon: #{e.message}"
+    end
+  end
+
+  # Remove a favourite (unlike) on the user's Mastodon instance.
+  #
+  # @param status_url [String] The full ActivityPub URL of the status
+  # @return [Object, nil] The Mastodon status object, or nil if it couldn't be resolved
+  def unfavourite_status(status_url:)
+    Rails.logger.info "=== MastodonApiClient: Unfavouriting status ==="
+    Rails.logger.info "  URL: #{status_url}"
+
+    local_id = search_status(status_url)
+    unless local_id
+      Rails.logger.warn "  Could not resolve status to a local ID; skipping unfavourite"
+      return nil
+    end
+
+    begin
+      status = client.unfavourite(local_id)
+      Rails.logger.info "  Success! Unfavourited status #{local_id}"
+      status
+    rescue StandardError => e
+      Rails.logger.error "  Failed to unfavourite status: #{e.class} - #{e.message}"
+      raise ApiError, "Failed to unfavourite status on Mastodon: #{e.message}"
+    end
+  end
+
   # Search for a remote status by its URL to get the local ID
   # This makes the server fetch and cache the remote status
   #

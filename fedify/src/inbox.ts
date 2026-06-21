@@ -5,6 +5,7 @@ import {
   Delete,
   Follow,
   type InboxContext,
+  Like,
   Undo,
   Update,
   type Activity,
@@ -52,14 +53,52 @@ export async function onFollow(
   );
 }
 
-export async function onUndoFollow(
+// Handles Undo for both Follow (unfollow, handled locally) and Like (unlike,
+// forwarded to Rails so the article's like count is decremented).
+export async function onUndo(
   ctx: InboxContext<void>,
   undo: Undo,
 ): Promise<void> {
+  const object = await undo.getObject(ctx);
+
+  if (object instanceof Like) {
+    try {
+      await notifyRails({
+        type: "UndoLike",
+        actorUrl: await actorHref(ctx, undo),
+        object: object.objectId?.href ?? null,
+        // Forward the inner Like's JSON-LD so Rails parses the same shape as a Like.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        raw: await (object as any).toJsonLd(),
+      });
+    } catch (e) {
+      console.error(`[inbox] Failed to forward Undo(Like) to Rails: ${e}`);
+    }
+    return;
+  }
+
+  // Default: treat as Undo(Follow).
   const followerUrl = (await undo.getActor(ctx))?.id?.href;
   if (!followerUrl) return;
 
   await sql`DELETE FROM ap_follows WHERE follower_url = ${followerUrl}`;
+}
+
+export async function onLike(
+  ctx: InboxContext<void>,
+  like: Like,
+): Promise<void> {
+  console.log(`[inbox] Like from ${like.actorId?.href} on ${like.objectId?.href}`);
+  try {
+    await notifyRails({
+      type: "Like",
+      actorUrl: await actorHref(ctx, like),
+      object: like.objectId?.href ?? null,
+      raw: await like.toJsonLd(),
+    });
+  } catch (e) {
+    console.error(`[inbox] Failed to forward Like to Rails: ${e}`);
+  }
 }
 
 // Handles Create activities for both Note (Mastodon comments) and Page (Lemmy posts)

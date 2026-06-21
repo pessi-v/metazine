@@ -134,32 +134,25 @@ RSpec.describe Article, type: :model do
     end
   end
 
-  describe '.handle_federated_object?' do
-    it 'returns true when hash has no inReplyTo' do
-      hash = { "type" => "Note", "content" => "Test" }
-      expect(Article.handle_federated_object?(hash)).to be true
+  describe '#federate!' do
+    it 'assigns a federated_url, stores rendered HTML content, and queues the Create' do
+      article = create(:article)
+      expect(ActivityPub::FedifyClient).to receive(:create_article).with(article.id)
+
+      article.federate!
+      article.reload
+
+      expect(article.federated_url).to match(%r{/ap/articles/#{article.id}\z})
+      expect(article.federated_content).to include(article.title)
+      expect(article.federated_content).to include("<strong>")
+      expect(article.federated_content).to include("/reader/#{article.id}")
     end
 
-    it 'returns false when hash has inReplyTo' do
-      hash = { "type" => "Note", "content" => "Test", "inReplyTo" => "https://example.com/note/1" }
-      expect(Article.handle_federated_object?(hash)).to be false
-    end
-  end
+    it 'is idempotent for an already-federated article' do
+      article = create(:article, federated_url: "https://example.test/ap/articles/1")
+      expect(ActivityPub::FedifyClient).not_to receive(:create_article)
 
-  describe '#to_activitypub_object' do
-    let(:article) { create(:article) }
-
-    it 'returns a hash with ActivityPub Note format' do
-      result = article.to_activitypub_object
-
-      expect(result).to be_a(Hash)
-      expect(result['type']).to eq('Note')
-      expect(result['name']).to eq(article.title)
-    end
-
-    it 'includes reader URL in content' do
-      result = article.to_activitypub_object
-      expect(result['content']).to include('reader')
+      expect { article.federate! }.not_to change { article.reload.federated_url }
     end
   end
 

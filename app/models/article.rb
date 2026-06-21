@@ -11,6 +11,7 @@ class Article < ApplicationRecord
   belongs_to :ap_actor, optional: true, class_name: "ApActor"
 
   has_many :comments, dependent: :delete_all, as: :parent
+  has_many :likes, dependent: :delete_all
 
   validates :title, :source_name, presence: true
   validates :title, uniqueness: true
@@ -31,7 +32,48 @@ class Article < ApplicationRecord
     read_attribute(:federated_url).present?
   end
 
+  # Idempotently federate this article: assign its ActivityPub URL, render and store
+  # the HTML content Fedify will serve, and queue the Create activity. Centralizes the
+  # logic previously duplicated across the comment/like federation call sites.
+  def federate!
+    return if read_attribute(:federated_url).present?
+
+    host = ENV["APP_HOST"] || Rails.application.routes.default_url_options[:host] || "localhost:3000"
+    url = "https://#{host}/ap/articles/#{id}"
+    update_columns(federated_url: url, federated_content: render_federated_content(host))
+
+    ActivityPub::FedifyClient.create_article(id)
+  end
+
+  def liked_by?(user)
+    return false unless user
+    return true if likes.exists?(user_id: user.id)
+    return true if user.ap_actor && likes.exists?(ap_actor_id: user.ap_actor.id)
+    if user.ap_actor&.federated_url.present?
+      return true if likes.exists?(remote_actor_url: user.ap_actor.federated_url)
+    end
+    false
+  end
+
+  def like_for(user)
+    return nil unless user
+    likes.find_by(user_id: user.id) ||
+      (user.ap_actor && likes.find_by(ap_actor_id: user.ap_actor.id)) ||
+      (user.ap_actor&.federated_url.present? && likes.find_by(remote_actor_url: user.ap_actor.federated_url)) ||
+      nil
+  end
+
   private
+
+  def render_federated_content(host)
+    ApplicationController.render(
+      partial: "articles/federated_content",
+      locals: { article: self, host: host }
+    )
+  rescue => e
+    Rails.logger.error "Failed to render federated content for Article##{id}: #{e.class}: #{e.message}"
+    nil
+  end
 
   def extract_searchable_content
     return unless readability_output_jsonb.present? && readability_output_jsonb["content"].present?

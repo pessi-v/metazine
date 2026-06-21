@@ -92,16 +92,11 @@ Rails.application.config.middleware.use OmniAuth::Builder do
       puts "Domain: #{domain}"
       puts "Callback URL: #{callback_url}"
 
-      # Find or register the Mastodon app for this domain
+      # Find or register the Mastodon app for this domain.
+      # register_app re-registers automatically when SCOPES change, so a domain
+      # registered before write:favourites was added gets a fresh app on next login.
       begin
-        mastodon_client = MastodonClient.find_by(domain: domain)
-
-        if mastodon_client
-          puts "Found existing client for #{domain}"
-        else
-          puts "No existing client found, registering new app..."
-          mastodon_client = MastodonClient.register_app(domain)
-        end
+        mastodon_client = MastodonClient.register_app(domain)
 
         unless mastodon_client
           puts "ERROR: Failed to get or create MastodonClient"

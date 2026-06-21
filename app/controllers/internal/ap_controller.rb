@@ -16,6 +16,10 @@ class Internal::ApController < ApplicationController
       ActivityPub::NoteActivityHandler.handle_delete_note(raw)
     when "Announce"
       Rails.logger.info "[Internal::ApController] Announce from #{payload["actorUrl"]} — not yet handled"
+    when "Like"
+      ActivityPub::LikeActivityHandler.handle_like(raw)
+    when "UndoLike"
+      ActivityPub::LikeActivityHandler.handle_undo_like(raw)
     else
       Rails.logger.warn "[Internal::ApController] Unknown activity type: #{type}"
     end

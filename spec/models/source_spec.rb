@@ -58,11 +58,11 @@ RSpec.describe Source, type: :model do
   end
 
   describe 'callbacks' do
-    describe 'before_create :add_description_and_image' do
-      it 'is called before creation' do
-        source = build(:source)
-        expect(source).to receive(:add_description_and_image)
-        source.save
+    describe 'after_create_commit :enqueue_description_and_image' do
+      it 'enqueues a SourceMetadataJob to fetch the description and image' do
+        source = create(:source)
+        expect(SourceMetadataJob).to receive(:perform_later).with(source.id)
+        source.send(:enqueue_description_and_image)
       end
     end
 

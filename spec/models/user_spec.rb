@@ -210,21 +210,20 @@ RSpec.describe User, type: :model do
       end
     end
 
-    context 'when actor does not exist' do
-      before do
-        # Stub the federation fetch to return nil
-        allow(ApActor).to receive(:find_by_federation_url).and_return(nil)
-      end
-
-      it 'does not create a link' do
+    context 'when no actor exists yet' do
+      it 'creates an actor from the OAuth data' do
         expect {
           user.link_to_federated_actor!
-        }.not_to change(ApActor, :count)
+        }.to change(ApActor, :count).by(1)
       end
 
-      it 'logs a warning' do
-        expect(Rails.logger).to receive(:warn).with(/Could not find or fetch actor/)
+      it 'links the newly created actor to the user' do
         user.link_to_federated_actor!
+
+        actor = ApActor.find_by(federated_url: expected_url)
+        expect(actor).to be_present
+        expect(actor.entity_id).to eq(user.id)
+        expect(actor.entity_type).to eq('User')
       end
     end
 

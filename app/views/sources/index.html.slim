@@ -12,8 +12,9 @@
           ul style='list-style-type:none'
             - sources.each do |source|
               li
-                h4
-                  = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
+                = link_to("/#{source.name}") do
+                  h4 = source.name
+                  h4.font-muted = "#{source.articles_count} articles"
 
   .column-right.flex-column.gap-m style="grid-column: 4 / span 2;"
     / Second half of items go here, sorted by index
@@ -24,8 +25,9 @@
           ul style='list-style-type:none'
             - sources.each do |source|
               li
-                h4
-                  = link_to("#{source.name} #{source.articles_count}", "/#{source.name}")
+                = link_to("/#{source.name}") do
+                h4 = source.name
+                h4.font-muted = "#{source.articles_count} articles"
 
 div style="margin-top: var(--space-l);"
   = render 'layouts/footer'
