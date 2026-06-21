@@ -6,7 +6,7 @@ class SourcesController < ApplicationController
 
   # GET /sources or /sources.json
   def index
-    @sources = Source.active.order(:name).select(:id, :name, :url, :articles_count)
+    @sources = Source.active.where("articles_count > ?", 0).order(:name).select(:id, :name, :url, :articles_count)
     # Group sources by first letter and sort alphabetically
     @sources_in_array = @sources.group_by { |source| source.name[0].upcase }
       .sort_by { |letter, _| letter }
